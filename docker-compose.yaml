@@ -1,0 +1,7 @@
+version: "3.7"
+services:
+  black-box:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: black-box
