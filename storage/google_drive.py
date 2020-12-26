@@ -1,2 +1,5 @@
+from config import BlackBox
+
+
 class GoogleDrive:
-    pass
+    enabled = BlackBox.gdrive_enabled

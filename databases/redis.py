@@ -1,5 +1,6 @@
+from config import BlackBox
 from utils import run_command
 
 
 class Redis:
-    pass
+    enabled = BlackBox.redis_enabled

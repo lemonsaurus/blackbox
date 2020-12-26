@@ -78,7 +78,7 @@ class YAMLGetter(type):
             yield name, getattr(cls, name)
 
 
-class Config(metaclass=YAMLGetter):
+class BlackBox(metaclass=YAMLGetter):
     """
     The configuration for the black-box application.
 
@@ -95,3 +95,9 @@ class Config(metaclass=YAMLGetter):
 
     # Database rotation
     rotation_days: int
+
+
+# Test that everything works if this file is run directly.
+if __name__ == "__main__":
+    for attribute, content in BlackBox:
+        print(f"Config.{attribute} = {content}")

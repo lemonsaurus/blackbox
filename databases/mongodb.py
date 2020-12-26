@@ -1,5 +1,6 @@
+from config import BlackBox
 from utils import run_command
 
 
 class MongoDB:
-    pass
+    enabled = BlackBox.mongodb_enabled

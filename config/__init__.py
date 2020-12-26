@@ -1,3 +1,3 @@
-from .config import Config
+from .config import BlackBox
 
-__all__ = ["Config"]
+__all__ = ["BlackBox"]
