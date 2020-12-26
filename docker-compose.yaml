@@ -1,16 +1,23 @@
 version: "3.7"
 services:
   black-box:
+    container_name: blackbox
     build:
       context: .
       dockerfile: docker/Dockerfile
-    container_name: blackbox
 
   postgres:
+    container_name: blackbox-postgres
     image: postgres
     environment:
       - POSTGRES_USER=blackbox
       - POSTGRES_PASSWORD=blackbox
     volumes:
-      - ./docker/postgres_init.sql:/docker-entrypoint-initdb.d/init.sql
-    container_name: blackbox-postgres
+      - ./docker/postgres/postgres_init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  mongo:
+    container_name: blackbox-mongo
+    image: mongo
+    volumes:
+      - ./docker/mongo/init_data:/init_data
+      - ./docker/mongo/mongo_import.sh:/docker-entrypoint-initdb.d/mongo_import.sh
