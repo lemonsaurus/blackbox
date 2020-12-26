@@ -46,6 +46,12 @@ class YAMLGetter(type):
     subsection = None
 
     def __getattr__(cls, name):
+        """
+        Fetch the attribute in the _CONFIG_YAML dictionary.
+
+        This just attempts to do a dictionary lookup in the _CONFIG_YAML we unpacked earlier,
+        and supports sections and subsections if we need nested config data.
+        """
         name = name.lower()
 
         try:
@@ -63,6 +69,7 @@ class YAMLGetter(type):
             raise
 
     def __getitem__(cls, name):
+        """Just defer to the __getattr__ implementation."""
         return cls.__getattr__(name)
 
     def __iter__(cls):
@@ -72,7 +79,12 @@ class YAMLGetter(type):
 
 
 class Config(metaclass=YAMLGetter):
-    """The configuration for the black-box application."""
+    """
+    The configuration for the black-box application.
+
+    NOTE: This has to match the configuration in config.yaml, so make sure to change both
+    if you want to add more configuration parameters.
+    """
     # Databases
     redis_enabled: bool
     mongodb_enabled: bool
