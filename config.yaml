@@ -1,0 +1,10 @@
+# Databases
+redis_enabled: true
+mongodb_enabled: true
+postgres_enabled: true
+
+# Storage providers
+gdrive_enabled: true
+
+# Database rotation
+rotation_days: 7
