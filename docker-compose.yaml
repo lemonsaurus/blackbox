@@ -3,5 +3,14 @@ services:
   black-box:
     build:
       context: .
-      dockerfile: Dockerfile
-    container_name: black-box
+      dockerfile: docker/Dockerfile
+    container_name: blackbox
+
+  postgres:
+    image: postgres
+    environment:
+      - POSTGRES_USER=blackbox
+      - POSTGRES_PASSWORD=blackbox
+    volumes:
+      - ./docker/postgres_init.sql:/docker-entrypoint-initdb.d/init.sql
+    container_name: blackbox-postgres
