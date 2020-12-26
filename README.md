@@ -3,6 +3,8 @@ A service designed to be run by `cron` or **Kubernetes CronJob** which backs up 
 
 A cheap and simple solution to backing up all your stuff.
 
+**NOTE: This is not ready to receive contributions yet!**
+
 # Setup
 This service can either be set up as a cron job (on UNIX systems), or as a Kubernetes CronJob. You can probably set it up on just about any system by applying some altered version of one of these approaches, if you're clever about it.
 
