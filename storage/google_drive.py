@@ -20,7 +20,3 @@ class GoogleDrive(BlackBoxStorageProvider):
         files that are not related to backup or logging.
         """
         raise NotImplementedError
-
-
-if __name__ == "__main__":
-    gdrive = GoogleDrive()

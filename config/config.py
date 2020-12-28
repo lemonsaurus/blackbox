@@ -1,14 +1,9 @@
 import logging
-import pathlib
 
-import yaml
+from utils.yaml import get_yaml_config
 
 log = logging.getLogger(__name__)
-
-# Load the yaml file in the root folder
-root_folder = pathlib.Path(__file__).parent.parent.absolute()
-with open(root_folder / "config.yaml", encoding="UTF-8") as f:
-    _CONFIG_YAML = yaml.safe_load(f)
+_CONFIG_YAML = get_yaml_config()
 
 
 class YAMLGetter(type):
@@ -95,9 +90,3 @@ class BlackBox(metaclass=YAMLGetter):
 
     # Database rotation
     rotation_days: int
-
-
-# Test that everything works if this file is run directly.
-if __name__ == "__main__":
-    for attribute, content in BlackBox:
-        print(f"Config.{attribute} = {content}")

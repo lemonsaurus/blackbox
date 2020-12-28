@@ -10,7 +10,3 @@ class Postgres(BlackBoxDatabase):
 
     def backup(self) -> Path:
         raise NotImplementedError
-
-
-if __name__ == "__main__":
-    postgres = Postgres()
