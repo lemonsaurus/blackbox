@@ -8,7 +8,7 @@ services:
 
   postgres:
     container_name: blackbox-postgres
-    image: postgres
+    image: postgres:12
     environment:
       - POSTGRES_USER=blackbox
       - POSTGRES_PASSWORD=blackbox
