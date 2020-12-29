@@ -1,18 +1,23 @@
+import logging
 import os
 import subprocess
-import logging
 
 log = logging.getLogger(__name__)
 
 
-def run_command(command: str, cwd: bool = None):
-    """Execute the command, and log the result."""
+def run_command(command: str, **environment):
+    """
+    Execute the command, and log the result.
+
+    Any additional keyword arguments passed into this call
+    will be added as environment variables.
+    """
     env = os.environ.copy()
+    env.update(environment)
     result = subprocess.run(
         [command],
         shell=True,
         capture_output=True,
-        cwd=cwd,
         env=env,
     )
 
