@@ -1,10 +1,13 @@
-# Databases
-redis_enabled: true
-mongodb_enabled: true
+# MongoDB
+mongodb_enabled: false
+mongodb_connstring: mongodb://blackbox:blackbox@blackbox-mongo:9999
+
+# Postgres
 postgres_enabled: true
+postgres_connstring: postgresql://blackbox:blackbox@blackbox-postgres:5432
 
 # Storage providers
-gdrive_enabled: true
+gdrive_enabled: false
 
 # Database rotation
 rotation_days: 7

@@ -130,3 +130,6 @@ dmypy.json
 
 # Jetbrains
 .idea
+
+# Ignore the config file
+config.yaml
