@@ -1,4 +1,4 @@
-# black-box
+![blackbox](blackbox.png)
 A service designed to be run by `cron` or **Kubernetes CronJob** which backs up all your databases to all your favorite cloud storage providers.
 
 A cheap and simple solution to backing up all your stuff.
