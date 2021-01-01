@@ -11,4 +11,5 @@ class BlackBoxConfigTests(unittest.TestCase):
         _config = get_yaml_config()
 
         for name, value in BlackBox:
-            self.assertEqual(_config[name], value)
+            if name in _config:
+                self.assertEqual(_config[name], value)

@@ -40,6 +40,10 @@ class YAMLGetter(type):
     section = None
     subsection = None
 
+    def _get_annotation(cls, name):
+        """Fetch the annotation configured in the subclass."""
+        return cls.__annotations__.get(name)
+
     def __getattr__(cls, name):
         """
         Fetch the attribute in the _CONFIG_YAML dictionary.
@@ -57,11 +61,13 @@ class YAMLGetter(type):
             else:
                 return _CONFIG_YAML[cls.section][cls.subsection][name]
         except KeyError:
-            dotted_path = '.'.join(
-                (cls.section or "", cls.subsection or "", name)
-            )
-            log.critical(f"Tried accessing configuration variable at `{dotted_path}`, but it could not be found.")
-            raise
+            # If one of the handler lists isn't defined, return an empty list.
+            if cls._get_annotation(name) == list:
+                return []
+            elif cls._get_annotation(name) == dict:
+                return {}
+            else:
+                return None
 
     def __getitem__(cls, name):
         """Just defer to the __getattr__ implementation."""
@@ -74,19 +80,12 @@ class YAMLGetter(type):
 
 
 class BlackBox(metaclass=YAMLGetter):
-    """
-    The configuration for the black-box application.
+    """The configuration for the black-box application."""
+    # Handlers
+    databases: list
+    storage: list
+    logging: list
+    notifiers: list
 
-    NOTE: This has to match the configuration in config.yaml, so make sure to change both
-    if you want to add more configuration parameters.
-    """
-    # Databases
-    redis_enabled: bool
-    mongodb_enabled: bool
-    postgres_enabled: bool
-
-    # Storage providers
-    gdrive_enabled: bool
-
-    # Database rotation
+    # Configuration
     rotation_days: int
