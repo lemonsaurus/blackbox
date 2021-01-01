@@ -8,7 +8,7 @@ _CONFIG_YAML = get_yaml_config()
 
 class YAMLGetter(type):
     """
-    Metaclass for accessing yaml config data.
+    Metaclass for accessing yaml blackbox data.
 
     Supports getting configuration from up to two levels
     of nested configuration through `section` and `subsection`.
@@ -20,19 +20,19 @@ class YAMLGetter(type):
     Adapted from python-discord/bot.
 
     Example Usage:
-        # config.yml
+        # blackbox.yml
         bot:
             prefixes:
                 direct_message: ''
                 guild: '!'
 
-        # config.py
+        # blackbox.py
         class Prefixes(metaclass=YAMLGetter):
             section = "bot"
             subsection = "prefixes"
 
         # Usage in Python code
-        from config import Prefixes
+        from blackbox import Prefixes
 
         print(Prefixes.direct_message)
         print(Prefixes.guild)
@@ -49,7 +49,7 @@ class YAMLGetter(type):
         Fetch the attribute in the _CONFIG_YAML dictionary.
 
         This just attempts to do a dictionary lookup in the _CONFIG_YAML we unpacked earlier,
-        and supports sections and subsections if we need nested config data.
+        and supports sections and subsections if we need nested blackbox data.
         """
         name = name.lower()
 
@@ -74,12 +74,12 @@ class YAMLGetter(type):
         return cls.__getattr__(name)
 
     def __iter__(cls):
-        """Return generator of key: value pairs of current constants class' config values."""
+        """Return generator of key: value pairs of current constants class' blackbox values."""
         for name in cls.__annotations__:
             yield name, getattr(cls, name)
 
 
-class BlackBox(metaclass=YAMLGetter):
+class Blackbox(metaclass=YAMLGetter):
     """The configuration for the black-box application."""
     # Handlers
     databases: list
