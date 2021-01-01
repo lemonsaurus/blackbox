@@ -1,12 +1,12 @@
 from pathlib import Path
 
-from databases._base import BlackBoxDatabase
+from databases._base import BlackboxDatabase
 
 
-class Redis(BlackBoxDatabase):
+class Redis(BlackboxDatabase):
 
     def _get_connstring(self):
-        """Try to get the connstring out of the config."""
+        """Ensure we only have a single connstring configured, and return it."""
         raise NotImplementedError
 
     def _parse_connstring(self):

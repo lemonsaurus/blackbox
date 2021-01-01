@@ -1,14 +1,12 @@
 from pathlib import Path
 
-from config import BlackBox
-from databases._base import BlackBoxDatabase
-from utils import run_command
+from databases._base import BlackboxDatabase
 
 
-class MongoDB(BlackBoxDatabase):
+class MongoDB(BlackboxDatabase):
 
     def _get_connstring(self):
-        """Try to get the connstring out of the config."""
+        """Ensure we only have a single connstring configured, and return it."""
         raise NotImplementedError
 
     def _parse_connstring(self):

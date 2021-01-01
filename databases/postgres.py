@@ -4,15 +4,15 @@ import re
 from pathlib import Path
 from typing import Optional, Tuple
 
-from config import BlackBox
-from config.exceptions import ImproperlyConfigured
-from databases._base import BlackBoxDatabase
+from blackbox import Blackbox
+from blackbox.exceptions import ImproperlyConfigured
+from databases._base import BlackboxDatabase
 from utils import run_command
 
 log = logging.getLogger(__name__)
 
 
-class Postgres(BlackBoxDatabase):
+class Postgres(BlackboxDatabase):
     """A Database handler that will do a pg_dumpall for Postgres, backing up all tables."""
 
     def __init__(self):
@@ -39,7 +39,7 @@ class Postgres(BlackBoxDatabase):
 
     def _get_connstring(self):
         """Ensure we only have a single connstring configured, and return it."""
-        connstrings = [connstring for connstring in BlackBox.databases if connstring.startswith("postgres")]
+        connstrings = [connstring for connstring in Blackbox.databases if connstring.startswith("postgres")]
 
         # No connstrings configured
         if len(connstrings) == 0:

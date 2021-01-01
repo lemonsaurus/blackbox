@@ -6,7 +6,7 @@ class BlackboxConnstringParser(ABC):
 
     @abstractmethod
     def _get_connstring(self):
-        """Try to get the connstring out of the config."""
+        """Ensure we only have a single connstring configured, and return it."""
         raise NotImplementedError
 
     @abstractmethod

@@ -1,8 +1,10 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from pathlib import Path
 
+from blackbox.abc import BlackboxConnstringParser
 
-class BlackBoxStorageProvider(ABC):
+
+class BlackboxStorageProvider(BlackboxConnstringParser):
     @abstractmethod
     def sync(self, file_path: Path):
         """
