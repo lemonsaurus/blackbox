@@ -42,6 +42,8 @@ rotation_days: 7
 ## Databases
 Right now, this app supports **MongoDB** and **PostgreSQL**. If you need support for an additional database, consider opening a pull request to add a new database handler.
 
+**Note: It is currently not possible to configure more than one of each database.**
+
 #### MongoDB
 - Add a connstring to the `databases` list with this format: `mongodb://username:password@host:port`.
 
@@ -57,6 +59,8 @@ We only support a single generic connstring format for logging, and that's this 
 
 ## Storage providers
 `black-box` can work with different storage providers to save your logs and backups - usually so that you can automatically store them in the cloud. Right now we only support **Google Drive**, but we will probably add additional providers in the future.
+
+**Note: It is currently not possible to configure more than one of each storage type.**
 
 #### Google Drive
 - Add a connstring to the `storage` list with this format: `gdrive://user:token`
