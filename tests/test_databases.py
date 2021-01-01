@@ -1,21 +1,28 @@
 import unittest
 
+from config.exceptions import ImproperlyConfigured
 from databases import MongoDB, Postgres, Redis
 
 
 class BlackBoxDatabaseTests(unittest.TestCase):
 
-    @staticmethod
-    def test_mongodb_handler_can_be_instantiated():
+    def test_mongodb_handler_can_be_instantiated(self):
         """Test if the MongoDB database handler can be instantiated."""
-        MongoDB()
+        try:
+            MongoDB()
+        except ImproperlyConfigured:
+            self.fail("Mongo() could not be instantiated.")
 
-    @staticmethod
-    def test_postgres_handler_can_be_instantiated():
+    def test_postgres_handler_can_be_instantiated(self):
         """Test if the PostgreSQL database handler can be instantiated."""
-        Postgres()
+        try:
+            Postgres()
+        except ImproperlyConfigured:
+            self.fail("Postgres() could not be instantiated.")
 
-    @staticmethod
-    def test_redis_handler_can_be_instantiated():
+    def test_redis_handler_can_be_instantiated(self):
         """Test if the Redis database handler can be instantiated."""
-        Redis()
+        try:
+            Redis()
+        except ImproperlyConfigured:
+            self.fail("Redis() could not be instantiated.")
