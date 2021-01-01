@@ -23,40 +23,54 @@ Here's an example manifest you can use for this.
 # Configuration
 `black-box` can be configured in a number of ways. To set it up, create a `config.yaml` file in the root folder. Here's an example of what it should contain:
 ```yaml
-# MongoDB
-mongodb_enabled: false
-mongodb_connstring: mongodb://username:password@host:port
+databases:
+  - mongodb://username:password@host:port
+  - postgres://username:password@host:port
 
-# Postgres
-postgres_enabled: true
-postgres_connstring: postgres://username:password@host:port
+storage:
+  - gdrive://username:token
 
-# Storage providers
-gdrive_enabled: false
+loggers:
+  - logs://username:password@host:port?command="docker logs api"
 
-# Database rotation
+notifiers:
+  - discord://webhook-uri
+
 rotation_days: 7
 ```
 
-####  Rotation
-By default, `black-box` will automatically remove all backup files older than 7 days in the folder you configure for your storage provider. To determine if something is a backup file or not, it will use a regex pattern that corresponds with the default file it saves, for example `black-box-postgres-backup-11-12-2020.sql`.
-
-You can configure the number of days before rotating by altering the `rotation_days` parameter in `config.yaml`. 
-
-# Databases
+## Databases
 Right now, this app supports **MongoDB** and **PostgreSQL**. If you need support for an additional database, consider opening a pull request to add a new database handler.
 
 #### MongoDB
-- Set `mongo_enabled` to `true` in `config.yaml`. 
-- Set a `mongo_connstring` in `config.yaml`. The correct format is `mongodb://username:password@host:port`.
+- Add a connstring to the `databases` list with this format: `mongodb://username:password@host:port`.
 
 #### Postgres
-- Set `postgres_enabled` to `true` in `config.yaml`. 
-- Set a `postgres_connstring` in `config.yaml`. The correct format is `postgresql://username:password@host:port`.
+- Add a connstring to the `databases` list with this format: `postgresql://username:password@host:port`.
 
-# Storage providers
-`black-box` can work with different storage providers to save your backups - usually so that you can automatically store them in the cloud. Right now we only support **Google Drive**, but we will probably add additional providers in the future.
+## Loggers
+A logger is a connstring used to fetch a log. For example, with `logs://user:password@host:port?command="docker logs api"`, blackbox will ssh to `host:port` using the provided username and password, and then run the command `docker logs api`. It will store the output from this command to a file named something like `blackbox_logs_docker_logs_api_01_01_2021.log`, and then upload it to all your configured storage providers.
+
+We only support a single generic connstring format for logging, and that's this one where you provide your own command. You **must** always provide a command, but the other parameters are optional. For example, `logs://?command="kubectl logs server"` is a valid connstring which will run the command on the local machine.
+
+**# TODO: Maybe an image here showcasing the log output**
+
+## Storage providers
+`black-box` can work with different storage providers to save your logs and backups - usually so that you can automatically store them in the cloud. Right now we only support **Google Drive**, but we will probably add additional providers in the future.
 
 #### Google Drive
-- Set `gdrive_enabled` to `true` in `config.yaml`
-- Ensure that the `BLACKBOX_GDRIVE_API_TOKEN` environment variable is set.
+- Add a connstring to the `storage` list with this format: `gdrive://user:token`
+
+## Notifiers
+`black-box` also implements different _notifiers_, which is how it reports the result of one of its jobs to you. Right now we only support **Discord**, but if you need a specific notifier, feel free to open an issue.
+
+**# TODO: Add an image showing off the Discord webhook here**
+
+#### Discord
+- Add a connstring to the `notifiers` list with this format:
+  `discord://<webhook-uri>`
+
+##  Rotation
+By default, `black-box` will automatically remove all backup files older than 7 days in the folder you configure for your storage provider. To determine if something is a backup file or not, it will use a regex pattern that corresponds with the default file it saves, for example `black-box-postgres-backup-11-12-2020.sql`.
+
+You can configure the number of days before rotating by altering the `rotation_days` parameter in `config.yaml`.
