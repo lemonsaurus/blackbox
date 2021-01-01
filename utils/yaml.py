@@ -2,7 +2,7 @@ import pathlib
 
 import yaml
 
-from config.exceptions import ImproperlyConfigured
+from blackbox.exceptions import ImproperlyConfigured
 
 
 def get_yaml_config() -> dict:
