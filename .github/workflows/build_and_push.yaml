@@ -47,5 +47,3 @@ jobs:
           tags: |
             ghcr.io/python-discord/blackbox:latest
             ghcr.io/python-discord/blackbox:${{ steps.sha_tag.outputs.tag }}
-          build-args: |
-            git_sha=${{ github.sha }}
