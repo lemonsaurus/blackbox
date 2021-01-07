@@ -12,8 +12,14 @@ def run_command(command: str, **environment):
     Any additional keyword arguments passed into this call
     will be added as environment variables.
     """
+    # Get the current environment variables.
     env = os.environ.copy()
-    env.update(environment)
+
+    # Now add all the environment variables we passed in that are not None.
+    extra_env = {key: value for key, value in environment.items() if value is not None}
+    env.update(extra_env)
+
+    # Run the command and capture the output
     result = subprocess.run(
         [command],
         shell=True,
