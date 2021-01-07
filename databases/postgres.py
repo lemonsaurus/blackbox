@@ -22,7 +22,7 @@ class Postgres(BlackboxDatabase):
         date = datetime.date.today().strftime("%d_%m_%Y")
         backup_path = Path.home() / f"postgres_blackbox_{date}.sql"
         output = run_command(
-            f"pg_dumpall --file={self.backup_path}",
+            f"pg_dumpall --file={backup_path}",
             PGUSER=self.config.get("user"),
             PGPASSWORD=self.config.get("password"),
             PGHOST=self.config.get("host"),
