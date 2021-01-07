@@ -17,16 +17,10 @@ class Postgres(BlackboxDatabase):
         "postgresql",
     ]
 
-    def __init__(self):
-        """Set up the Postgres handler."""
-        super().__init__()
-
-        # What should the output file be called?
-        date = datetime.date.today().strftime("%d_%m_%Y")
-        self.backup_path = Path.home() / f"postgres_blackbox_{date}.sql"
-
     def backup(self) -> Path:
         """Dump all the data to a file and then return the filepath."""
+        date = datetime.date.today().strftime("%d_%m_%Y")
+        backup_path = Path.home() / f"postgres_blackbox_{date}.sql"
         output = run_command(
             f"pg_dumpall --file={self.backup_path}",
             PGUSER=self.config.get("user"),
@@ -34,6 +28,5 @@ class Postgres(BlackboxDatabase):
             PGHOST=self.config.get("host"),
             PGPORT=self.config.get("port"),
         )
-        print(output)
         log.debug(output)
-        return self.backup_path
+        return backup_path
