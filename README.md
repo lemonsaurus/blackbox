@@ -46,9 +46,11 @@ Right now, this app supports **MongoDB** and **PostgreSQL 12**. If you need supp
 
 #### MongoDB
 - Add a connstring to the `databases` list with this format: `mongodb://username:password@host:port`.
+- To restore from the backup, use `mongorestore --gzip --archive=/path/to/backup.archive`
 
 #### Postgres
 - Add a connstring to the `databases` list with this format: `postgresql://username:password@host:port`.
+- To restore from the backup, use `psql -f /path/to/backup.sql`
 
 ## Loggers
 A logger is a connstring used to fetch a log. For example, with `logs://user:password@host:port?command="docker logs api"`, blackbox will ssh to `host:port` using the provided username and password, and then run the command `docker logs api`. It will store the output from this command to a file named something like `blackbox_logs_docker_logs_api_01_01_2021.log`, and then upload it to all your configured storage providers.
