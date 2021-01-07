@@ -1,16 +1,20 @@
 import logging
 import os
 import subprocess
+from typing import Tuple
 
 log = logging.getLogger(__name__)
 
 
-def run_command(command: str, **environment):
+def run_command(command: str, **environment) -> Tuple[bool, str]:
     """
     Execute the command, and log the result.
 
     Any additional keyword arguments passed into this call
     will be added as environment variables.
+
+    Returns a tuple of (success, output), where success is a boolean value
+    that is either True or False, and output is a string.
     """
     # Get the current environment variables.
     env = os.environ.copy()
@@ -20,14 +24,20 @@ def run_command(command: str, **environment):
     env.update(extra_env)
 
     # Run the command and capture the output
-    result = subprocess.run(
-        [command],
-        shell=True,
-        capture_output=True,
-        env=env,
-    )
+    try:
+        result = subprocess.run(
+            [command],
+            shell=True,
+            capture_output=True,
+            env=env,
+            check=True
+        )
+        output = result.stderr.decode("utf-8").strip()
+        success = True
+    except subprocess.CalledProcessError as e:
+        output = e.stderr.decode("utf-8").strip()
+        success = False
 
     # Log and return output
-    output = result.stderr.decode("utf-8").strip()
     log.info(output)
-    return output
+    return success, output
