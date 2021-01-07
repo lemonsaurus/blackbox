@@ -84,7 +84,7 @@ class Blackbox(metaclass=YAMLGetter):
     # Handlers
     databases: list
     storage: list
-    logging: list
+    loggers: list
     notifiers: list
 
     # Configuration
