@@ -40,7 +40,7 @@ rotation_days: 7
 ```
 
 ## Databases
-Right now, this app supports **MongoDB** and **PostgreSQL**. If you need support for an additional database, consider opening a pull request to add a new database handler.
+Right now, this app supports **MongoDB** and **PostgreSQL 12**. If you need support for an additional database, consider opening a pull request to add a new database handler.
 
 **Note: It is currently not possible to configure more than one of each database.**
 
