@@ -25,12 +25,16 @@ class MongoDB(BlackboxDatabase):
         """Dump all the data to a file and then return the filepath."""
         date = datetime.date.today().strftime("%d_%m_%Y")
         archive_file = Path.home() / f"mongodb_blackbox_{date}.archive"
-        output = run_command(
+
+        # Run the backup, and store the outcome in this object.
+        self.success, self.output = run_command(
             f"mongodump "
             f"--uri={self.connstring} "
             "--gzip "
             "--forceTableScan "
             f"--archive={archive_file}"
         )
-        log.debug(output)
+        log.debug(self.output)
+
+        # Return the path to the backup file
         return archive_file

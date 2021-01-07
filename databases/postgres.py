@@ -21,12 +21,16 @@ class Postgres(BlackboxDatabase):
         """Dump all the data to a file and then return the filepath."""
         date = datetime.date.today().strftime("%d_%m_%Y")
         backup_path = Path.home() / f"postgres_blackbox_{date}.sql"
-        output = run_command(
+
+        # Run the backup, and store the outcome.
+        self.success, self.output = run_command(
             f"pg_dumpall --file={backup_path}",
             PGUSER=self.config.get("user"),
             PGPASSWORD=self.config.get("password"),
             PGHOST=self.config.get("host"),
             PGPORT=self.config.get("port"),
         )
-        log.debug(output)
+        log.debug(self.output)
+
+        # Return the path to the backup file
         return backup_path
