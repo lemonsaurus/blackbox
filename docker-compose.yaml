@@ -5,6 +5,8 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile
+    volumes:
+      - ./config.yaml:/blackbox/config.yaml
 
   postgres:
     container_name: blackbox-postgres
