@@ -42,8 +42,8 @@ jobs:
           context: .
           file: ./docker/Dockerfile
           push: true
-          cache-from: type=registry,ref=ghcr.io/python-discord/blackbox:latest
+          cache-from: type=registry,ref=ghcr.io/lemonsaurus/blackbox:latest
           cache-to: type=inline
           tags: |
-            ghcr.io/python-discord/blackbox:latest
-            ghcr.io/python-discord/blackbox:${{ steps.sha_tag.outputs.tag }}
+            ghcr.io/lemonsaurus/blackbox:latest
+            ghcr.io/lemonsaurus/blackbox:${{ steps.sha_tag.outputs.tag }}
