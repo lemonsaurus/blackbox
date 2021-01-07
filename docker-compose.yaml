@@ -12,14 +12,17 @@ services:
     container_name: blackbox-postgres
     image: postgres:12
     environment:
-      - POSTGRES_USER=blackbox
-      - POSTGRES_PASSWORD=blackbox
+      POSTGRES_USER: blackbox
+      POSTGRES_PASSWORD: blackbox
     volumes:
       - ./docker/postgres/postgres_init.sql:/docker-entrypoint-initdb.d/init.sql
 
   mongo:
     container_name: blackbox-mongo
     image: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: blackbox
+      MONGO_INITDB_ROOT_PASSWORD: blackbox
     volumes:
       - ./docker/mongo/init_data:/init_data
       - ./docker/mongo/mongo_import.sh:/docker-entrypoint-initdb.d/mongo_import.sh
