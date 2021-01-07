@@ -21,7 +21,7 @@ RUN apt-get -y update \
 RUN pip install -U pipenv
 
 # Create and set the working directory, so we don't make a mess in the Docker filesystem.
-WORKDIR /black-box
+WORKDIR /blackbox
 
 # Install project dependencies
 COPY Pipfile* ./
