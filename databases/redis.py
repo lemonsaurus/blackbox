@@ -5,13 +5,8 @@ from databases._base import BlackboxDatabase
 
 class Redis(BlackboxDatabase):
 
-    def _get_connstring(self):
-        """Ensure we only have a single connstring configured, and return it."""
-        raise NotImplementedError
-
-    def _parse_connstring(self):
-        """Parse the connstring and return its constituent parts."""
-        raise NotImplementedError
+    connstring_regex = r""
+    valid_uri_protocols = []
 
     def backup(self) -> Path:
         raise NotImplementedError

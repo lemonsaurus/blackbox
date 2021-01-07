@@ -1,10 +1,10 @@
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from pathlib import Path
 
-from blackbox.abc import BlackboxConnstringParser
+from blackbox.mixins import ConnstringParserMixin
 
 
-class BlackboxDatabase(BlackboxConnstringParser):
+class BlackboxDatabase(ABC, ConnstringParserMixin):
     """An abstract database handler."""
 
     @abstractmethod

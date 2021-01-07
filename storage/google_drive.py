@@ -1,17 +1,12 @@
 from pathlib import Path
 
-from storage._base import BlackboxStorageProvider
+from storage._base import BlackboxStorage
 
 
-class GoogleDrive(BlackboxStorageProvider):
+class GoogleDrive(BlackboxStorage):
 
-    def _get_connstring(self):
-        """Ensure we only have a single connstring configured, and return it."""
-        raise NotImplementedError
-
-    def _parse_connstring(self):
-        """Parse the connstring and return its constituent parts."""
-        raise NotImplementedError
+    connstring_regex = r""
+    valid_uri_protocols = []
 
     def sync(self, file_path: Path) -> None:
         """Sync a file to Google Drive."""
