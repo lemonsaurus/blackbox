@@ -1,5 +1,4 @@
-from databases import all_databases
-from storage import all_storage_providers
+from blackbox.handlers import all_databases, all_storage_providers, all_notifiers
 
 if __name__ == "__main__":
     report = {}

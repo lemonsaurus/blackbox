@@ -7,7 +7,7 @@ from blackbox.exceptions import ImproperlyConfigured
 
 def get_yaml_config() -> dict:
     """Load the yaml file in the root folder, and return it as a dict."""
-    root_folder = pathlib.Path(__file__).parent.parent.absolute()
+    root_folder = pathlib.Path(__file__).parent.parent.parent.absolute()
 
     try:
         with open(root_folder / "config.yaml", encoding="UTF-8", mode="r") as f:

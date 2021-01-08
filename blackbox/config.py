@@ -1,6 +1,6 @@
 import logging
 
-from utils.yaml import get_yaml_config
+from blackbox.utils.yaml import get_yaml_config
 
 log = logging.getLogger(__name__)
 _CONFIG_YAML = get_yaml_config()
@@ -80,7 +80,7 @@ class YAMLGetter(type):
 
 
 class Blackbox(metaclass=YAMLGetter):
-    """The configuration for the black-box application."""
+    """The configuration for the blackbox application."""
     # Handlers
     databases: list
     storage: list

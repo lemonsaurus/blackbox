@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from storage._base import BlackboxStorage
+from ._base import BlackboxStorage
 
 
 class GoogleDrive(BlackboxStorage):

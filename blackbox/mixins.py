@@ -2,7 +2,7 @@ import re
 from itertools import chain
 from typing import Optional
 
-from blackbox import Blackbox
+from blackbox.config import Blackbox
 from blackbox.exceptions import ImproperlyConfigured
 
 

@@ -1,7 +1,7 @@
 import unittest
 
-from blackbox import Blackbox
-from utils.yaml import get_yaml_config
+from blackbox.config import Blackbox
+from blackbox.utils.yaml import get_yaml_config
 
 
 class BlackBoxConfigTests(unittest.TestCase):

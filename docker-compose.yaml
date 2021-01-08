@@ -1,6 +1,6 @@
 version: "3.7"
 services:
-  black-box:
+  blackbox:
     container_name: blackbox
     build:
       context: .

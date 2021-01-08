@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from databases._base import BlackboxDatabase
+from ._base import BlackboxDatabase
 
 
 class Redis(BlackboxDatabase):

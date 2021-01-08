@@ -1,6 +1,6 @@
 import unittest
 
-from storage import GoogleDrive
+from blackbox.handlers import GoogleDrive
 
 
 class BlackBoxStorageTests(unittest.TestCase):

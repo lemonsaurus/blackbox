@@ -2,8 +2,8 @@ import datetime
 import logging
 from pathlib import Path
 
-from databases._base import BlackboxDatabase
-from utils import run_command
+from ._base import BlackboxDatabase
+from blackbox.utils import run_command
 
 log = logging.getLogger(__name__)
 

@@ -1,8 +1,8 @@
 import unittest
 
-from blackbox import Blackbox
+from blackbox.config import Blackbox
 from blackbox.exceptions import ImproperlyConfigured
-from databases import MongoDB, Postgres, Redis
+from blackbox.handlers import MongoDB, Postgres, Redis
 
 
 class BlackBoxDatabaseTests(unittest.TestCase):
