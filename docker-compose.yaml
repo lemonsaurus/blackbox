@@ -8,6 +8,7 @@ services:
     volumes:
       - ./config.yaml:/blackbox/config.yaml
       - ./main.py:/blackbox/main.py
+      - ./blackbox:/blackbox/blackbox
 
   postgres:
     container_name: blackbox-postgres
