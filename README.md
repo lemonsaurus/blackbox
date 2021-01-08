@@ -70,7 +70,8 @@ We only support a single generic connstring format for logging, and that's this 
 ## Notifiers
 `blackbox` also implements different _notifiers_, which is how it reports the result of one of its jobs to you. Right now we only support **Discord**, but if you need a specific notifier, feel free to open an issue.
 
-**# TODO: Add an image showing off the Discord webhook here**
+![blackbox](img/blackbox_discord.png)
+![blackbox](img/blackbox_discord_2.png)
 
 #### Discord
 - Add a connstring to the `notifiers` list with this format:
