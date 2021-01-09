@@ -3,13 +3,13 @@ from pathlib import Path
 from ._base import BlackboxStorage
 
 
-class GoogleDrive(BlackboxStorage):
+class S3(BlackboxStorage):
 
     connstring_regex = r""
-    valid_uri_protocols = []
+    valid_prefixes = []
 
     def sync(self, file_path: Path) -> None:
-        """Sync a file to Google Drive."""
+        """Sync a file to an S3 bucket."""
         raise NotImplementedError
 
     def rotate(self) -> None:
