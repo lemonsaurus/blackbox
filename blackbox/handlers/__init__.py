@@ -1,17 +1,15 @@
 from .databases.mongodb import MongoDB
 from .databases.postgres import Postgres
-from .databases.redis import Redis
 from .notifiers.discord import Discord
-from .storage.google_drive import GoogleDrive
+from .storage.s3 import S3
 
 all_databases = [
-    Redis,
     MongoDB,
     Postgres,
 ]
 
 all_storage_providers = [
-    GoogleDrive,
+    S3,
 ]
 
 all_notifiers = [

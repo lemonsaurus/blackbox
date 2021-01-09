@@ -13,7 +13,7 @@ class ConnstringParserMixin:
     connstring_regex = r""
 
     # What are the valid URI protocols for this connstring?
-    valid_uri_protocols = []
+    valid_prefixes = []
 
     def __init__(self):
         """Ensure that the connstrings are set up correctly."""
@@ -31,10 +31,12 @@ class ConnstringParserMixin:
 
     def _get_connstring(self) -> Optional[str]:
         """Ensure we only have a single connstring configured, and return it."""
-        connstrings = [
-            connstring for connstring in self._get_all_connstrings()
-            if connstring.split(":")[0] in self.valid_uri_protocols
-        ]
+        # Get valid connstrings
+        connstrings = []
+        for connstring in self._get_all_connstrings():
+            for prefix in self.valid_prefixes:
+                if connstring.startswith(prefix):
+                    connstrings.append(connstring)
 
         # No connstrings configured
         if len(connstrings) == 0:
