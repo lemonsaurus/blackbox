@@ -17,7 +17,7 @@ class MongoDB(BlackboxDatabase):
     """
 
     connstring_regex = r"mongodb://(?P<user>.+):(?P<password>.+)@(?P<host>.+):(?P<port>.+)"
-    valid_uri_protocols = [
+    valid_prefixes = [
         "mongodb"
     ]
 
