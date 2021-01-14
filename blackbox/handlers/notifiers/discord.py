@@ -6,11 +6,14 @@ from ._base import BlackboxNotifier
 class Discord(BlackboxNotifier):
     """A notifier for sending webhooks to Discord."""
 
-    connstring_regex = r"(?P<webhook_url>https://(?:.+\.)?discord\.?com/api/webhooks/.+)"
+    connstring_regex = r"(?P<webhook_url>https://(?:.+\.)?discord(?:app)?\.?com/api/webhooks/.+)"
     valid_prefixes = [
         "https://discord.com",
         "https://ptb.discord.com",
         "https://canary.discord.com",
+        "https://discordapp.com",
+        "https://ptb.discordapp.com",
+        "https://canary.discordapp.com",
     ]
 
     def _parse_report(self, report: dict) -> dict:
