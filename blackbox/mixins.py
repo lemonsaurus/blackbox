@@ -5,6 +5,8 @@ from typing import Optional
 from blackbox.config import Blackbox
 from blackbox.exceptions import ImproperlyConfigured
 
+PARAMS_REGEX = r"(?:\?|&|;)([^=]+)=([^&|;]+)"
+
 
 class ConnstringParserMixin:
     """A mixin class for handlers that depend on connstrings."""
@@ -54,8 +56,16 @@ class ConnstringParserMixin:
     @property
     def config(self) -> dict:
         """Parse the connstring and return its constituent parts."""
+        config = {}
         if self.enabled:
-            return re.search(self.connstring_regex, self.connstring).groupdict()
+            config = re.search(self.connstring_regex + r"\?", self.connstring).groupdict()
+
+            # Now, let's parse out any params specified behind the connstring,
+            # like fruit and dino in `s3://user:password?fruit=lemon&dino=saurus`
+            for param, value in re.findall(PARAMS_REGEX, self.connstring):
+                config[param] = value
+
+        return config
 
     @property
     def enabled(self) -> bool:
