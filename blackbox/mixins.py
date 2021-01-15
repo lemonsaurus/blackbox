@@ -55,7 +55,22 @@ class ConnstringParserMixin:
 
     @property
     def config(self) -> dict:
-        """Parse the connstring and return its constituent parts."""
+        """
+        Parse the connstring and return its constituent parts.
+
+        Uses the connstring_regex defined in the subclass, but also parses out any
+        URL-style additional parameters and adds those to the dictionary.
+
+        So, if you've got a connstring like `stuff://internet:dingdong?fire=ice&magic=blue`,
+        and you're working with a connstring_regex like `stuff://(?P<user>.+):(?P<password>.+)`,
+        self.config will look like this:
+        {
+            "user": "internet",
+            "password": "dingdong",
+            "fire": "ice",
+            "magic": "blue,
+        }
+        """
         config = {}
         if self.enabled:
             config = re.search(self.connstring_regex + r"\?", self.connstring).groupdict()
