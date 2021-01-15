@@ -1,6 +1,6 @@
 import requests
 
-from ._base import BlackboxNotifier
+from _base import BlackboxNotifier
 
 
 class Discord(BlackboxNotifier):

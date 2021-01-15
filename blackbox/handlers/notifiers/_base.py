@@ -1,9 +1,9 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 
-from blackbox.mixins import ConnstringParserMixin
+from blackbox.handlers._base import BlackboxHandler
 
 
-class BlackboxNotifier(ABC, ConnstringParserMixin):
+class BlackboxNotifier(BlackboxHandler):
     @abstractmethod
     def _parse_report(self, report: dict) -> dict:
         """Turn the report from main.py into something the notify function can use."""

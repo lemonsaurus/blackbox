@@ -1,10 +1,10 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from pathlib import Path
 
-from blackbox.mixins import ConnstringParserMixin
+from blackbox.handlers._base import BlackboxHandler
 
 
-class BlackboxStorage(ABC, ConnstringParserMixin):
+class BlackboxStorage(BlackboxHandler):
     @abstractmethod
     def sync(self, file_path: Path):
         """

@@ -26,6 +26,9 @@ if __name__ == "__main__":
         report['output'] += database.output if not database.success else ""
         report['success'] = database.success if not database.success else report['success']
 
+        # Do any cleanup needed.
+        database.teardown()
+
         # Check the outcome of the backup.
         # If it failed, we'll add it to the report and continue
         # with the next database. No need to sync.
@@ -34,22 +37,25 @@ if __name__ == "__main__":
 
         # Otherwise, sync the backup file to every provider.
         for StorageProvider in all_storage_providers:
-            provider = StorageProvider()
+            storage_provider = StorageProvider()
             provider_type = StorageProvider.__name__
 
-            if not provider.enabled:
+            if not storage_provider.enabled:
                 continue
 
             # Sync the provider, and store the outcome to the report.
-            provider.sync(backup_file)
+            storage_provider.sync(backup_file)
             report['databases'][database_type]['storage'].append({
-                "type": provider_type,
-                "success": provider.success,
+                "type":    provider_type,
+                "success": storage_provider.success,
             })
-            report['output'] += provider.output
+            report['output'] += storage_provider.output
 
             # If one storage handler failed, the overall report is a failure.
-            report['success'] = provider.success if not provider.success else report['success']
+            report['success'] = storage_provider.success if not storage_provider.success else report['success']
+
+            # Do cleanup
+            storage_provider.teardown()
 
     # Now send a report to all notifiers.
     for Notifier in all_notifiers:
@@ -60,3 +66,6 @@ if __name__ == "__main__":
 
         # Send a notification
         notifier.notify(report)
+
+        # Do cleanup
+        notifier.teardown()
