@@ -1,14 +1,17 @@
-import os
+import logging
 from pathlib import Path
 
 import boto3
+from botocore.exceptions import ClientError
 
-from _base import BlackboxStorage
+from blackbox.exceptions import ImproperlyConfigured
+from blackbox.handlers.storage._base import BlackboxStorage
+
+log = logging.getLogger(__name__)
 
 
 class S3(BlackboxStorage):
-
-    connstring_regex = r"(?P<endpoint>s3://.+)"
+    connstring_regex = r"s3://(?P<bucket_name>[^:]+):(?P<s3_endpoint>[^:]+)"
     valid_prefixes = [
         "s3",
     ]
@@ -16,35 +19,50 @@ class S3(BlackboxStorage):
     def __init__(self):
         super().__init__()
 
-        # We need to inject the access keys from the connstring into the environment
-        # variables named AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY.
-        #
-        # However, if these environment variables are already set, we should set them back
-        # to what they were after we're done, so we don't mess with the local environment.
-        #
-        # If they're _not_ currently set, we should unset them after we're done. Basically
-        # this whole environment variable modification stuff needs to be idempotent.
-        self.access_key_id = os.environ.get("AWS_ACCESS_KEY_ID")
-        self.secret_access_key = os.environ.get("AWS_SECRET_ACCESS_KEY")
+        # Defaults
+        self.success = False
+        self.output = ""
 
-        os.environ["AWS_ACCESS_KEY_ID"] = self.config.get("aws_access_key_id")
-        os.environ["AWS_SECRET_ACCESS_KEY"] = self.config.get("aws_secret_access_key")
+        # If the optional parameters for credentials have been provided, we use these.
+        key_id = self.config.get("aws_access_key_id")
+        secret_key = self.config.get("aws_secret_access_key")
+        s3_endpoint = self.config.get('s3_endpoint')
+        configuration = {
+            "endpoint_url": f"https://{s3_endpoint}"
+        }
 
-    def teardown(self):
-        """Restore environment variables to their former state."""
-        if self.access_key_id:
-            os.environ["AWS_ACCESS_KEY_ID"] = self.access_key_id
-        else:
-            del os.environ["AWS_ACCESS_KEY_ID"]
+        # If config was provided for both of these, we should use it!
+        if key_id and secret_key:
+            configuration['aws_access_key_id'] = key_id
+            configuration['aws_secret_access_key'] = secret_key
 
-        if self.secret_access_key:
-            os.environ["AWS_SECRET_ACCESS_KEY"] = self.secret_access_key
-        else:
-            del os.environ["AWS_SECRET_ACCESS_KEY"]
+        # If config was provided for only one of them, that's too weird of a state for us to accept,
+        # so we'll raise an exception. (That weird ^ operator is an XOR).
+        elif bool(key_id) ^ bool(secret_key):
+            raise ImproperlyConfigured("You must configure either both or none of the AWS credential params.")
+
+        # If neither was provided, we'll just initialize the client without credentials, and
+        # it will default to looking at first environment vars and then in ~/.aws/credentials.
+        # See https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html
+        self.client = boto3.client(
+            's3',
+            **configuration
+        )
 
     def sync(self, file_path: Path) -> None:
         """Sync a file to an S3 bucket."""
-        raise NotImplementedError
+
+        try:
+            self.client.upload_file(
+                str(file_path),
+                self.config.get('bucket_name'),
+                file_path.name
+            )
+            self.success = True
+        except ClientError as e:
+            log.error(e)
+            self.output = str(e)
+            self.success = False
 
     def rotate(self) -> None:
         """
@@ -54,4 +72,8 @@ class S3(BlackboxStorage):
         those files fit certain regular expressions. We don't want to delete
         files that are not related to backup or logging.
         """
-        raise NotImplementedError
+        pass
+
+
+s = S3()
+print(s.config)
