@@ -26,7 +26,7 @@ databases:
   - postgres://username:password@host:port
 
 storage:
-  - s3://my-s3-bucket.com/my/folder?user=daniel&password=n0tf4nny
+  - s3://my-s3-bucket.com/my/folder?aws_access_key_id=1234&aws_secret_access_key=lemondance
 
 loggers:
   - logs://username:password@host:port?command="docker logs api"
@@ -61,11 +61,20 @@ We support any S3 object storage bucket, whether it's from **AWS**, **Linode**, 
 **Blackbox** will respect the `retention_days` configuration setting and delete older files from the S3 storage. Please note that if you have a bucket expiration policy on your storage, **blackbox** will not do anything to disable it. So, for example, if your bucket expiration policy is 12 hours and blackbox is set to 7 `retention_days`, then your backups are all gonna be deleted after 12 hours unless you disable your policy.  
 
 #### Connection string
-`s3://[host][path]?user=[user]&password=[password]` 
-- If the bucket is public, no user or password needs to be provided
-- `path` is always optional
-- For example, for a password protected bucket where you save stuff in subfolders, the connstring might be `s3://my-s3-bucket.com/my/folder?user=daniel&password=n0tf4nny`
-- For a public bucket where everything is dumped into root, it might simply be `s3://my-s3-bucket.com`
+```json
+s3://<s3 base endpoint>:<s3 bucket endpoint>?<parameter=value>&...
+
+Valid strings:
+- s3://s3.eu-west-1.amazonaws.com:bucket.example.com?aws_access_key_id=1234&aws_secret_access_key=lemondance
+- s3://s3.eu-west-1.amazonaws.com:bucket.example.com
+```
+
+#### Credentials
+To upload stuff to S3, you'll need credentials. Your **AWS credentials** can be provided in several ways. This is the order in which blackbox looks for them:
+- First, we look for the optional parameters in the s3 connection string, called `aws_access_key_id` and `aws_secret_access_key`.
+- If these are not found, we'll check if the `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables are declared in the local environment where Blackbox is running.
+- If we can't find these, we'll look for an `.aws/config` file in the local environment.
+- NOTE: If the bucket is public, no credentials are necessary.
 
 ## Notifiers
 `blackbox` also implements different _notifiers_, which is how it reports the result of one of its jobs to you. Right now we only support **Discord**, but if you need a specific notifier, feel free to open an issue.
