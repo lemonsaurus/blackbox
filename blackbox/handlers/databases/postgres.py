@@ -2,7 +2,7 @@ import datetime
 import logging
 from pathlib import Path
 
-from _base import BlackboxDatabase
+from blackbox.handlers.databases._base import BlackboxDatabase
 from blackbox.utils import run_command
 
 log = logging.getLogger(__name__)

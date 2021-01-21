@@ -1,6 +1,6 @@
 import requests
 
-from _base import BlackboxNotifier
+from blackbox.handlers.notifiers._base import BlackboxNotifier
 
 
 class Discord(BlackboxNotifier):
@@ -66,7 +66,4 @@ class Discord(BlackboxNotifier):
 
     def notify(self, report: dict) -> bool:
         """Send a webhook to Discord with a blackbox report."""
-        print(report)
-        print(self._parse_report(report))
-        r = requests.post(self.config.get("webhook_url"), json=self._parse_report(report))
-        print(r.text)
+        requests.post(self.config.get("webhook_url"), json=self._parse_report(report))
