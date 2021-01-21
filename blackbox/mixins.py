@@ -73,7 +73,7 @@ class ConnstringParserMixin:
         """
         config = {}
         if self.enabled:
-            config = re.search(self.connstring_regex + r"\?", self.connstring).groupdict()
+            config = re.search(self.connstring_regex, self.connstring).groupdict()
 
             # Now, let's parse out any params specified behind the connstring,
             # like fruit and dino in `s3://user:password?fruit=lemon&dino=saurus`
