@@ -1,13 +1,13 @@
-import logging
+import datetime
 from pathlib import Path
 
 import boto3
 from botocore.exceptions import ClientError
 
+from blackbox.config import Blackbox
 from blackbox.exceptions import ImproperlyConfigured
 from blackbox.handlers.storage._base import BlackboxStorage
-
-log = logging.getLogger(__name__)
+from blackbox.utils.logger import log
 
 
 class S3(BlackboxStorage):
@@ -22,6 +22,7 @@ class S3(BlackboxStorage):
         # Defaults
         self.success = False
         self.output = ""
+        self.bucket = self.config.get('bucket_name')
 
         # If the optional parameters for credentials have been provided, we use these.
         key_id = self.config.get("aws_access_key_id")
@@ -55,7 +56,7 @@ class S3(BlackboxStorage):
         try:
             self.client.upload_file(
                 str(file_path),
-                self.config.get('bucket_name'),
+                self.bucket,
                 file_path.name
             )
             self.success = True
@@ -72,8 +73,17 @@ class S3(BlackboxStorage):
         those files fit certain regular expressions. We don't want to delete
         files that are not related to backup or logging.
         """
-        pass
+        retention_days = Blackbox.retention_days
 
+        # Look through the items and figure out which ones are older than `retention_days`
+        for item in self.client.list_objects(Bucket=self.bucket)["Contents"]:
+            last_modified = item.get("LastModified")
+            now_tz = datetime.datetime.now(tz=last_modified.tzinfo)
+            delta = now_tz - item.get("LastModified")
 
-s = S3()
-print(s.config)
+            # Delete the deprecated items
+            if delta.days >= retention_days:
+                self.client.delete_object(
+                    Bucket=self.bucket,
+                    Key=item.get("Key")
+                )

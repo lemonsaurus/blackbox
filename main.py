@@ -54,7 +54,8 @@ if __name__ == "__main__":
             # If one storage handler failed, the overall report is a failure.
             report['success'] = storage_provider.success if not storage_provider.success else report['success']
 
-            # Do cleanup
+            # Rotate, and then do cleanup
+            storage_provider.rotate()
             storage_provider.teardown()
 
     # Now send a report to all notifiers.
