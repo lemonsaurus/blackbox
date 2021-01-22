@@ -1,8 +1,6 @@
-import logging
-
 from blackbox.utils.yaml import get_yaml_config
+from blackbox.utils.logger import log
 
-log = logging.getLogger(__name__)
 _CONFIG_YAML = get_yaml_config()
 
 
@@ -60,8 +58,9 @@ class YAMLGetter(type):
                 return _CONFIG_YAML[cls.section][name]
             else:
                 return _CONFIG_YAML[cls.section][cls.subsection][name]
-        except KeyError:
+        except KeyError as e:
             # If one of the handler lists isn't defined, return an empty list.
+            log.warning(f"{name} is not defined in the config.yaml file -- returning an falsy value.")
             if cls._get_annotation(name) == list:
                 return []
             elif cls._get_annotation(name) == dict:
@@ -88,4 +87,4 @@ class Blackbox(metaclass=YAMLGetter):
     notifiers: list
 
     # Configuration
-    rotation_days: int
+    retention_days: int

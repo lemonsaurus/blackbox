@@ -4,8 +4,7 @@ from pathlib import Path
 
 from blackbox.handlers.databases._base import BlackboxDatabase
 from blackbox.utils import run_command
-
-log = logging.getLogger(__name__)
+from blackbox.utils.logger import log
 
 
 class Postgres(BlackboxDatabase):

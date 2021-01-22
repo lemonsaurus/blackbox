@@ -3,7 +3,7 @@ import os
 import subprocess
 from typing import Tuple
 
-log = logging.getLogger(__name__)
+from blackbox.utils.logger import log
 
 
 def run_command(command: str, **environment) -> Tuple[bool, str]:
