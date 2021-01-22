@@ -9,13 +9,13 @@ This service can either be set up as a cron job (on UNIX systems), as a Kubernet
 ### Setting up as a cron job
 All you need to do to set it up as a cron job is clone this repo, create a config file (see below), and trigger `main.py` to run automatically however often you want.
 ```yaml
-# example cron file
+# TODO: Example cron file
 ```
 
 ### Setting it up as a Kubernetes CronJob
 Here's an example manifest you can use if you want to run this in a Kubernetes cluster.
 ```yaml
-# example CronJob manifest
+# TODO: Example CronJob manifest
 ```
 
 # Configuration
@@ -26,10 +26,7 @@ databases:
   - postgres://username:password@host:port
 
 storage:
-  - s3://my-s3-bucket.com/my/folder?aws_access_key_id=1234&aws_secret_access_key=lemondance
-
-loggers:
-  - logs://username:password@host:port?command="docker logs api"
+  - s3://s3.eu-west-1.amazonaws.com:bucket.example.com?aws_access_key_id=1234&aws_secret_access_key=lemondance
 
 notifiers:
   - https://discord.com/api/webhooks/797541821394714674/lzRM9DFggtfHZXGJTz3yE-MrYJ-4O-0AbdQg3uV2x4vFbu7HTHY2Njq8cx8oyMg0T3Wk
@@ -91,12 +88,3 @@ These usually look something like `https://discord.com/api/webhooks/797541821394
 By default, `blackbox` will automatically remove all backup files older than 7 days in the folder you configure for your storage provider. To determine if something is a backup file or not, it will use a regex pattern that corresponds with the default file it saves, for example `blackbox-postgres-backup-11-12-2020.sql`.
 
 You can configure the number of days before rotating by altering the `retention_days` parameter in `config.yaml`.
-
-## Loggers
-**NOTE: This feature has not been released yet**
-
-A logger is a connstring used to fetch a log. For example, with `logs://user:password@host:port?command="docker logs api"`, blackbox will ssh to `host:port` using the provided username and password, and then run the command `docker logs api`. It will store the output from this command to a file named something like `blackbox_logs_docker_logs_api_01_01_2021.log`, and then upload it to all your configured storage providers.
-
-We only support a single generic connstring format for logging, and that's this one where you provide your own command. You **must** always provide a command, but the other parameters are optional. For example, `logs://?command="kubectl logs server"` is a valid connstring which will run the command on the local machine.
-
-**# TODO: Maybe an image here showcasing the log output**
