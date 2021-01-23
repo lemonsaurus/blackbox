@@ -70,6 +70,9 @@ If you want to re-enable `appendonly`:
 - Set `appendonly` to `yes` in Redis configuration.
 - Start Redis server.
 
+#### Example data
+After spinning up containers with `docker-compose up`, you should run `./docker/redis/insert-data.sh` (at blackbox base directory) to insert testing data to container. This have to be done manually because of Redis image limitations.
+
 ## Storage providers
 **Blackbox** can work with different storage providers to save your logs and backups - usually so that you can automatically store them in the cloud. Right now we only support **S3**, but we will probably add additional providers in the future.
 
