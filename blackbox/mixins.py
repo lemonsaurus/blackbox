@@ -26,7 +26,6 @@ class ConnstringParserMixin:
         """Get all connstrings in the config."""
         return list(chain(
             Blackbox.databases,
-            Blackbox.loggers,
             Blackbox.notifiers,
             Blackbox.storage
         ))
