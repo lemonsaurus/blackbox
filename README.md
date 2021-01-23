@@ -52,7 +52,6 @@ Right now, this app supports **MongoDB**, **PostgreSQL 12** and **Redis**. If yo
 - Add a connstring to the `databases` list with this format: `redis://password@host:port`.
 
 #### To restore from the backup
-**Host mode:**
 - Stop Redis server.
 - Turn off `appendonly` mode in Redis configuration (set to `no`).
 - Copy backup file to Redis working directory (`dir` in configuration) with name that is defined in configuration key `dbfilename`.
@@ -70,9 +69,6 @@ If you want to re-enable `appendonly`:
 - Stop Redis server.
 - Set `appendonly` to `yes` in Redis configuration.
 - Start Redis server.
-
-**Docker:**
-Start new container with linking container `/data` with local directory that contains backup file using Docker volumes.
 
 ## Storage providers
 **Blackbox** can work with different storage providers to save your logs and backups - usually so that you can automatically store them in the cloud. Right now we only support **S3**, but we will probably add additional providers in the future.
