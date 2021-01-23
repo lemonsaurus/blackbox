@@ -39,6 +39,10 @@ class Discord(BlackboxNotifier):
                 emoji = ":white_check_mark:" if provider['success'] else ":x:"
                 field['value'] += f"{emoji}  {provider['type']}\n"
 
+            # When backup failed, add X emoji to value to avoid error.
+            if not field['value']:
+                field['value'] = ":x:"
+
             # Strip any trailing newlines and append
             field['value'] = field['value'].strip()
             fields.append(field)
