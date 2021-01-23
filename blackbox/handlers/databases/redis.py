@@ -10,7 +10,7 @@ from blackbox.utils.logger import log
 class Redis(BlackboxDatabase):
 	"""A Database handler that will run a redis-cli command for Redis backup."""
 
-	connstring_regex = r"redis://(?P<password>.+)@(?P<host>.+):(?P<port>.+)"
+	connstring_regex = r"redis://(?P<host>.+):(?P<port>.+)"
 	valid_prefixes = [
 	    "redis"
 	]
