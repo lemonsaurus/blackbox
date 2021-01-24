@@ -1,5 +1,4 @@
 from datetime import datetime
-import os
 from pathlib import Path
 
 from dropbox import Dropbox as DropboxClient
@@ -43,7 +42,7 @@ class Dropbox(BlackboxStorage):
 
         try:
             with file_path.open("rb") as f:
-                file_size = os.path.getsize(str(file_path))
+                file_size = file_path.stat().st_size
                 if file_size <= chunk_size:
                     self.client.files_upload(
                         f.read(), upload_path, WriteMode.overwrite
