@@ -67,7 +67,7 @@ class Discord(BlackboxNotifier):
                     "fields": fields
                 }
             ],
-            "username":   "blackbox",
+            "username": "blackbox",
             "avatar_url": "https://raw.githubusercontent.com/lemonsaurus/blackbox/main/img/blackbox_avatar.png"
         }
 

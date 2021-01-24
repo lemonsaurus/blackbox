@@ -1,5 +1,5 @@
-from blackbox.utils.yaml import get_yaml_config
 from blackbox.utils.logger import log
+from blackbox.utils.yaml import get_yaml_config
 
 _CONFIG_YAML = get_yaml_config()
 
@@ -58,7 +58,7 @@ class YAMLGetter(type):
                 return _CONFIG_YAML[cls.section][name]
             else:
                 return _CONFIG_YAML[cls.section][cls.subsection][name]
-        except KeyError as e:
+        except KeyError:
             # If one of the handler lists isn't defined, return an empty list.
             log.warning(f"{name} is not defined in the config.yaml file -- returning an falsy value.")
             if cls._get_annotation(name) == list:

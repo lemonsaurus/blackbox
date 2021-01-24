@@ -1,6 +1,6 @@
 from blackbox.handlers.databases import BlackboxDatabase
-from blackbox.handlers.storage import BlackboxStorage
 from blackbox.handlers.notifiers import BlackboxNotifier
+from blackbox.handlers.storage import BlackboxStorage
 
 if __name__ == "__main__":
     report = {
@@ -49,7 +49,7 @@ if __name__ == "__main__":
             # Sync the provider, and store the outcome to the report.
             storage_provider.sync(backup_file)
             report['databases'][database_type]['storage'].append({
-                "type":    provider_type,
+                "type": provider_type,
                 "success": storage_provider.success,
             })
             report['output'] += storage_provider.output

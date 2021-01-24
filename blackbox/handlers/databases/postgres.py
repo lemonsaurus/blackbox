@@ -1,5 +1,4 @@
 import datetime
-import logging
 from pathlib import Path
 
 from blackbox.handlers.databases._base import BlackboxDatabase
