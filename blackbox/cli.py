@@ -1,6 +1,5 @@
-from sys import exit
-
 import click
+
 
 @click.command()
 @click.option('--config', default="blackbox.yml", help="Path to blackbox.yml file")
@@ -13,11 +12,10 @@ def cli(config, init):
     """
 
     if init:
-        raise NotImplemented
+        raise NotImplementedError
 
     if config:
         print("do something with this")
-
 
     from blackbox.handlers.databases import BlackboxDatabase
     from blackbox.handlers.notifiers import BlackboxNotifier
