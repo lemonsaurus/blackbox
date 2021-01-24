@@ -1,14 +1,6 @@
 import pytest
 
 
-def test_mongodb_handler_can_be_instantiated(config_file):
-    """Test if the MongoDB database handler can be instantiated."""
-
-    from blackbox.handlers.databases import MongoDB
-
-    MongoDB()
-
-
 def test_postgres_handler_can_be_instantiated_with_one_connstring(config_file):
     """Test if the PostgreSQL database handler can be instantiated."""
 
