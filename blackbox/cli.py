@@ -1,14 +1,23 @@
+from sys import exit
+
 import click
 
-@click.group()
+@click.command()
 @click.option('--config', default="blackbox.yml", help="Path to blackbox.yml file")
-@click.option('--init', default="blackbox.yml", help="Generate blackbox.yml file")
+@click.option('--init', is_flag=True, help="Generate blackbox.yml file")
 def cli(config, init):
     """
     BLACKBOX
 
     Backup database to external storage system
     """
+
+    if init:
+        raise NotImplemented
+
+    if config:
+        print("do something with this")
+
 
     from blackbox.handlers.databases import BlackboxDatabase
     from blackbox.handlers.notifiers import BlackboxNotifier
@@ -84,5 +93,3 @@ def cli(config, init):
 
         # Do cleanup
         notifier.teardown()
-
-cli.add_command(cli)
