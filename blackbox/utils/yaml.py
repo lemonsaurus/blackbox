@@ -1,5 +1,10 @@
+import os
 import pathlib
 
+from jinja2 import Environment
+from jinja2 import StrictUndefined
+from jinja2.exceptions import TemplateSyntaxError
+from jinja2.exceptions import UndefinedError
 import yaml
 
 from blackbox.exceptions import ImproperlyConfigured
@@ -7,11 +12,23 @@ from blackbox.exceptions import ImproperlyConfigured
 
 def get_yaml_config() -> dict:
     """Load the yaml file in the root folder, and return it as a dict."""
+    template = Environment(undefined=StrictUndefined)
     root_folder = pathlib.Path(__file__).parent.parent.parent.absolute()
 
     try:
         with open(root_folder / "config.yaml", encoding="UTF-8", mode="r") as f:
-            return yaml.safe_load(f)
+            return yaml.safe_load(template.from_string(f.read()).render(**os.environ))
+
+    except TemplateSyntaxError as e:
+        raise ImproperlyConfigured(
+            f"There is an error in the config file: {e}"
+        ) from e
+
+    except UndefinedError as e:
+        raise ImproperlyConfigured(
+            f"Missing environment variable: {e}"
+        ) from e
+
     except FileNotFoundError as e:
         raise ImproperlyConfigured(
             "You must create a config.yaml file in the root folder! "
