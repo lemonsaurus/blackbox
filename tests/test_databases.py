@@ -6,7 +6,7 @@ from tests.fixtures import config_file
 def test_mongodb_handler_can_be_instantiated(config_file):
     """Test if the MongoDB database handler can be instantiated."""
 
-    from blackbox.handlers import MongoDB
+    from blackbox.handlers.databases import MongoDB
 
     MongoDB()
 
@@ -14,7 +14,7 @@ def test_mongodb_handler_can_be_instantiated(config_file):
 def test_postgres_handler_can_be_instantiated_with_one_connstring(config_file):
     """Test if the PostgreSQL database handler can be instantiated."""
 
-    from blackbox.handlers import Postgres
+    from blackbox.handlers.databases import Postgres
 
     Postgres()
 
@@ -24,7 +24,7 @@ def test_postgres_fails_with_multiple_connstrings(config_file):
 
     from blackbox.config import Blackbox
     from blackbox.exceptions import ImproperlyConfigured
-    from blackbox.handlers import Postgres
+    from blackbox.handlers.databases import Postgres
 
     with pytest.raises(ImproperlyConfigured):
         Blackbox.databases = [
@@ -33,11 +33,10 @@ def test_postgres_fails_with_multiple_connstrings(config_file):
         ]
         Postgres()
 
-# Not yet implemented
-# def test_redis_handler_can_be_instantiated(config_file):
-#     """Test if the Redis database handler can be instantiated."""
 
-#     from blackbox.handlers import Redis
+def test_redis_handler_can_be_instantiated(config_file):
+    """Test if the Redis database handler can be instantiated."""
 
-#     Redis()
+    from blackbox.handlers.databases import Redis
 
+    Redis()

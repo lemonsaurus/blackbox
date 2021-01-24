@@ -12,7 +12,7 @@ def config_file(mocker):
             - postgres://username:password@host:port
 
         storage:
-            - s3://s3.bucket
+            - s3://username:password?fire=ice&magic=blue
 
         notifiers:
             - https://web.hook/

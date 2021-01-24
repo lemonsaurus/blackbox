@@ -28,14 +28,15 @@ def run_command(command: str, **environment) -> Tuple[bool, str]:
         result = subprocess.run(
             [command],
             shell=True,
-            capture_output=True,
             env=env,
-            check=True
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT
         )
-        output = result.stderr.decode("utf-8").strip()
+        output = result.stdout.decode("utf-8").strip()
         success = True
     except subprocess.CalledProcessError as e:
-        output = e.stderr.decode("utf-8").strip()
+        output = e.stdout.decode("utf-8").strip()
         success = False
 
     # Log and return output
