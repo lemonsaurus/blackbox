@@ -1,8 +1,19 @@
-from blackbox.handlers.databases import BlackboxDatabase
-from blackbox.handlers.notifiers import BlackboxNotifier
-from blackbox.handlers.storage import BlackboxStorage
+import click
 
-if __name__ == "__main__":
+@click.group()
+@click.option('--config', default="blackbox.yml", help="Path to blackbox.yml file")
+@click.option('--init', default="blackbox.yml", help="Generate blackbox.yml file")
+def cli(config, init):
+    """
+    BLACKBOX
+
+    Backup database to external storage system
+    """
+
+    from blackbox.handlers.databases import BlackboxDatabase
+    from blackbox.handlers.notifiers import BlackboxNotifier
+    from blackbox.handlers.storage import BlackboxStorage
+
     report = {
         "output": "",
         "success": True,
@@ -73,3 +84,5 @@ if __name__ == "__main__":
 
         # Do cleanup
         notifier.teardown()
+
+cli.add_command(cli)
