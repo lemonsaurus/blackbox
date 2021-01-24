@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# This script is customized version of example from https://stackoverflow.com/a/56696941
+
 # Start Redis in background and wait 1 second
 redis-server --daemonize yes --requirepass blackbox --appendonly yes && sleep 1
 
