@@ -133,3 +133,6 @@ dmypy.json
 
 # Ignore the config file
 config.yaml
+
+# VSCode
+.vscode/
