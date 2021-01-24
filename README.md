@@ -38,6 +38,29 @@ notifiers:
 retention_days: 7
 ```
 
+## Environment Variables
+
+The `config.yaml` will ✨ **magically interpolate** ✨ any environment variables that exist in the environment where `blackbox` is running. This is very useful if you want to keep your secrets in environment variables, instead of keeping them in the config file in plaintext.
+
+#### Example
+Imagine your current config looks like this, but you want to move the username and password into environment variables.
+```yaml
+databases:
+  - mongodb://lemonsaurus:security-is-overrated@mongo.lemonsaur.us:1234
+```
+
+So we'll create two environment variables like these:
+```sh
+export MONGO_USERNAME=lemonsaurus
+export MONGO_PASSWORD=security-is-overrated
+```
+
+And now we can make use of these environment variables by using double curly brackets, like this:
+```yaml
+databases:
+  - mongodb://{{ MONGO_USERNAME }}:{{ MONGO_PASSWORD }}@mongo.lemonsaur.us:1234
+```
+
 ## Databases
 Right now, this app supports **MongoDB**, **PostgreSQL 12** and **Redis**. If you need support for an additional database, consider opening a pull request to add a new database handler.
 
