@@ -1,12 +1,14 @@
-import os
 from datetime import datetime
+import os
 from pathlib import Path
 
 from dropbox import Dropbox as DropboxClient
-from dropbox.exceptions import ApiError, HttpError
-from dropbox.files import (
-    CommitInfo, FileMetadata, UploadSessionCursor, WriteMode
-)
+from dropbox.exceptions import ApiError
+from dropbox.exceptions import HttpError
+from dropbox.files import CommitInfo
+from dropbox.files import FileMetadata
+from dropbox.files import UploadSessionCursor
+from dropbox.files import WriteMode
 
 from blackbox.config import Blackbox
 from blackbox.handlers.storage._base import BlackboxStorage
