@@ -126,7 +126,7 @@ To upload stuff to S3, you'll need credentials. Your **AWS credentials** can be 
 Dropbox storage handler need user access token. For this:
 - Create Dropbox account (if you don't have).
 - Go to https://dropbox.com/developers
-- Create new application with App Folder (full access is not recommended).
+- Create new application with App Folder (full access is not recommended, because without directory defined in connstring will have destructive results).
 
 You can also define custom location (root is App Folder) using 
 `upload_directory` optional parameter. This **should** begin with slash
