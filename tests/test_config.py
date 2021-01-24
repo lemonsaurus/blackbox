@@ -1,5 +1,7 @@
 import pytest
 
+from blackbox.exceptions import ImproperlyConfigured
+
 
 def test_config_gets_correct_values(config_file):
     """Test if the YAMLGetter class gets the values we expect it to get."""
@@ -23,7 +25,7 @@ def test_config_render_fails(config_file_with_errors):
     # The blackbox package needs to be imported after patching open()
     # because the get_yaml_config() is called implicitly at package import
     # that's why these imports are here
-    from blackbox.exceptions import ImproperlyConfigured
+
     from blackbox.utils.yaml import get_yaml_config
 
     with pytest.raises(ImproperlyConfigured):
@@ -37,7 +39,6 @@ def test_config_missing_value(config_file_with_missing_value):
     # because the get_yaml_config() is called implicitly at package import
     # that's why these imports are here
 
-    from blackbox.exceptions import ImproperlyConfigured
     from blackbox.utils.yaml import get_yaml_config
 
     with pytest.raises(ImproperlyConfigured):

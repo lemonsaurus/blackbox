@@ -25,8 +25,12 @@ def config_file(mocker):
         """
     )
 
-    os.environ["MONGO_USER"] = "mongouser"
-    os.environ["MONGO_PW"] = "mongopassword"
+    environment_variables = {
+        "MONGO_USER": "mongouser",
+        "MONGO_PW": "mongopassword"
+    }
+
+    mocker.patch.dict(os.environ, environment_variables)
 
     mocker.patch("builtins.open", mocker.mock_open(read_data=config))
 
@@ -42,7 +46,11 @@ def config_file_with_errors(mocker):
         """
     )
 
-    os.environ["MONGO_USER"] = "mongouser"
+    environment_variables = {
+        "MONGO_USER": "mongouser",
+    }
+
+    mocker.patch.dict(os.environ, environment_variables)
 
     mocker.patch("builtins.open", mocker.mock_open(read_data=config_with_missing_bracket))
 
@@ -57,9 +65,5 @@ def config_file_with_missing_value(mocker):
             - mongodb://{{ MONGO_USER }} :mongopassword@host:port
         """
     )
-
-    # Ensure the value is unset to cause expected error
-    if os.environ.get("MONGO_USER"):
-        del os.environ["MONGO_USER"]
 
     mocker.patch("builtins.open", mocker.mock_open(read_data=config_with_missing_bracket))
