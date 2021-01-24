@@ -1,6 +1,6 @@
 import unittest
 
-from blackbox.handlers import S3
+from blackbox.handlers.storage import S3
 
 
 class BlackBoxStorageTests(unittest.TestCase):
