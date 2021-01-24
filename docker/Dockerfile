@@ -8,7 +8,8 @@ RUN apt-get -y update \
         lsb-release
 
 # Install mongotools, used for getting mongo backups
-RUN apt-get install -y mongo-tools
+# and redis-tools, used for redis backups.
+RUN apt-get install -y mongo-tools redis-tools
 
 # Install the Postgres 12 client, needed for pg_dumpall
 RUN sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'

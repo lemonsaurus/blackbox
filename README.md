@@ -24,6 +24,7 @@ Here's an example manifest you can use if you want to run this in a Kubernetes c
 databases:
   - mongodb://username:password@host:port
   - postgres://username:password@host:port
+  - redis://password@host:port
 
 storage:
   - s3://s3.eu-west-1.amazonaws.com:bucket.example.com?aws_access_key_id=1234&aws_secret_access_key=lemondance
@@ -35,7 +36,7 @@ retention_days: 7
 ```
 
 ## Databases
-Right now, this app supports **MongoDB** and **PostgreSQL 12**. If you need support for an additional database, consider opening a pull request to add a new database handler.
+Right now, this app supports **MongoDB**, **PostgreSQL 12** and **Redis**. If you need support for an additional database, consider opening a pull request to add a new database handler.
 
 **Note: It is currently not possible to configure more than one of each database.**
 
@@ -46,6 +47,28 @@ Right now, this app supports **MongoDB** and **PostgreSQL 12**. If you need supp
 ### Postgres
 - Add a connstring to the `databases` list with this format: `postgresql://username:password@host:port`.
 - To restore from the backup, use `psql -f /path/to/backup.sql`
+
+### Redis
+- Add a connstring to the `databases` list with this format: `redis://password@host:port`.
+
+#### To restore from the backup
+- Stop Redis server.
+- Turn off `appendonly` mode in Redis configuration (set to `no`).
+- Copy backup file to Redis working directory (`dir` in configuration) with name that is defined in configuration key `dbfilename`.
+- Set backup permissions.
+```
+sudo chown redis:redis <path-to-redis-dump-file>
+sudo chmod 660 <path-to-redis-dump-file>
+```
+- Start Redis server.
+
+If you want to re-enable `appendonly`:
+- Login with `redis-cli`.
+- Run `BGREWRITEAOF`.
+- Exit from Redis CLI (with `exit`).
+- Stop Redis server.
+- Set `appendonly` to `yes` in Redis configuration.
+- Start Redis server.
 
 ## Storage providers
 **Blackbox** can work with different storage providers to save your logs and backups - usually so that you can automatically store them in the cloud. Right now we only support **S3**, but we will probably add additional providers in the future.
