@@ -37,16 +37,25 @@ retention_days: 7
 
 ## Environment Variables
 
-To include environment variables it's possible to use jinja2 rendering tags like so
+The `config.yaml` will ✨ **magically interpolate** ✨ any environment variables that exist in the environment where `blackbox` is running. This is very useful if you want to keep your secrets in environment variables, instead of keeping them in the config file in plaintext.
 
-```sh
-export MONGO_USERNAME=someusername
-export MONGO_PASSWORD=somepassword
+#### Example
+Imagine your current config looks like this, but you want to move the username and password into environment variables.
+```yaml
+databases:
+  - mongodb://lemonsaurus:security-is-overrated@mongo.lemonsaur.us:1234
 ```
 
-```jinja
+So we'll create two environment variables like these:
+```sh
+export MONGO_USERNAME=lemonsaurus
+export MONGO_PASSWORD=security-is-overrated
+```
+
+And now we can make use of these environment variables by using double curly brackets, like this:
+```yaml
 databases:
-  - mongodb://{{ MONGO_USERNAME }}:{{ MONGO_PASSWORD }}@host:port
+  - mongodb://{{ MONGO_USERNAME }}:{{ MONGO_PASSWORD }}@mongo.lemonsaur.us:1234
 ```
 
 ## Databases
