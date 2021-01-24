@@ -1,7 +1,5 @@
 import pytest
 
-from tests.fixtures import config_file
-
 
 def test_mongodb_handler_can_be_instantiated(config_file):
     """Test if the MongoDB database handler can be instantiated."""

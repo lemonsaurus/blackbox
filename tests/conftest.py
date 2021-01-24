@@ -1,12 +1,16 @@
+# This is a special pytest file
+
 from textwrap import dedent
 
 import pytest
+
 
 @pytest.fixture
 def config_file(mocker):
     """ Mock reading config values"""
 
-    config = dedent("""
+    config = dedent(
+        """
         databases:
             - mongodb://username:password@host:port
             - postgres://username:password@host:port
@@ -18,6 +22,7 @@ def config_file(mocker):
             - https://web.hook/
 
         retention_days: 7
-    """
+        """
     )
+
     mocker.patch('builtins.open', mocker.mock_open(read_data=config))

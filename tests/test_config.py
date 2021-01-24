@@ -1,4 +1,3 @@
-from tests.fixtures import config_file
 
 def test_config_gets_correct_values(config_file):
     """Test if the YAMLGetter class gets the values we expect it to get."""

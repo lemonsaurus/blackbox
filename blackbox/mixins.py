@@ -1,5 +1,5 @@
-import re
 from itertools import chain
+import re
 from typing import Optional
 
 from blackbox.config import Blackbox
