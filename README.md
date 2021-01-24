@@ -30,7 +30,7 @@ databases:
   - redis://password@host:port
 
 storage:
-  - s3://s3.eu-west-1.amazonaws.com:bucket.example.com?aws_access_key_id=1234&aws_secret_access_key=lemondance
+  - s3://bucket:s3.endpoint.com?aws_access_key_id=1234&aws_secret_access_key=lemondance
 
 notifiers:
   - https://discord.com/api/webhooks/797541821394714674/lzRM9DFggtfHZXGJTz3yE-MrYJ-4O-0AbdQg3uV2x4vFbu7HTHY2Njq8cx8oyMg0T3Wk
