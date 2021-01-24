@@ -29,7 +29,8 @@ services:
       - ./docker/mongo/init_data:/init_data
       - ./docker/mongo/mongo_import.sh:/docker-entrypoint-initdb.d/mongo_import.sh
 
-  redis:
+  redis_blackbox:
     container_name: blackbox-redis
-    image: redis
-    command: redis-server --requirepass blackbox
+    build:
+      context: .
+      dockerfile: docker/redis/Dockerfile
