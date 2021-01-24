@@ -32,5 +32,4 @@ RUN pipenv install --system --deploy
 COPY . .
 
 # Start the application!
-ENTRYPOINT ["sleep"]
-CMD ["300000"]
+CMD ["python", "main.py"]
