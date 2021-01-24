@@ -1,3 +1,5 @@
+![tests](https://github.com/lemonsaurus/blackbox/workflows/tests/badge.svg)
+
 ![blackbox](img/blackbox_banner.png)
 A simple service which magically backs up all your databases to all your favorite cloud storage providers, and then notifies you.
 
@@ -78,7 +80,7 @@ If you want to re-enable `appendonly`:
 ### S3
 We support any S3 object storage bucket, whether it's from **AWS**, **Linode**, **DigitalOcean**, **Scaleway**, or another S3-compatible object storage provider.
 
-**Blackbox** will respect the `retention_days` configuration setting and delete older files from the S3 storage. Please note that if you have a bucket expiration policy on your storage, **blackbox** will not do anything to disable it. So, for example, if your bucket expiration policy is 12 hours and blackbox is set to 7 `retention_days`, then your backups are all gonna be deleted after 12 hours unless you disable your policy.  
+**Blackbox** will respect the `retention_days` configuration setting and delete older files from the S3 storage. Please note that if you have a bucket expiration policy on your storage, **blackbox** will not do anything to disable it. So, for example, if your bucket expiration policy is 12 hours and blackbox is set to 7 `retention_days`, then your backups are all gonna be deleted after 12 hours unless you disable your policy.
 
 #### Connection string
 ```json
@@ -103,7 +105,7 @@ To upload stuff to S3, you'll need credentials. Your **AWS credentials** can be 
 ![blackbox](img/blackbox_discord_2.png)
 
 ### Discord
-To set this up, simply add a valid Discord webhook URL to the `notifiers` list. 
+To set this up, simply add a valid Discord webhook URL to the `notifiers` list.
 
 These usually look something like `https://discord.com/api/webhooks/797541821394714674/lzRM9DFggtfHZXGJTz3yE-MrYJ-4O-0AbdQg3uV2x4vFbu7HTHY2Njq8cx8oyMg0T3Wk`, but we also support `ptb.discord.com` and `canary.discord.com` webhooks.
 
