@@ -3,6 +3,12 @@ name = "pypi"
 url = "https://pypi.org/simple"
 verify_ssl = true
 
+[dev-packages]
+win32-setctime = {version = "1.0.3", sys_platform = "== 'win32'"}
+pytest = "*"
+pytest-cov = "*"
+pytest-mock = "*"
+
 [packages]
 pyyaml = "~=5.3.1"
 requests = "~=2.25.1"
@@ -11,3 +17,6 @@ loguru = "~=0.5.3"
 
 [requires]
 python_version = "3.9"
+
+[scripts]
+test = "pytest --cov blackbox -vv --cov-report=term-missing ."
