@@ -1,4 +1,6 @@
-from blackbox.handlers import all_databases, all_storage_providers, all_notifiers
+from blackbox.handlers.databases import BlackboxDatabase
+from blackbox.handlers.storage import BlackboxStorage
+from blackbox.handlers.notifiers import BlackboxNotifier
 
 if __name__ == "__main__":
     report = {
@@ -6,7 +8,8 @@ if __name__ == "__main__":
         "success": True,
         "databases": {},
     }
-    for DatabaseHandler in all_databases:
+
+    for DatabaseHandler in BlackboxDatabase.__subclasses__():
         database = DatabaseHandler()
         database_type = DatabaseHandler.__name__
 
@@ -36,7 +39,7 @@ if __name__ == "__main__":
             continue
 
         # Otherwise, sync the backup file to every provider.
-        for StorageProvider in all_storage_providers:
+        for StorageProvider in BlackboxStorage.__subclasses__():
             storage_provider = StorageProvider()
             provider_type = StorageProvider.__name__
 
@@ -59,7 +62,7 @@ if __name__ == "__main__":
             storage_provider.teardown()
 
     # Now send a report to all notifiers.
-    for Notifier in all_notifiers:
+    for Notifier in BlackboxNotifier.__subclasses__():
         notifier = Notifier()
 
         if not notifier.enabled:
