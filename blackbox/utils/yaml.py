@@ -17,7 +17,11 @@ def get_yaml_config() -> dict:
 
     try:
         with open(root_folder / "config.yaml", encoding="UTF-8", mode="r") as f:
-            return yaml.safe_load(template.from_string(f.read()).render(**os.environ))
+            # Inject the local environment variables into the rendering context.
+            # This bit of magic allows us to resolve any {{ VARIABLE }} to whatever
+            # the value of the equivalent environment variable is.
+            parsed_config = template.from_string(f.read()).render(**os.environ)
+            return yaml.safe_load(parsed_config)
 
     except TemplateSyntaxError as e:
         raise ImproperlyConfigured(
