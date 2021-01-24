@@ -97,7 +97,7 @@ If you want to re-enable `appendonly`:
 - Start Redis server.
 
 ## Storage providers
-**Blackbox** can work with different storage providers to save your logs and backups - usually so that you can automatically store them in the cloud. Right now we only support **S3**, but we will probably add additional providers in the future.
+**Blackbox** can work with different storage providers to save your logs and backups - usually so that you can automatically store them in the cloud. Right now we only support **S3** and **Dropbox**, but we will probably add additional providers in the future.
 
 **Note: It is currently not possible to configure more than one of each storage type.**
 
@@ -121,6 +121,23 @@ To upload stuff to S3, you'll need credentials. Your **AWS credentials** can be 
 - If these are not found, we'll check if the `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables are declared in the local environment where Blackbox is running.
 - If we can't find these, we'll look for an `.aws/config` file in the local environment.
 - NOTE: If the bucket is public, no credentials are necessary.
+
+### Dropbox
+Dropbox storage handler need user access token. For this:
+- Create Dropbox account (if you don't have).
+- Go to https://dropbox.com/developers
+- Create new application with App Folder (full access is not recommended).
+
+You can also define custom location (root is App Folder) using 
+`upload_directory` optional parameter. This **should** begin with slash
+and **must** end with slash. Default is root. Note that all files in this directory will
+be deleted after `retention_days`.
+
+So connstring may look like:
+```
+dropbox://<access-token>
+dropbox://<access-token>?upload_directory=/foobar/
+```
 
 ## Notifiers
 `blackbox` also implements different _notifiers_, which is how it reports the result of one of its jobs to you. Right now we only support **Discord**, but if you need a specific notifier, feel free to open an issue.
