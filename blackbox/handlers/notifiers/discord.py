@@ -39,10 +39,10 @@ class Discord(BlackboxNotifier):
                 emoji = ":white_check_mark:" if provider['success'] else ":x:"
                 field['value'] += f"{emoji}  {provider['type']}\n"
 
-            # When backup failed, backup were not upload to any storage,
-            # what means no storage status were added to database field.
-            # But Discord doesn't allow empty field values, so
-            # this is adding X emoji to database field.
+            # If all backup fails, no storage statuses will be added to
+            # database['storage']. Discord doesn't allow empty field
+            # values, so we have to add the :x: emoji to the field to
+            # prevent the webhook endpoint from raising an error.
             if not field['value']:
                 field['value'] = ":x:"
 
