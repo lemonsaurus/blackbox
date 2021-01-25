@@ -62,6 +62,21 @@ def config_file_with_missing_value(mocker):
     config_with_missing_bracket = dedent(
         """
         databases:
+            - postgres://johnwasafraid
+            - postgres://lellowmelon
+        """
+    )
+
+    mocker.patch("builtins.open", mocker.mock_open(read_data=config_with_missing_bracket))
+
+
+@pytest.fixture
+def config_file_too_many_postgres(mocker):
+    """ Mock reading config values"""
+
+    config_with_missing_bracket = dedent(
+        """
+        databases:
             - mongodb://{{ MONGO_USER }} :mongopassword@host:port
         """
     )
