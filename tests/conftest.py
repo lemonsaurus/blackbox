@@ -14,6 +14,7 @@ def config_file(mocker):
         databases:
             - mongodb://{{ MONGO_USER }}:{{ MONGO_PW }}@host:port
             - postgres://username:password@host:port
+            - redis://password@host:port
 
         storage:
             - s3://username:password?fire=ice&magic=blue
