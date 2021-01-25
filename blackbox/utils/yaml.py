@@ -34,6 +34,6 @@ def get_yaml_config(config_path: pathlib.Path) -> dict:
 
     except FileNotFoundError as e:
         raise ImproperlyConfigured(
-            f"Your blackbox.yaml file was not found at {config_path}!"
+            f"Your blackbox.yaml file was not found at {config_path}!\n"
             "See the readme under 'Configuration' for more information."
         ) from e
