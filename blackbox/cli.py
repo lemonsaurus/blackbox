@@ -1,4 +1,5 @@
 from pathlib import Path
+from textwrap import dedent
 
 import click
 
@@ -9,8 +10,8 @@ from blackbox.handlers.storage import BlackboxStorage
 
 
 @click.command()
-@click.option('--config', default="blackbox.yml", help="Path to blackbox.yml file")
-@click.option('--init', is_flag=True, help="Generate blackbox.yml file")
+@click.option('--config', default="blackbox.yml", help="Path to blackbox.yaml file")
+@click.option('--init', is_flag=True, help="Generate blackbox.yaml file and exit")
 def cli(config, init):
     """
     BLACKBOX
@@ -19,7 +20,30 @@ def cli(config, init):
     """
 
     if init:
-        raise NotImplementedError
+        config_file = Path("blackbox.yaml")
+        if not config_file.exists():
+            config_file.write_text(dedent(
+                """
+                databases:
+                  - mongodb://username:password@host:port
+                  - postgres://username:password@host:port
+                  - redis://password@host:port
+
+                storage:
+                  - s3://username:password?fire=ice&magic=blue
+
+                notifiers:
+                  - https://web.hook/
+
+                retention_days: 7
+                """).lstrip()
+            )
+            print("blackbox.yaml configuration created")
+
+        else:
+            print("blackbox.yaml already exists")
+
+        exit()
 
     if config:
         YAMLGetter.parse_config(Path(config))
