@@ -22,7 +22,8 @@ Here's an example manifest you can use if you want to run this in a Kubernetes c
 ```
 
 # Configuration
-`blackbox` can be configured in a number of ways. To set it up, create a `config.yaml` file in the root folder. Here's an example of what it should contain:
+`blackbox` configuration is easy. You simply create a yaml file, `blackbox.yaml`, which contains something like this:
+
 ```yaml
 databases:
   - mongodb://username:password@host:port
@@ -38,9 +39,14 @@ notifiers:
 retention_days: 7
 ```
 
+Blackbox will look for this file in the root folder by default, however you can provide an alternative config file path by creating an environment variable called `BLACKBOX_CONFIG_PATH`, and set it to the absolute path of the file.
+```sh
+export BLACKBOX_CONFIG_PATH=/var/my/favorite/fruit/blackbox.yaml
+```
+
 ## Environment Variables
 
-The `config.yaml` will ✨ **magically interpolate** ✨ any environment variables that exist in the environment where `blackbox` is running. This is very useful if you want to keep your secrets in environment variables, instead of keeping them in the config file in plaintext.
+The `blackbox.yaml` will ✨ **magically interpolate** ✨ any environment variables that exist in the environment where `blackbox` is running. This is very useful if you want to keep your secrets in environment variables, instead of keeping them in the config file in plaintext.
 
 #### Example
 Imagine your current config looks like this, but you want to move the username and password into environment variables.
@@ -136,4 +142,4 @@ These usually look something like `https://discord.com/api/webhooks/797541821394
 ##  Rotation
 By default, `blackbox` will automatically remove all backup files older than 7 days in the folder you configure for your storage provider. To determine if something is a backup file or not, it will use a regex pattern that corresponds with the default file it saves, for example `blackbox-postgres-backup-11-12-2020.sql`.
 
-You can configure the number of days before rotating by altering the `retention_days` parameter in `config.yaml`.
+You can configure the number of days before rotating by altering the `retention_days` parameter in `blackbox.yaml`.
