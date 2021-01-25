@@ -1,4 +1,11 @@
+from pathlib import Path
+
 import click
+
+from blackbox.config import YAMLGetter
+from blackbox.handlers.databases import BlackboxDatabase
+from blackbox.handlers.notifiers import BlackboxNotifier
+from blackbox.handlers.storage import BlackboxStorage
 
 
 @click.command()
@@ -15,11 +22,7 @@ def cli(config, init):
         raise NotImplementedError
 
     if config:
-        print("do something with this")
-
-    from blackbox.handlers.databases import BlackboxDatabase
-    from blackbox.handlers.notifiers import BlackboxNotifier
-    from blackbox.handlers.storage import BlackboxStorage
+        YAMLGetter.parse_config(Path(config))
 
     report = {
         "output": "",
