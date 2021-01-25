@@ -10,13 +10,12 @@ import yaml
 from blackbox.exceptions import ImproperlyConfigured
 
 
-def get_yaml_config() -> dict:
+def get_yaml_config(config_path: pathlib.Path) -> dict:
     """Load the yaml file in the root folder, and return it as a dict."""
     template = Environment(undefined=StrictUndefined)
-    root_folder = pathlib.Path(__file__).parent.parent.parent.absolute()
 
     try:
-        with open(root_folder / "config.yaml", encoding="UTF-8", mode="r") as f:
+        with open(config_path, encoding="UTF-8", mode="r") as f:
             # Inject the local environment variables into the rendering context.
             # This bit of magic allows us to resolve any {{ VARIABLE }} to whatever
             # the value of the equivalent environment variable is.
@@ -35,6 +34,6 @@ def get_yaml_config() -> dict:
 
     except FileNotFoundError as e:
         raise ImproperlyConfigured(
-            "You must create a config.yaml file in the root folder! "
+            f"Your blackbox.yaml file was not found at {config_path}!\n"
             "See the readme under 'Configuration' for more information."
         ) from e
