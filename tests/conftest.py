@@ -59,11 +59,11 @@ def config_file_with_errors(mocker):
 def config_file_with_missing_value(mocker):
     """ Mock reading config values"""
 
-    config_with_missing_bracket = dedent(
+    missing_value = dedent(
         """
         databases:
             - mongodb://{{ MONGO_USER }} :mongopassword@host:port
         """
     )
 
-    mocker.patch("builtins.open", mocker.mock_open(read_data=config_with_missing_bracket))
+    mocker.patch("builtins.open", mocker.mock_open(read_data=missing_value))
