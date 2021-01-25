@@ -56,21 +56,6 @@ def config_file_with_errors(mocker):
 
 
 @pytest.fixture
-def config_file_too_many_postgres(mocker):
-    """ Mock reading config values"""
-
-    too_many_postgres = dedent(
-        """
-        databases:
-            - postgres://johnwasafraid
-            - postgres://lellowmelon
-        """
-    )
-
-    mocker.patch("builtins.open", mocker.mock_open(read_data=too_many_postgres))
-
-
-@pytest.fixture
 def config_file_with_missing_value(mocker):
     """ Mock reading config values"""
 

@@ -1,11 +1,11 @@
 import datetime
 from pathlib import Path
 
+from blackbox.handlers.databases import MongoDB
+
 
 def test_mongodb_backup(config_file, mocker, fake_process):
     """Test if the MongoDB database handler executes a backup"""
-
-    from blackbox.handlers.databases import MongoDB
 
     mongo = MongoDB()
 
