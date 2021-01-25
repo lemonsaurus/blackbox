@@ -89,7 +89,7 @@ class YAMLGetter(type):
                 return cls._config[cls.section][cls.subsection][name]
         except KeyError:
             # If one of the handler lists isn't defined, return an empty list.
-            log.warning(f"{name} is not defined in the config.yaml file -- returning an falsy value.")
+            log.warning(f"{name} is not defined in the blackbox.yaml file -- returning an falsy value.")
             if cls._get_annotation(name) == list:
                 return []
             elif cls._get_annotation(name) == dict:

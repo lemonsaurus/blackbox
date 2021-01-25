@@ -132,7 +132,7 @@ dmypy.json
 .idea
 
 # Ignore the config file
-config.yaml
+blackbox.yaml
 
 # vscode
 .vscode/

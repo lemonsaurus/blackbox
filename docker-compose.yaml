@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: docker/Dockerfile
     volumes:
-      - ./config.yaml:/blackbox/config.yaml
+      - ./blackbox.yaml:/blackbox/blackbox.yaml
       - ./main.py:/blackbox/main.py
       - ./blackbox:/blackbox/blackbox
 
