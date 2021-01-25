@@ -20,7 +20,6 @@ def test_redis_backup(config_file, mocker, fake_process):
 
     command_to_run = [
         f"redis-cli -h {redis.config.get('host')} -p {redis.config.get('port')} --rdb {backup_path}"
-        # redis-cli -h password@host              -p  port                      --rdb C:\Users\Inveracity\redis_blackbox_25_01_2021.rdb'
     ]
 
     fake_process.register_subprocess(
