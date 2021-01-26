@@ -1,9 +1,4 @@
-from itertools import chain
 import re
-from typing import Optional
-
-from blackbox.config import Blackbox
-from blackbox.exceptions import ImproperlyConfigured
 
 PARAMS_REGEX = r"(?:\?|&|;)([^=]+)=([^&|;]+)"
 
@@ -60,3 +55,16 @@ class ConnstringParserMixin:
         if self.connstring and self.connstring_regex:
             return True
         return False
+
+    @classmethod
+    @property
+    def prefix_regex(cls) -> str:
+        """
+        Returns a regex string that groups the handler name to their valid prefixes.
+        """
+        name = cls.__name__
+        prefixes = "|".join(cls.valid_prefixes)
+        return f"(?P<{name}>{prefixes})"
+
+    def __repr__(self):
+        return f"{self.__class__}('{self.connstring}')"
