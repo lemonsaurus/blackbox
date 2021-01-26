@@ -2,6 +2,7 @@ import datetime
 from pathlib import Path
 
 import boto3
+from botocore.exceptions import BotoCoreError
 from botocore.exceptions import ClientError
 
 from blackbox.config import Blackbox
@@ -60,7 +61,7 @@ class S3(BlackboxStorage):
                 file_path.name
             )
             self.success = True
-        except ClientError as e:
+        except (ClientError, BotoCoreError) as e:
             log.error(e)
             self.output = str(e)
             self.success = False
@@ -75,15 +76,19 @@ class S3(BlackboxStorage):
         """
         retention_days = Blackbox.retention_days
 
-        # Look through the items and figure out which ones are older than `retention_days`
-        for item in self.client.list_objects(Bucket=self.bucket)["Contents"]:
-            last_modified = item.get("LastModified")
-            now_tz = datetime.datetime.now(tz=last_modified.tzinfo)
-            delta = now_tz - item.get("LastModified")
+        # Look through the items and figure out which ones are older than `retention_days`.
+        # Catch all boto errors and log them to avoid return code 1.
+        try:
+            for item in self.client.list_objects(Bucket=self.bucket)["Contents"]:
+                last_modified = item.get("LastModified")
+                now_tz = datetime.datetime.now(tz=last_modified.tzinfo)
+                delta = now_tz - item.get("LastModified")
 
-            # Delete the deprecated items
-            if delta.days >= retention_days:
-                self.client.delete_object(
-                    Bucket=self.bucket,
-                    Key=item.get("Key")
-                )
+                # Delete the deprecated items
+                if delta.days >= retention_days:
+                    self.client.delete_object(
+                        Bucket=self.bucket,
+                        Key=item.get("Key")
+                    )
+        except (ClientError, BotoCoreError) as e:
+            log.error(e)
