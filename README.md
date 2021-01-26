@@ -35,6 +35,7 @@ storage:
 
 notifiers:
   - https://discord.com/api/webhooks/797541821394714674/lzRM9DFggtfHZXGJTz3yE-MrYJ-4O-0AbdQg3uV2x4vFbu7HTHY2Njq8cx8oyMg0T3Wk
+  - https://hooks.slack.com/services/XXXXXXXXXXX/XXXXXXXXXXX/XXXXXXXXXXXXXXXXXXX
 
 retention_days: 7
 ```
@@ -138,6 +139,13 @@ To upload stuff to S3, you'll need credentials. Your **AWS credentials** can be 
 To set this up, simply add a valid Discord webhook URL to the `notifiers` list.
 
 These usually look something like `https://discord.com/api/webhooks/797541821394714674/lzRM9DFggtfHZXGJTz3yE-MrYJ-4O-0AbdQg3uV2x4vFbu7HTHY2Njq8cx8oyMg0T3Wk`, but we also support `ptb.discord.com` and `canary.discord.com` webhooks.
+
+### Slack
+To set this up, simply add a valid Slack incoming webhook URL to the `notifiers` list.
+These look like `https://hooks.slack.com/services/XXXXXXXXXXX/XXXXXXXXXXX/XXXXXXXXXXXXXXXXXXX`.
+
+Slack notifier have 2 styles: legacy attachment (default) and modern Block Kit version.
+To enable Block Kit version, add `?use_block_kit=1` to end of webhook URL.
 
 ##  Rotation
 By default, `blackbox` will automatically remove all backup files older than 7 days in the folder you configure for your storage provider. To determine if something is a backup file or not, it will use a regex pattern that corresponds with the default file it saves, for example `blackbox-postgres-backup-11-12-2020.sql`.
