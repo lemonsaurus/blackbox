@@ -17,40 +17,9 @@ class ConnstringParserMixin:
     # What are the valid URI protocols for this connstring?
     valid_prefixes = []
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         """Ensure that the connstrings are set up correctly."""
-        self.connstring = self._get_connstring()
-
-    @staticmethod
-    def _get_all_connstrings() -> list:
-        """Get all connstrings in the config."""
-        return list(chain(
-            Blackbox.databases,
-            Blackbox.notifiers,
-            Blackbox.storage
-        ))
-
-    def _get_connstring(self) -> Optional[str]:
-        """Ensure we only have a single connstring configured, and return it."""
-        # Get valid connstrings
-        connstrings = []
-        for connstring in self._get_all_connstrings():
-            for prefix in self.valid_prefixes:
-                if connstring.startswith(prefix):
-                    connstrings.append(connstring)
-
-        # No connstrings configured
-        if len(connstrings) == 0:
-            return ""
-
-        # More than one connstring configured! Fail hard.
-        elif len(connstrings) > 1:
-            raise ImproperlyConfigured(
-                "You cannot configure more than one connstring of the same type at a time!"
-            )
-
-        # If only a single connstring is configured, return it!
-        return connstrings[0]
+        self.connstring = kwargs.pop("connstring", "")
 
     @property
     def config(self) -> dict:

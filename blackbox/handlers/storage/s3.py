@@ -16,8 +16,8 @@ class S3(BlackboxStorage):
         "s3",
     ]
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
         # Defaults
         self.success = False
