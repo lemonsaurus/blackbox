@@ -11,6 +11,13 @@ class Slack(BlackboxNotifier):
         "https://hooks.slack.com",
     ]
 
+    def _parse_report(self, report: dict) -> dict:
+        """Turn the report from main.py into something the notify function can use."""
+        if self.config.get("use_block_kit"):
+            return self._parse_report_modern(report)
+
+        return self._parse_report_classic(report)
+
     def _parse_report_classic(self, report: dict) -> dict:
         """Turn the report from main.py into Slack webhook payload with secondary attachment."""
         attachment = {
@@ -79,7 +86,7 @@ class Slack(BlackboxNotifier):
         for i in range(0, len(databases), 2):
             dbs = [databases[i]]
             if len(databases) > i + 1:
-                databases.append(databases[i + 1])
+                dbs.append(databases[i + 1])
 
             fields = []
             for db in dbs:
@@ -147,13 +154,8 @@ class Slack(BlackboxNotifier):
             }
         )
 
-        return blocks
+        return {"blocks": blocks}
 
     def notify(self, report: dict) -> None:
         """Send a webhook to Slack with a blackbox report."""
-        if self.config.get("use_block_kit"):
-            payload = self._parse_report_modern(report)
-        else:
-            payload = self._parse_report_classic(report)
-
-        requests.post(self.config.get("webhook_url"), json=payload)
+        requests.post(self.config.get("webhook_url"), json=self._parse_report(report))
