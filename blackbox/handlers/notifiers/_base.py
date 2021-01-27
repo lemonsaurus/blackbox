@@ -25,7 +25,7 @@ class BlackboxNotifier(BlackboxHandler):
             self.report["success"] = False
 
         # Add the database contained in the report
-        self.report["databases"][report["type"]] = report
+        self.report["databases"][report["id"]] = report
 
     @abstractmethod
     def _parse_report(self, report: dict) -> dict:

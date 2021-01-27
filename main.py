@@ -21,7 +21,10 @@ def main():
         configured_databases, configured_storage_providers, configured_notifiers
     )
 
-    id_counter = itertools.count()  # Ensure databases have unique type
+    # Counter to ensure handlers have unique ids
+    # This does not get used if the handler specifies an id
+    id_counter = itertools.count()
+
     # Go through each workflow
     for workflow in workflows:
         database = workflow.database
@@ -34,7 +37,7 @@ def main():
         report = {
             "output": "",
             "success": True,
-            "type": database_id,
+            "id": database_id,
             "storage": []
         }
 
@@ -60,13 +63,14 @@ def main():
         for storage_provider in workflow.storage_providers:
             log.debug(f"Syncing {database} to {storage_provider}")
             storage_id = (
-                f"{storage_provider.__class__.__name__}-{storage_provider.config.get('id', next(id_counter))}"
+                f"{storage_provider.__class__.__name__}"
+                f"-{storage_provider.config.get('id', next(id_counter))}"
             )
 
             # Sync the provider, and store the outcome to the report.
             storage_provider.sync(backup_file)
             report["storage"].append({
-                "type": storage_id,
+                "id": storage_id,
                 "success": storage_provider.success,
             })
             report["output"] += storage_provider.output

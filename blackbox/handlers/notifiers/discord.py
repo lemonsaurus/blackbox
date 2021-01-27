@@ -30,14 +30,14 @@ class Discord(BlackboxNotifier):
         fields = []
         for database in report['databases'].values():
             field = {
-                "name": f"**{database['type']}**",
+                "name": f"**{database['id']}**",
                 "inline": True,
                 "value": ""
             }
 
             for provider in database['storage']:
                 emoji = ":white_check_mark:" if provider['success'] else ":x:"
-                field['value'] += f"{emoji}  {provider['type']}\n"
+                field['value'] += f"{emoji}  {provider['id']}\n"
 
             # If all backup fails, no storage statuses will be added to
             # database['storage']. Discord doesn't allow empty field
