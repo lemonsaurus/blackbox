@@ -9,7 +9,7 @@ from blackbox.utils.logger import log
 class Postgres(BlackboxDatabase):
     """A Database handler that will do a pg_dumpall for Postgres, backing up all tables."""
 
-    connstring_regex = r"postgres(?:ql)?://(?P<user>.+):(?P<password>.+)@(?P<host>.+):(?P<port>.+)"
+    connstring_regex = r"postgres(?:ql)?://(?P<user>.+):(?P<password>.+)@(?P<host>.+):(?P<port>[0-9]+)"
     valid_prefixes = [
         "postgres",
         "postgresql",
