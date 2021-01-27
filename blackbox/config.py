@@ -46,11 +46,13 @@ class YAMLGetter(type):
         # If config_path is passed, use that.
         if config_path:
             cls._config = get_yaml_config(config_path)
+            return
 
         # Otherwise, if there's an environment variable with a path, we'll use that.
         env_config_path = os.environ.get("BLACKBOX_CONFIG_PATH")
         if env_config_path:
             cls._config = get_yaml_config(Path(env_config_path))
+            return
 
         # Otherwise, we expect the config file to be in the root folder,
         # and to be called 'blackbox.yaml'
