@@ -71,6 +71,6 @@ class Discord(BlackboxNotifier):
             "avatar_url": "https://raw.githubusercontent.com/lemonsaurus/blackbox/main/img/blackbox_avatar.png"
         }
 
-    def notify(self, report: dict) -> bool:
+    def notify(self) -> bool:
         """Send a webhook to Discord with a blackbox report."""
-        requests.post(self.config.get("webhook_url"), json=self._parse_report(report))
+        requests.post(self.config.get("webhook_url"), json=self._parse_report(self.report))

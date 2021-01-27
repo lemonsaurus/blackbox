@@ -20,8 +20,6 @@ class S3(BlackboxStorage):
         super().__init__(*args, **kwargs)
 
         # Defaults
-        self.success = False
-        self.output = ""
         self.bucket = self.config.get('bucket_name')
 
         # If the optional parameters for credentials have been provided, we use these.

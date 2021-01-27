@@ -5,6 +5,12 @@ from blackbox.handlers._base import BlackboxHandler
 
 
 class BlackboxStorage(BlackboxHandler):
+    def __init__(self, *args, **kwargs):
+        """Set up database handler."""
+        super().__init__(*args, **kwargs)
+        self.success = False  # Was the sync successful?
+        self.output = ""  # What did the sync/rotate output?
+
     @abstractmethod
     def sync(self, file_path: Path):
         """

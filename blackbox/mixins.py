@@ -14,7 +14,7 @@ class ConnstringParserMixin:
 
     def __init__(self, *args, **kwargs):
         """Ensure that the connstrings are set up correctly."""
-        self.connstring = kwargs.pop("connstring", "")
+        self.connstring: str = kwargs.pop("connstring", "")
 
     @property
     def config(self) -> dict:

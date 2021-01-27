@@ -10,7 +10,7 @@ class BlackboxDatabase(BlackboxHandler):
     def __init__(self, *args, **kwargs):
         """Set up database handler."""
         super().__init__(*args, **kwargs)
-        self.success = None  # Was the backup successful?
+        self.success = False  # Was the backup successful?
         self.output = ""     # What did the backup output?
 
     @abstractmethod
