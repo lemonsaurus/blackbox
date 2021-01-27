@@ -1,9 +1,15 @@
-from abc import ABC
+from abc import ABCMeta
 
 from blackbox.mixins import ConnstringParserMixin
 
 
-class BlackboxHandler(ABC, ConnstringParserMixin):
+class NamedClassMeta(ABCMeta):
+    """Metaclass to simplify the name of class objects."""
+    def __str__(self) -> str:
+        return self.__name__
+
+
+class BlackboxHandler(ConnstringParserMixin, metaclass=NamedClassMeta):
     """An abstract base handler."""
 
     def teardown(self) -> None:
