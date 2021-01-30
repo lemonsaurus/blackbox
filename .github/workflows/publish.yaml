@@ -3,9 +3,6 @@ name: Release to PyPI
 on:
   release:
     types: [published]
-    tags-ignore:
-      - "**dev**"
-      - "**rc**"
 
 jobs:
   build:
