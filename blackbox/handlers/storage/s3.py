@@ -30,14 +30,14 @@ class S3(BlackboxStorage):
         key_id = self.config.get("aws_access_key_id")
         secret_key = self.config.get("aws_secret_access_key")
         s3_endpoint = self.config.get('s3_endpoint')
-        configuration = {
-            "endpoint_url": f"https://{s3_endpoint}"
-        }
+        configuration = dict()
 
         # If config was provided for both of these, we should use it!
         if key_id and secret_key:
-            configuration['aws_access_key_id'] = key_id
-            configuration['aws_secret_access_key'] = secret_key
+            configuration = {
+                "aws_access_key_id": key_id,
+                "aws_secret_access_key": secret_key,
+            }
 
         # If config was provided for only one of them, that's too weird of a state for us to accept,
         # so we'll raise an exception. (That weird ^ operator is an XOR).
@@ -64,9 +64,12 @@ class S3(BlackboxStorage):
         # If we get to this point, the user has either environment variables or credentials files,
         # so Blackbox will make use of these.
         # See https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html
-        self.client = boto3.client(
-            's3',
+        self.session = boto3.Session(
             **configuration
+        )
+        self.client = self.session.client(
+            's3',
+            endpoint_url=f"https://{s3_endpoint}",
         )
 
     def sync(self, file_path: Path) -> None:
