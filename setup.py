@@ -7,7 +7,7 @@ setup(
     description="Tool for automatic backups of databases",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
-    author="Leon Sandoy",
+    author="Leon Sandøy",
     author_email="heavysaturn@gmail.com",
     url="https://github.com/lemonsaurus/blackbox",
     license="MIT",
