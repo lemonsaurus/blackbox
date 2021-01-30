@@ -1,7 +1,7 @@
 ![Lint & Test](https://github.com/lemonsaurus/blackbox/workflows/Lint%20&%20Test/badge.svg)
 ![Docker Build](https://github.com/lemonsaurus/blackbox/workflows/Docker%20Build/badge.svg)
 
-![blackbox](img/blackbox_banner.png)
+![blackbox](https://github.com/lemonsaurus/blackbox/raw/main/img/blackbox_banner.png)
 A simple service which magically backs up all your databases to all your favorite cloud storage providers, and then notifies you.
 
 Simply create a config file, fill in some connection strings for your favorite services, and schedule `blackbox` to run however often you want using something like `cron`, or a Kubernetes CronJob.
@@ -249,8 +249,8 @@ To set this up, simply add a valid Discord webhook URL to the `notifiers` list.
 
 These usually look something like `https://discord.com/api/webhooks/797541821394714674/lzRM9DFggtfHZXGJTz3yE-MrYJ-4O-0AbdQg3uV2x4vFbu7HTHY2Njq8cx8oyMg0T3Wk`, but we also support `ptb.discord.com` and `canary.discord.com` webhooks.
 
-![blackbox](img/blackbox_discord.png)
-![blackbox](img/blackbox_discord_2.png)
+![blackbox](https://github.com/lemonsaurus/blackbox/raw/main/img/blackbox_discord.png)
+![blackbox](https://github.com/lemonsaurus/blackbox/raw/main/img/blackbox_discord_2.png)
 
 ### Slack
 To set this up, simply add a valid Slack incoming webhook URL to the `notifiers` list.
@@ -261,13 +261,13 @@ To enable Block Kit version, add `?use_block_kit=1` to end of webhook URL.
 
 Default:
 
-![blackbox](img/blackbox_slack_default_success.png)
-![blackbox](img/blackbox_slack_default_fail.png)
+![blackbox](https://github.com/lemonsaurus/blackbox/raw/main/img/blackbox_slack_default_success.png)
+![blackbox](https://github.com/lemonsaurus/blackbox/raw/main/img/blackbox_slack_default_fail.png)
 
 Modern:
 
-![blackbox](img/blackbox_slack_modern_success.png)
-![blackbox](img/blackbox_slack_modern_fail.png)
+![blackbox](https://github.com/lemonsaurus/blackbox/raw/main/img/blackbox_slack_modern_success.png)
+![blackbox](https://github.com/lemonsaurus/blackbox/raw/main/img/blackbox_slack_modern_fail.png)
 
 ## Rotation
 By default, `blackbox` will automatically remove all backup files older than 7 days in the folder you configure for your storage provider. To determine if something is a backup file or not, it will use a regex pattern that corresponds with the default file it saves, for example `blackbox-postgres-backup-11-12-2020.sql`.
