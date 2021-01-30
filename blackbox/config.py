@@ -43,15 +43,14 @@ class YAMLGetter(type):
     @classmethod
     def parse_config(cls, config_path: Path = None):
         """Parse the config from the blackbox.yaml file."""
-
-        # If config_path is passed, use that.
+        # Get the config path from environment variables
         env_config_path = os.environ.get("BLACKBOX_CONFIG_PATH")
 
-        # If there is a path to the config, parse it
+        # If the config path is given from elsewhere use that path
         if config_path:
             cls._config = get_yaml_config(config_path)
 
-        # Otherwise, if there's an environment variable with a path, we'll use that.
+        # If there's an environment variable with a path, we'll use that.
         elif env_config_path:
             cls._config = get_yaml_config(Path(env_config_path))
 
