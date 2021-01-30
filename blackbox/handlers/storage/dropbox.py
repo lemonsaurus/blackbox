@@ -91,7 +91,7 @@ class Dropbox(BlackboxStorage):
             self.upload_base if self.upload_base != "/" else ""
         )
         entries = [
-            e for e in files_result.entries if isinstance(e, FileMetadata)
+            entry for entry in files_result.entries if isinstance(entry, FileMetadata)
         ]
 
         # If there is more files, receive all of them.
@@ -99,7 +99,7 @@ class Dropbox(BlackboxStorage):
             cursor = files_result.cursor
             files_result = self.client.files_list_folder_continue(cursor)
             entries += [
-                e for e in files_result.entries if isinstance(e, FileMetadata)
+                entry for entry in files_result.entries if isinstance(e, FileMetadata)
             ]
 
         # Find all old files and delete them.
