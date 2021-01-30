@@ -12,7 +12,7 @@ from blackbox.utils.logger import log
 
 
 class S3(BlackboxStorage):
-    connstring_regex = r"s3://(?P<bucket_name>[^:]+):(?P<s3_endpoint>[^:]+)"
+    connstring_regex = r"s3://(?P<bucket_name>[^:]+):(?P<s3_endpoint>[^:?]+)"
     valid_prefixes = [
         "s3",
     ]
