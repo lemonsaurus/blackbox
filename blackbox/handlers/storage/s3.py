@@ -1,4 +1,5 @@
 import datetime
+import os
 from pathlib import Path
 
 import boto3
@@ -41,10 +42,27 @@ class S3(BlackboxStorage):
         # If config was provided for only one of them, that's too weird of a state for us to accept,
         # so we'll raise an exception. (That weird ^ operator is an XOR).
         elif bool(key_id) ^ bool(secret_key):
-            raise ImproperlyConfigured("You must configure either both or none of the AWS credential params.")
+            raise ImproperlyConfigured("You must configure either both or none of the S3 credential params.")
 
-        # If neither was provided, we'll just initialize the client without credentials, and
-        # it will default to looking at first environment vars and then in ~/.aws/credentials.
+        # If config hasn't been provided, we expect either environment variables or ~/.aws/
+        # credentials and config files to exist. If none of that exists, we should raise
+        # a convenient error.
+        has_environment_variables = (
+            os.environ.get("AWS_ACCESS_KEY_ID")
+            and os.environ.get("AWS_SECRET_ACCESS_KEY")
+        )
+        has_aws_config_files = (
+            (Path.home() / ".aws/config").exists()
+            and (Path.home() / ".aws/credentials").exists()
+        )
+        if not has_aws_config_files and not has_environment_variables:
+            raise ImproperlyConfigured(
+                "Blackbox could not find any valid S3 credentials. "
+                "See the readme under Configuration for more information on how to do this."
+            )
+
+        # If we get to this point, the user has either environment variables or credentials files,
+        # so Blackbox will make use of these.
         # See https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html
         self.client = boto3.client(
             's3',
