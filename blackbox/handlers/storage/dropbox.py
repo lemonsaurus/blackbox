@@ -25,6 +25,10 @@ class Dropbox(BlackboxStorage):
     def __init__(self):
         super().__init__()
 
+        # We don't need to initialize handlers that aren't enabled.
+        if not self.enabled:
+            return
+
         self.success = False
         self.output = ""
 
