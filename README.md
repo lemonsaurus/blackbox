@@ -32,6 +32,7 @@ databases:
 
 storage:
   - s3://bucket:s3.endpoint.com?aws_access_key_id=1234&aws_secret_access_key=lemondance
+  - dropbox://abyhhdhhfdbgdDjurajlgcfs?upload_directory=/testing/
 
 notifiers:
   - https://discord.com/api/webhooks/797541821394714674/lzRM9DFggtfHZXGJTz3yE-MrYJ-4O-0AbdQg3uV2x4vFbu7HTHY2Njq8cx8oyMg0T3Wk
@@ -104,7 +105,7 @@ If you want to re-enable `appendonly`:
 - Start Redis server.
 
 ## Storage providers
-**Blackbox** can work with different storage providers to save your logs and backups - usually so that you can automatically store them in the cloud. Right now we only support **S3**, but we will probably add additional providers in the future.
+**Blackbox** can work with different storage providers to save your logs and backups - usually so that you can automatically store them in the cloud. Right now we support **S3** and **Dropbox**.
 
 **Note: It is currently not possible to configure more than one of each storage type.**
 
@@ -128,6 +129,22 @@ To upload stuff to S3, you'll need credentials. Your **AWS credentials** can be 
 - If these are not found, we'll check if the `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables are declared in the local environment where Blackbox is running.
 - If we can't find these, we'll look for an `.aws/config` file in the local environment.
 - NOTE: If the bucket is public, no credentials are necessary.
+
+### Dropbox
+The Dropbox storage handler needs a user access token in order to work. To get one, do the following:
+- Create a Dropbox account (if you don't already have one).
+- Go to https://dropbox.com/developers
+- Create a new application with App Folder access. **Do not give it full access**, as this may have dangerous, destructive consequences if configured incorrectly.
+
+You can also define a custom location (root is App Folder) using the
+`upload_directory` optional parameter. This **should** begin with slash
+and **must** end with slash. Default is root.
+
+The configuration connections strings may look like the following:
+```
+dropbox://<access-token>
+dropbox://<access-token>?upload_directory=/foobar/
+```
 
 ## Notifiers
 `blackbox` also implements different _notifiers_, which is how it reports the result of one of its jobs to you. Right now we only support **Discord**, but if you need a specific notifier, feel free to open an issue.
