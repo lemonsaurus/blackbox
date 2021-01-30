@@ -10,11 +10,17 @@ def test_discord_notify(mocker):
         "webhook_url": "https://discord.com/api/webhooks/x"
     }
 
+    storage = [{
+        "type": "s3",
+        "success": "sortof"
+    }]
     report = {
         "output": "salad",
         "success": "maybe",
         "databases": {
-            "s3": {"type": "databasetype", "storage": []},
+            "mongo": {
+                "type": "mongo",
+                "storage": storage},
         }
     }
 
@@ -26,8 +32,8 @@ def test_discord_notify(mocker):
         'content': None,
         'embeds': [{'color': 1024049,
                     'fields': [{'inline': True,
-                                'name': '**databasetype**',
-                                'value': ':x:'}],
+                                'name': '**mongo**',
+                                'value': ':white_check_mark:  s3'}],
                     'title': 'Backup'}],
         'username': 'blackbox'
     }
