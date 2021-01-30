@@ -36,7 +36,7 @@ def cli(config, init, version):
                   - redis://password@host:port
 
                 storage:
-                  - s3://username:password?fire=ice&magic=blue
+                  - s3://bucket:s3.endpoint.com?aws_access_key_id=1234&aws_secret_access_key=lemondance
 
                 notifiers:
                   - https://web.hook/
