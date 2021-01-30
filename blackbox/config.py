@@ -1,7 +1,8 @@
+import os
+from pathlib import Path
+
 from blackbox.utils.logger import log
 from blackbox.utils.yaml import get_yaml_config
-
-_CONFIG_YAML = get_yaml_config()
 
 
 class YAMLGetter(type):
@@ -37,6 +38,26 @@ class YAMLGetter(type):
     """
     section = None
     subsection = None
+    _config = None
+
+    @classmethod
+    def parse_config(cls, config_path: Path = None):
+        """Parse the config from the blackbox.yaml file."""
+        # If config_path is passed, use that.
+        if config_path:
+            cls._config = get_yaml_config(config_path)
+            return
+
+        # Otherwise, if there's an environment variable with a path, we'll use that.
+        env_config_path = os.environ.get("BLACKBOX_CONFIG_PATH")
+        if env_config_path:
+            cls._config = get_yaml_config(Path(env_config_path))
+            return
+
+        # Otherwise, we expect the config file to be in the root folder,
+        # and to be called 'blackbox.yaml'
+        root_folder = Path(__file__).parent.parent.absolute()
+        cls._config = get_yaml_config(root_folder / "blackbox.yaml")
 
     def _get_annotation(cls, name):
         """Fetch the annotation configured in the subclass."""
@@ -44,23 +65,33 @@ class YAMLGetter(type):
 
     def __getattr__(cls, name):
         """
-        Fetch the attribute in the _CONFIG_YAML dictionary.
+        Fetch the attribute in the `YAMLGetter.config` dictionary.
 
-        This just attempts to do a dictionary lookup in the _CONFIG_YAML we unpacked earlier,
+        This just attempts to do a dictionary lookup in `YAMLGetter.config`,
         and supports sections and subsections if we need nested blackbox data.
         """
         name = name.lower()
 
+        # Here's a bit of magic - We don't set the cls._config until the first time
+        # something tries to actually call this method. This kind of just-in-time approach
+        # allows us to comfortably modify the `_config` at some point before we start using
+        # any of the Handlers, without worrying about any race conditions.
+        #
+        # If you need this config to be set before or after the first call to __getattr__, simply call
+        # YAMLGetter.parse_config(). You can pass in a configuration file path if you need to.
+        if not cls._config:
+            cls.parse_config()
+
         try:
             if cls.section is None:
-                return _CONFIG_YAML[name]
+                return cls._config[name]
             elif cls.subsection is None:
-                return _CONFIG_YAML[cls.section][name]
+                return cls._config[cls.section][name]
             else:
-                return _CONFIG_YAML[cls.section][cls.subsection][name]
+                return cls._config[cls.section][cls.subsection][name]
         except KeyError:
             # If one of the handler lists isn't defined, return an empty list.
-            log.warning(f"{name} is not defined in the config.yaml file -- returning an falsy value.")
+            log.warning(f"{name} is not defined in the blackbox.yaml file -- returning an falsy value.")
             if cls._get_annotation(name) == list:
                 return []
             elif cls._get_annotation(name) == dict:
