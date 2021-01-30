@@ -12,6 +12,7 @@ flake8 = "*"
 flake8-isort = "*"
 pytest-subprocess = "*"
 
+# Remember to update setup.py with these requirements
 [packages]
 pyyaml = "~=5.3.1"
 requests = "~=2.25.1"
