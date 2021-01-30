@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 
 setup(
-    name="blackbox",
+    name="blackbox-cli",
     version="0.0.1",
     description="Tool for automatic backups of databases",
     long_description=open("README.md").read(),
