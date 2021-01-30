@@ -53,12 +53,13 @@ class S3(BlackboxStorage):
 
     def sync(self, file_path: Path) -> None:
         """Sync a file to an S3 bucket."""
+        file_ = self.compress(file_path)
 
         try:
-            self.client.upload_file(
-                str(file_path),
+            self.client.upload_fileobj(
+                file_,
                 self.bucket,
-                file_path.name
+                file_path.name,
             )
             self.success = True
         except (ClientError, BotoCoreError) as e:
