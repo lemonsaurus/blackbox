@@ -41,23 +41,6 @@ crontab -e
 Here's an example manifest you can use if you want to run this in a Kubernetes cluster.
 
 ```yaml
-apiVersion: batch/v1beta1
-kind: CronJob
-metadata:
-  name: backup
-spec:
-  schedule: "0 */1 * * *" # Every hour
-  jobTemplate:
-    spec:
-      template:
-        spec:
-          containers:
-            - name: blackbox-backups
-              image: lemonsaurus/blackbox:latest
-              imagePullPolicy: Always
-              args:
-                - blackbox
-          restartPolicy: OnFailure
 ```
 
 # Configuration
