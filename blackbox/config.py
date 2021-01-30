@@ -43,21 +43,22 @@ class YAMLGetter(type):
     @classmethod
     def parse_config(cls, config_path: Path = None):
         """Parse the config from the blackbox.yaml file."""
-        # If config_path is passed, use that.
+        # Get the config path from environment variables
+        env_config_path = os.environ.get("BLACKBOX_CONFIG_PATH")
+
+        # If the config path is given from elsewhere use that path
         if config_path:
             cls._config = get_yaml_config(config_path)
-            return
 
-        # Otherwise, if there's an environment variable with a path, we'll use that.
-        env_config_path = os.environ.get("BLACKBOX_CONFIG_PATH")
-        if env_config_path:
+        # If there's an environment variable with a path, we'll use that.
+        elif env_config_path:
             cls._config = get_yaml_config(Path(env_config_path))
-            return
 
         # Otherwise, we expect the config file to be in the root folder,
         # and to be called 'blackbox.yaml'
-        root_folder = Path(__file__).parent.parent.absolute()
-        cls._config = get_yaml_config(root_folder / "blackbox.yaml")
+        else:
+            root_folder = Path(__file__).parent.parent.absolute()
+            cls._config = get_yaml_config(root_folder / "blackbox.yaml")
 
     def _get_annotation(cls, name):
         """Fetch the annotation configured in the subclass."""

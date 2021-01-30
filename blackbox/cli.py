@@ -1,8 +1,59 @@
+from pathlib import Path
+from textwrap import dedent
+
+import click
+
+from blackbox.__version__ import __version__
+from blackbox.config import YAMLGetter
 from blackbox.handlers.databases import BlackboxDatabase
 from blackbox.handlers.notifiers import BlackboxNotifier
 from blackbox.handlers.storage import BlackboxStorage
 
-if __name__ == "__main__":
+
+@click.command()
+@click.option('--config', default="blackbox.yml", help="Path to blackbox.yaml file")
+@click.option('--init', is_flag=True, help="Generate blackbox.yaml file and exit")
+@click.option('--version', is_flag=True, help="Show version and exit")
+def cli(config, init, version):
+    """
+    BLACKBOX
+
+    Backup database to external storage system
+    """
+
+    if version:
+        print(__version__, flush=True)
+        exit()
+
+    if init:
+        config_file = Path("blackbox.yaml")
+        if not config_file.exists():
+            config_file.write_text(dedent(
+                """
+                databases:
+                  - mongodb://username:password@host:port
+                  - postgres://username:password@host:port
+                  - redis://password@host:port
+
+                storage:
+                  - s3://bucket:s3.endpoint.com?aws_access_key_id=1234&aws_secret_access_key=lemondance
+
+                notifiers:
+                  - https://web.hook/
+
+                retention_days: 7
+                """).lstrip()
+            )
+            print("blackbox.yaml configuration created", flush=True)
+
+        else:
+            print("blackbox.yaml already exists", flush=True)
+
+        exit()
+
+    if config:
+        YAMLGetter.parse_config(Path(config))
+
     report = {
         "output": "",
         "success": True,
