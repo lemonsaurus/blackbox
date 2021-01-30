@@ -15,7 +15,7 @@ This service can either be set up as a cron job (on UNIX systems), as a Kubernet
 Requires Python 3.9 or newer
 
 ```sh
-# TODO: decide on this naming convention
+# Install the CLI tool
 pip install blackbox-cli
 
 # Check the installed version
