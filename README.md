@@ -19,6 +19,9 @@ pip install blackbox-cli
 
 # Create a configuration file
 blacbox --init
+
+# Run blackbox with a specific config file
+blackbox --config=/path/to/blackbox.yaml
 ```
 
 ### Setting up as a cron job
@@ -132,6 +135,11 @@ Blackbox will look for this file in the root folder by default, however you can 
 
 ```sh
 export BLACKBOX_CONFIG_PATH=/var/my/favorite/fruit/blackbox.yaml
+```
+
+You can also specify the location of this file when using the `blackbox` cli command.
+```sh
+blackbox --config=/path/to/blackbox.yaml
 ```
 
 ## Environment Variables
