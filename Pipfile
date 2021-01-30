@@ -18,6 +18,7 @@ requests = "~=2.25.1"
 boto3 = "~=1.16.51"
 loguru = "~=0.5.3"
 jinja2 = "==2.11.2"
+dropbox = "~=11.0.0"
 
 [requires]
 python_version = "3.9"
