@@ -49,10 +49,12 @@ class YAMLGetter(type):
 
         if config_path:
             cls._config = get_yaml_config(config_path)
+            return
 
         elif env_config_path:
             # Otherwise, if there's an environment variable with a path, we'll use that.
             cls._config = get_yaml_config(Path(env_config_path))
+            return
 
         else:
             # Otherwise, we expect the config file to be in the root folder,
