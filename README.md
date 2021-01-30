@@ -1,5 +1,6 @@
 ![Lint & Test](https://github.com/lemonsaurus/blackbox/workflows/Lint%20&%20Test/badge.svg)
 ![Docker Build](https://github.com/lemonsaurus/blackbox/workflows/Docker%20Build/badge.svg)
+[![PyPI version](https://badge.fury.io/py/blackbox-cli.svg)](https://pypi.org/project/blackbox-cli/)
 
 ![blackbox](img/blackbox_banner.png)
 A simple service which magically backs up all your databases to all your favorite cloud storage providers, and then notifies you.
