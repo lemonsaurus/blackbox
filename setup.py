@@ -8,7 +8,7 @@ setup(
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     author="Leon Sandøy",
-    author_email="heavysaturn@gmail.com",
+    author_email="leon.sandoy@gmail.com",
     url="https://github.com/lemonsaurus/blackbox",
     license="MIT",
     packages=find_packages(exclude=["tests", "tests.*"]),
