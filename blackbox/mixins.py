@@ -67,7 +67,7 @@ class ConnstringParserMixin:
             "user": "internet",
             "password": "dingdong",
             "fire": "ice",
-            "magic": "blue,
+            "magic": "blue",
         }
         """
         config = {}
