@@ -99,7 +99,7 @@ class Dropbox(BlackboxStorage):
             cursor = files_result.cursor
             files_result = self.client.files_list_folder_continue(cursor)
             entries += [
-                entry for entry in files_result.entries if isinstance(e, FileMetadata)
+                entry for entry in files_result.entries if isinstance(entry, FileMetadata)
             ]
 
         # Find all old files and delete them.
