@@ -21,6 +21,7 @@ setup(
         "Topic :: Database",
         "Topic :: System :: Archiving :: Backup"
     ],
+    # Remember to update this with the contents of the Pipfile
     install_requires=[
         "pyyaml~=5.3.1",
         "requests~=2.25.1",
