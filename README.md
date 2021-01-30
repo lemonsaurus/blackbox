@@ -18,9 +18,6 @@ Requires Python 3.9 or newer
 # Install the CLI tool
 pip install blackbox-cli
 
-# Check the installed version
-blackbox --version
-
 # Create a configuration file
 blacbox --init
 ```
@@ -41,6 +38,7 @@ crontab -e
 Here's an example manifest you can use if you want to run this in a Kubernetes cluster.
 
 ```yaml
+# TODO
 ```
 
 # Configuration
@@ -144,7 +142,6 @@ If you want to re-enable `appendonly`:
 
 **Blackbox** can work with different storage providers to save your logs and backups - usually so that you can automatically store them in the cloud. Right now we support **S3** and **Dropbox**.
 
-
 **Note: It is currently not possible to configure more than one of each storage type.**
 
 ### S3
@@ -173,7 +170,9 @@ To upload stuff to S3, you'll need credentials. Your **AWS credentials** can be 
 - NOTE: If the bucket is public, no credentials are necessary.
 
 ### Dropbox
+
 The Dropbox storage handler needs a user access token in order to work. To get one, do the following:
+
 - Create a Dropbox account (if you don't already have one).
 - Go to https://dropbox.com/developers
 - Create a new application with App Folder access. **Do not give it full access**, as this may have dangerous, destructive consequences if configured incorrectly.
@@ -183,6 +182,7 @@ You can also define a custom location (root is App Folder) using the
 and **must** end with slash. Default is root.
 
 The configuration connections strings may look like the following:
+
 ```
 dropbox://<access-token>
 dropbox://<access-token>?upload_directory=/foobar/
@@ -219,7 +219,7 @@ Modern:
 ![blackbox](img/blackbox_slack_modern_success.png)
 ![blackbox](img/blackbox_slack_modern_fail.png)
 
-##  Rotation
+## Rotation
 
 By default, `blackbox` will automatically remove all backup files older than 7 days in the folder you configure for your storage provider. To determine if something is a backup file or not, it will use a regex pattern that corresponds with the default file it saves, for example `blackbox-postgres-backup-11-12-2020.sql`.
 

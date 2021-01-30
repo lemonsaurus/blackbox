@@ -1,9 +1,10 @@
 from setuptools import find_packages, setup
 
+exec(open("blackbox/__version__.py").read())
 
 setup(
     name="blackbox-cli",
-    version="0.0.1",
+    version=__version__,
     description="Tool for automatic backups of databases",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
@@ -34,5 +35,6 @@ setup(
     python_requires='~=3.9',
     extras_require={},
     include_package_data=True,
-    zip_safe=False
+    zip_safe=False,
+    entry_points={"console_scripts": ["blackbox=blackbox.cli:cli"]},
 )

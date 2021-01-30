@@ -3,6 +3,7 @@ from textwrap import dedent
 
 import click
 
+from blackbox.__version__ import __version__
 from blackbox.config import YAMLGetter
 from blackbox.handlers.databases import BlackboxDatabase
 from blackbox.handlers.notifiers import BlackboxNotifier
@@ -12,12 +13,17 @@ from blackbox.handlers.storage import BlackboxStorage
 @click.command()
 @click.option('--config', default="blackbox.yml", help="Path to blackbox.yaml file")
 @click.option('--init', is_flag=True, help="Generate blackbox.yaml file and exit")
-def cli(config, init):
+@click.option('--version', is_flag=True, help="Show version and exit")
+def cli(config, init, version):
     """
     BLACKBOX
 
     Backup database to external storage system
     """
+
+    if version:
+        print(__version__, flush=True)
+        exit()
 
     if init:
         config_file = Path("blackbox.yaml")
@@ -38,10 +44,10 @@ def cli(config, init):
                 retention_days: 7
                 """).lstrip()
             )
-            print("blackbox.yaml configuration created")
+            print("blackbox.yaml configuration created", flush=True)
 
         else:
-            print("blackbox.yaml already exists")
+            print("blackbox.yaml already exists", flush=True)
 
         exit()
 
