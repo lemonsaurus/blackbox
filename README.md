@@ -4,14 +4,12 @@
 ![blackbox](img/blackbox_banner.png)
 A simple service which magically backs up all your databases to all your favorite cloud storage providers, and then notifies you.
 
-Simply create a config file, fill in some connection strings for your favorite services, and schedule `blackbox` to run however often you want using something like `cron`.
+Simply create a config file, fill in some connection strings for your favorite services, and schedule `blackbox` to run however often you want using something like `cron`, or a Kubernetes CronJob.
 
 # Setup
-
 This service can either be set up as a cron job (on UNIX systems), as a Kubernetes CronJob, or scheduled in your favorite alternative scheduler.
 
 ## Quick start
-
 Requires Python 3.9 or newer
 
 ```sh
@@ -35,14 +33,81 @@ crontab -e
 
 ### Setting it up as a Kubernetes CronJob
 
-Here's an example manifest you can use if you want to run this in a Kubernetes cluster.
+To set this up as a Kubernetes CronJob, you'll want three manifests and a secret.
 
+Before we start, you'll probably want to create a Secret where you expose environment variables containing stuff like passwords for your databases, credentials for your storage, and webhooks as environment variables. We'll be interpolating those into the config file.
+
+Next, we'll need a ConfigMap for the `blackbox.yaml` config file. See the Configuration section below for more information on what to put inside this file.
 ```yaml
-# TODO
+# blackbox-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: blackbox-config
+data:
+  blackbox.yaml: |
+    databases:
+      - mongodb://{{ MONGO_INITDB_ROOT_USERNAME }}:{{ MONGO_INITDB_ROOT_PASSWORD }}@mongodb.default.svc.cluster.local:27017
+      - postgres://{{ POSTGRES_USER }}:{{ POSTGRES_PASSWORD }}@postgres.default.svc.cluster.local:5432
+
+    storage:
+      - s3://blackbox:my.s3.com?aws_access_key_id={{ AWS_ACCESS_KEY_ID }}&aws_secret_access_key={{ AWS_SECRET_ACCESS_KEY }}
+
+    notifiers:
+      - {{ DISCORD_WEBHOOK }}
+
+    retention_days: 7
+```
+
+Next, we'll need to configure the `BLACKBOX_CONFIG_PATH`, which tells Blackbox where to find the config file. This doesn't need to be a secret, so we'll just put that into a regular ConfigMap.
+```yaml
+# env-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: blackbox-env
+data:
+  # Set the config file location
+  BLACKBOX_CONFIG_PATH: "/blackbox/config_file/blackbox.yaml"
+```
+
+Finally, we need the CronJob itself. This one is configured to run once a day, at midnight.
+```yaml
+# cronjob.yaml
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: blackbox
+spec:
+  schedule: "@daily"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: blackbox
+            image: lemonsaurus/blackbox
+            imagePullPolicy: Always
+            envFrom:
+              - secretRef:
+                  name: blackbox-secrets
+              - configMapRef:
+                  name: blackbox-env
+            volumeMounts:
+              # Take care not to mount this in the root folder!
+              # That will replace everything in the root folder with
+              # the contents of this volume, which sucks.
+              - mountPath: /blackbox/config_file
+                name: blackbox-config
+          volumes:
+            - name: blackbox-config
+              configMap:
+                name: blackbox-config
+          restartPolicy: OnFailure
+      backoffLimit: 3
 ```
 
 # Configuration
-
 `blackbox` configuration is easy. You simply create a yaml file, `blackbox.yaml`, which contains something like this:
 
 ```yaml
@@ -69,11 +134,9 @@ export BLACKBOX_CONFIG_PATH=/var/my/favorite/fruit/blackbox.yaml
 ```
 
 ## Environment Variables
-
 The `blackbox.yaml` will ✨ **magically interpolate** ✨ any environment variables that exist in the environment where `blackbox` is running. This is very useful if you want to keep your secrets in environment variables, instead of keeping them in the config file in plaintext.
 
 #### Example
-
 Imagine your current config looks like this, but you want to move the username and password into environment variables.
 
 ```yaml
@@ -96,27 +159,22 @@ databases:
 ```
 
 ## Databases
-
 Right now, this app supports **MongoDB**, **PostgreSQL 12** and **Redis**. If you need support for an additional database, consider opening a pull request to add a new database handler.
 
 **Note: It is currently not possible to configure more than one of each database.**
 
 ### MongoDB
-
 - Add a connstring to the `databases` list with this format: `mongodb://username:password@host:port`.
 - To restore from the backup, use `mongorestore --gzip --archive=/path/to/backup.archive`
 
 ### Postgres
-
 - Add a connstring to the `databases` list with this format: `postgresql://username:password@host:port`.
 - To restore from the backup, use `psql -f /path/to/backup.sql`
 
 ### Redis
-
 - Add a connstring to the `databases` list with this format: `redis://password@host:port`.
 
 #### To restore from the backup
-
 - Stop Redis server.
 - Turn off `appendonly` mode in Redis configuration (set to `no`).
 - Copy backup file to Redis working directory (`dir` in configuration) with name that is defined in configuration key `dbfilename`.
@@ -139,19 +197,16 @@ If you want to re-enable `appendonly`:
 - Start Redis server.
 
 ## Storage providers
-
 **Blackbox** can work with different storage providers to save your logs and backups - usually so that you can automatically store them in the cloud. Right now we support **S3** and **Dropbox**.
 
 **Note: It is currently not possible to configure more than one of each storage type.**
 
 ### S3
-
 We support any S3 object storage bucket, whether it's from **AWS**, **Linode**, **DigitalOcean**, **Scaleway**, or another S3-compatible object storage provider.
 
 **Blackbox** will respect the `retention_days` configuration setting and delete older files from the S3 storage. Please note that if you have a bucket expiration policy on your storage, **blackbox** will not do anything to disable it. So, for example, if your bucket expiration policy is 12 hours and blackbox is set to 7 `retention_days`, then your backups are all gonna be deleted after 12 hours unless you disable your policy.
 
 #### Connection string
-
 ```json
 s3://<s3 base endpoint>:<s3 bucket endpoint>?<parameter=value>&...
 
@@ -161,7 +216,6 @@ Valid strings:
 ```
 
 #### Credentials
-
 To upload stuff to S3, you'll need credentials. Your **AWS credentials** can be provided in several ways. This is the order in which blackbox looks for them:
 
 - First, we look for the optional parameters in the s3 connection string, called `aws_access_key_id` and `aws_secret_access_key`.
@@ -170,7 +224,6 @@ To upload stuff to S3, you'll need credentials. Your **AWS credentials** can be 
 - NOTE: If the bucket is public, no credentials are necessary.
 
 ### Dropbox
-
 The Dropbox storage handler needs a user access token in order to work. To get one, do the following:
 
 - Create a Dropbox account (if you don't already have one).
@@ -189,11 +242,9 @@ dropbox://<access-token>?upload_directory=/foobar/
 ```
 
 ## Notifiers
-
 `blackbox` also implements different _notifiers_, which is how it reports the result of one of its jobs to you. Right now we only support **Discord**, but if you need a specific notifier, feel free to open an issue.
 
 ### Discord
-
 To set this up, simply add a valid Discord webhook URL to the `notifiers` list.
 
 These usually look something like `https://discord.com/api/webhooks/797541821394714674/lzRM9DFggtfHZXGJTz3yE-MrYJ-4O-0AbdQg3uV2x4vFbu7HTHY2Njq8cx8oyMg0T3Wk`, but we also support `ptb.discord.com` and `canary.discord.com` webhooks.
@@ -202,7 +253,6 @@ These usually look something like `https://discord.com/api/webhooks/797541821394
 ![blackbox](img/blackbox_discord_2.png)
 
 ### Slack
-
 To set this up, simply add a valid Slack incoming webhook URL to the `notifiers` list.
 These look like `https://hooks.slack.com/services/XXXXXXXXXXX/XXXXXXXXXXX/XXXXXXXXXXXXXXXXXXX`.
 
@@ -220,7 +270,6 @@ Modern:
 ![blackbox](img/blackbox_slack_modern_fail.png)
 
 ## Rotation
-
 By default, `blackbox` will automatically remove all backup files older than 7 days in the folder you configure for your storage provider. To determine if something is a backup file or not, it will use a regex pattern that corresponds with the default file it saves, for example `blackbox-postgres-backup-11-12-2020.sql`.
 
 You can configure the number of days before rotating by altering the `retention_days` parameter in `blackbox.yaml`.
