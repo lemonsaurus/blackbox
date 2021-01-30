@@ -18,7 +18,6 @@ setup(
         "Operating System :: POSIX :: Linux",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3.9",
-        "Framework :: AsyncIO",
         "Topic :: Database",
         "Topic :: System :: Archiving :: Backup"
     ],
