@@ -124,3 +124,8 @@ def cli(config, init, version):
 
         # Do cleanup
         notifier.teardown()
+
+    # If this failed, we'll exit with a non-zero exit code, to indicate
+    # a failure. Might be useful for Kubernetes jobs.
+    if not report.get("success"):
+        exit(1)
