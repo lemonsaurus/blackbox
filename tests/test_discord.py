@@ -35,12 +35,3 @@ def test_discord_notify(mocker):
     with requests_mock.Mocker() as m:
         m.post(requests_mock.ANY, json=report)
         discord.notify(report)
-
-        {'avatar_url': 'https://raw.githubusercontent.com/lemonsaurus/blackbox/main/img/blackbox_avatar.png',
-         'content': None,
-         'embeds': [{'color': 1024049,
-                     'fields': [{'inline': True,
-                                 'name': '**databasetype**',
-                                 'value': ':x:'}],
-                     'title': 'Backup'}],
-         'username': 'blackbox'}
