@@ -28,6 +28,8 @@ setup(
         "boto3~=1.16.51",
         "loguru~=0.5.3",
         "jinja2==2.11.2",
+        "click==7.1.2",
+        "dropbox~=11.0.0",
     ],
     python_requires='~=3.9',
     extras_require={},
