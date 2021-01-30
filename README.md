@@ -124,15 +124,14 @@ To upload stuff to S3, you'll need credentials. Your **AWS credentials** can be 
 - NOTE: If the bucket is public, no credentials are necessary.
 
 ### Dropbox
-Dropbox storage handler needs a user access token. For this:
-- Create Dropbox account (if you don't have).
+The Dropbox storage handler needs a user access token in order to work. To get one, do the following:
+- Create a Dropbox account (if you don't already have one).
 - Go to https://dropbox.com/developers
-- Create a new application with App Folder (full access is not recommended, because without directory defined in the configuration it will have destructive results).
+- Create a new application with App Folder access. **Do not give it full access**, as this may have dangerous, destructive consequences if configured incorrectly.
 
-You can also define a custom location (root is App Folder) using 
+You can also define a custom location (root is App Folder) using the
 `upload_directory` optional parameter. This **should** begin with slash
-and **must** end with slash. Default is root. Note that all files in this directory will
-be deleted after `retention_days`.
+and **must** end with slash. Default is root.
 
 The configuration connections strings may look like the following:
 ```
