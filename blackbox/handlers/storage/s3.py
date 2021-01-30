@@ -37,8 +37,9 @@ class S3(BlackboxStorage):
             configuration['aws_access_key_id'] = key_id
             configuration['aws_secret_access_key'] = secret_key
 
-        # If either of the keys are missing, inform that both keys are needed
-        elif not all([key_id, secret_key]):
+        # If config was provided for only one of them, that's too weird of a state for us to accept,
+        # so we'll raise an exception. (That weird ^ operator is an XOR).
+        elif bool(key_id) ^ bool(secret_key):
             raise ImproperlyConfigured("You must configure either both or none of the AWS credential params.")
 
         # If neither was provided, we'll just initialize the client without credentials, and
