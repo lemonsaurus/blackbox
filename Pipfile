@@ -11,9 +11,9 @@ pytest-mock = "*"
 flake8 = "*"
 flake8-isort = "*"
 pytest-subprocess = "*"
+requests-mock = "*"
 
-# Remember to update setup.py with these requirements
-[packages]
+[packages] # Remember to update setup.py with these requirements
 pyyaml = "~=5.3.1"
 requests = "~=2.25.1"
 boto3 = "~=1.16.51"
