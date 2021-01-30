@@ -98,7 +98,7 @@ If you want to re-enable `appendonly`:
 - Start Redis server.
 
 ## Storage providers
-**Blackbox** can work with different storage providers to save your logs and backups - usually so that you can automatically store them in the cloud. Right now we only support **S3** and **Dropbox**, but we will probably add additional providers in the future.
+**Blackbox** can work with different storage providers to save your logs and backups - usually so that you can automatically store them in the cloud. Right now we support **S3** and **Dropbox**.
 
 **Note: It is currently not possible to configure more than one of each storage type.**
 
