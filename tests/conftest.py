@@ -29,7 +29,7 @@ def config_file(mocker):
 
         retention_days: 7
         """
-    )
+    ).lstrip()
 
     environment_variables = {
         "MONGO_USER": "mongouser",
@@ -39,6 +39,8 @@ def config_file(mocker):
     mocker.patch.dict(os.environ, environment_variables)
 
     mocker.patch("builtins.open", mocker.mock_open(read_data=config))
+
+    return config
 
 
 @pytest.fixture
