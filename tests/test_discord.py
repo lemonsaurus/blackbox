@@ -39,5 +39,5 @@ def test_discord_notify(mocker):
     }
 
     with requests_mock.Mocker() as m:
-        m.post(requests_mock.ANY, json=report)
+        m.post(webhook_url["webhook_url"])
         discord.notify(report)
