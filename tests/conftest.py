@@ -5,6 +5,11 @@ from textwrap import dedent
 import pytest
 
 
+########################
+# Config file Fixtures #
+########################
+
+
 @pytest.fixture
 def config_file(mocker):
     """ Mock reading config values"""
@@ -68,3 +73,32 @@ def config_file_with_missing_value(mocker):
     )
 
     mocker.patch("builtins.open", mocker.mock_open(read_data=missing_value))
+
+
+#########################
+# Notification fixtures #
+#########################
+
+
+@pytest.fixture
+def report():
+    """
+    notification fixture for passing in report
+    """
+
+    storage = [{
+        "type": "s3",
+        "success": "sortof"
+    }]
+
+    report = {
+        "output": "salad",
+        "success": "maybe",
+        "databases": {
+            "mongo": {
+                "type": "mongo",
+                "storage": storage},
+        }
+    }
+
+    return report

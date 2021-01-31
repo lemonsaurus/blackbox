@@ -3,25 +3,11 @@ import requests_mock
 from blackbox.handlers.notifiers.discord import Discord
 
 
-def test_discord_notify(mocker):
+def test_discord_notify(mocker, report):
     """Test report parsing for Discord notifications"""
 
     webhook_url = {
         "webhook_url": "https://discord.com/api/webhooks/x"
-    }
-
-    storage = [{
-        "type": "s3",
-        "success": "sortof"
-    }]
-    report = {
-        "output": "salad",
-        "success": "maybe",
-        "databases": {
-            "mongo": {
-                "type": "mongo",
-                "storage": storage},
-        }
     }
 
     discord = Discord()
