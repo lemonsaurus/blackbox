@@ -1,6 +1,12 @@
 import itertools
+from pathlib import Path
+from textwrap import dedent
 
+import click
+
+from blackbox.__version__ import __version__
 from blackbox.config import Blackbox as CONFIG
+from blackbox.config import YAMLGetter
 from blackbox.handlers.databases import BlackboxDatabase
 from blackbox.handlers.notifiers import BlackboxNotifier
 from blackbox.handlers.storage import BlackboxStorage
@@ -9,8 +15,13 @@ from blackbox.workflows import get_configured_handlers
 from blackbox.workflows import get_workflows
 
 
-def main():
-    """Main function of Blackbox."""
+def main() -> bool:
+    """
+    Main function of Blackbox.
+
+    The return code is `False` if any of the workflows are unsuccessful, `True` otherwise.
+    """
+    success = True
 
     # Parse configuration and instantiate handlers
     configured_storage_providers = get_configured_handlers(BlackboxStorage, CONFIG.storage)
@@ -84,6 +95,9 @@ def main():
             storage_provider.rotate()
             storage_provider.teardown()
 
+        # Set overall program success to False if workflow is unsuccessful
+        success = False if report["success"] is False else report["success"]
+
         # Now add the report to specified notifiers
         for notifier in workflow.notifiers:
             log.debug(f"Adding {database} report to {notifier}")
@@ -95,6 +109,56 @@ def main():
         notifier.notify()
         notifier.teardown()
 
+    return success
 
-if __name__ == "__main__":
-    main()
+
+@click.command()
+@click.option('--config', help="Path to blackbox.yaml file")
+@click.option('--init', is_flag=True, help="Generate blackbox.yaml file and exit")
+@click.option('--version', is_flag=True, help="Show version and exit")
+def cli(config, init, version):
+    """
+    BLACKBOX
+
+    Backup database to external storage system
+    """
+
+    if version:
+        print(__version__, flush=True)
+        exit()
+
+    if init:
+        config_file = Path("blackbox.yaml")
+        if not config_file.exists():
+            config_file.write_text(dedent(
+                """
+                databases:
+                  - mongodb://username:password@host:port
+                  - postgres://username:password@host:port
+                  - redis://password@host:port
+
+                storage:
+                  - s3://bucket:s3.endpoint.com?aws_access_key_id=1234&aws_secret_access_key=lemondance
+
+                notifiers:
+                  - https://web.hook/
+
+                retention_days: 7
+                """).lstrip()
+            )
+            print("blackbox.yaml configuration created", flush=True)
+
+        else:
+            print("blackbox.yaml already exists", flush=True)
+
+        exit()
+
+    if config:
+        YAMLGetter.parse_config(Path(config))
+
+    success = main()
+
+    # If this failed, we'll exit with a non-zero exit code, to indicate
+    # a failure. Might be useful for Kubernetes jobs.
+    if not success:
+        exit(1)

@@ -11,18 +11,22 @@ pytest-mock = "*"
 flake8 = "*"
 flake8-isort = "*"
 pytest-subprocess = "*"
+requests-mock = "*"
 
-[packages]
+[packages] # Remember to update setup.py with these requirements
 pyyaml = "~=5.3.1"
 requests = "~=2.25.1"
 boto3 = "~=1.16.51"
 loguru = "~=0.5.3"
 jinja2 = "==2.11.2"
+click = "==7.1.2"
+dropbox = "~=11.0.0"
 
 [requires]
 python_version = "3.9"
 
 [scripts]
+blackbox = "python -m blackbox"
 test = "pytest --cov blackbox -vv --cov-report=term-missing ."
 lint = "flake8 ."
 isort = "isort ."

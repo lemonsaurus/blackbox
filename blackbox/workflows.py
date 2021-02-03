@@ -1,7 +1,7 @@
-from collections import defaultdict
 import dataclasses
 import re
 import typing as t
+from collections import defaultdict
 
 from blackbox.exceptions import ImproperlyConfigured
 from blackbox.handlers._base import BlackboxHandler
@@ -9,6 +9,7 @@ from blackbox.handlers.databases import BlackboxDatabase
 from blackbox.handlers.notifiers import BlackboxNotifier
 from blackbox.handlers.storage import BlackboxStorage
 from blackbox.utils.logger import log
+
 
 Handler = t.TypeVar("Handler", bound=BlackboxHandler)
 HandlerById = t.Mapping[str, set[Handler]]
