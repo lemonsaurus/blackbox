@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 from pathlib import Path
 
@@ -42,11 +43,13 @@ class Dropbox(BlackboxStorage):
         # in multiple parts.
         chunk_size = 4 * 1024 * 1024
 
-        upload_path = f"{self.upload_base}{file_path.name}"
+        temp_file = self.compress(file_path)
+        upload_path = f"{self.upload_base}{file_path.name}.gz"
 
         try:
-            with file_path.open("rb") as f:
-                file_size = file_path.stat().st_size
+            with temp_file as f:
+                file_size = os.stat(f.name).st_size
+                log.debug(file_size)
                 if file_size <= chunk_size:
                     self.client.files_upload(
                         f.read(), upload_path, WriteMode.overwrite
