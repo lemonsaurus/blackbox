@@ -15,7 +15,7 @@ class BlackboxStorage(BlackboxHandler):
     @staticmethod
     def compress(file_path: Path) -> typing.IO:
         """
-        Compresses the file using gzip into a tempfile.TemporaryFile.
+        Compress the file using gzip into a tempfile.TemporaryFile.
 
         Returns a file-like object, which is removed when it is closed.
         This should always be called before syncing the
