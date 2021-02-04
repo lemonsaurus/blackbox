@@ -84,7 +84,8 @@ class S3(BlackboxStorage):
             self.client.upload_fileobj(
                 file_,
                 self.bucket,
-                file_path.name,
+                f"{file_path.name}.gz",
+                ExtraArgs={"ContentEncoding": "gzip"}
             )
             self.success = True
         except (ClientError, BotoCoreError) as e:
