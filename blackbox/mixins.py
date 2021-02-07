@@ -1,9 +1,10 @@
-from itertools import chain
 import re
+from itertools import chain
 from typing import Optional
 
 from blackbox.config import Blackbox
 from blackbox.exceptions import ImproperlyConfigured
+
 
 PARAMS_REGEX = r"(?:\?|&|;)([^=]+)=([^&|;]+)"
 

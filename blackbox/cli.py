@@ -11,7 +11,7 @@ from blackbox.handlers.storage import BlackboxStorage
 
 
 @click.command()
-@click.option('--config', default="blackbox.yml", help="Path to blackbox.yaml file")
+@click.option('--config', help="Path to blackbox.yaml file")
 @click.option('--init', is_flag=True, help="Generate blackbox.yaml file and exit")
 @click.option('--version', is_flag=True, help="Show version and exit")
 def cli(config, init, version):
@@ -124,3 +124,8 @@ def cli(config, init, version):
 
         # Do cleanup
         notifier.teardown()
+
+    # If this failed, we'll exit with a non-zero exit code, to indicate
+    # a failure. Might be useful for Kubernetes jobs.
+    if not report.get("success"):
+        exit(1)

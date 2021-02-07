@@ -1,11 +1,11 @@
 import os
 import pathlib
 
+import yaml
 from jinja2 import Environment
 from jinja2 import StrictUndefined
 from jinja2.exceptions import TemplateSyntaxError
 from jinja2.exceptions import UndefinedError
-import yaml
 
 from blackbox.exceptions import ImproperlyConfigured
 
