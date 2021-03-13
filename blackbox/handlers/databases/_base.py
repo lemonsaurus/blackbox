@@ -7,10 +7,13 @@ from blackbox.handlers._base import BlackboxHandler
 class BlackboxDatabase(BlackboxHandler):
     """An abstract database handler."""
 
-    def __init__(self):
+    handler_type = "database"
+
+    def __init__(self, **kwargs):
         """Set up database handler."""
-        super().__init__()
-        self.success = None  # Was the backup successful?
+        super().__init__(**kwargs)
+
+        self.success = False  # Was the backup successful?
         self.output = ""     # What did the backup output?
 
     @abstractmethod

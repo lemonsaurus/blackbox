@@ -9,10 +9,7 @@ from blackbox.utils.logger import log
 class Redis(BlackboxDatabase):
     """A Database handler that will run a redis-cli command for Redis backup."""
 
-    connstring_regex = r"redis://(?P<host>.+):(?P<port>.+)"
-    valid_prefixes = [
-        "redis"
-    ]
+    required_fields = ("password", "host", "port")
 
     def backup(self) -> Path:
         """Dump all the data to a file and then return the filepath."""

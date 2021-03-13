@@ -14,10 +14,7 @@ class MongoDB(BlackboxDatabase):
     arguments, e.g. mongorestore --gzip --archive=/path/to/file.archive.
     """
 
-    connstring_regex = r"mongodb://(?P<user>.+):(?P<password>.+)@(?P<host>.+):(?P<port>.+)"
-    valid_prefixes = [
-        "mongodb"
-    ]
+    required_fields = ("username", "password", "host", "port")
 
     def backup(self) -> Path:
         """Dump all the data to a file and then return the filepath."""

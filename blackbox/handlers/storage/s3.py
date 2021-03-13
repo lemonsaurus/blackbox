@@ -13,27 +13,17 @@ from blackbox.utils.logger import log
 
 
 class S3(BlackboxStorage):
-    connstring_regex = r"s3://(?P<bucket_name>[^:]+):(?P<s3_endpoint>[^:?]+)"
-    valid_prefixes = [
-        "s3",
-    ]
+    required_fields = ("bucket", "endpoint")
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
-        # We don't need to initialize handlers that aren't enabled.
-        if not self.enabled:
-            return
-
-        # Defaults
-        self.success = False
-        self.output = ""
-        self.bucket = self.config.get('bucket_name')
+        self.bucket = self.config["bucket"]
+        self.endpoint = self.config["endpoint"]
 
         # If the optional parameters for credentials have been provided, we use these.
         key_id = self.config.get("aws_access_key_id")
         secret_key = self.config.get("aws_secret_access_key")
-        s3_endpoint = self.config.get('s3_endpoint')
         configuration = dict()
 
         # If config was provided for both of these, we should use it!
@@ -73,7 +63,7 @@ class S3(BlackboxStorage):
         )
         self.client = self.session.client(
             's3',
-            endpoint_url=f"https://{s3_endpoint}",
+            endpoint_url=f"https://{self.endpoint}",
         )
 
     def sync(self, file_path: Path) -> None:
