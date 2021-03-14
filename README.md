@@ -7,6 +7,24 @@ A simple service which magically backs up all your databases to all your favorit
 
 Simply create a config file, fill in some connection strings for your favorite services, and schedule `blackbox` to run however often you want using something like `cron`, or a Kubernetes CronJob.
 
+## Table of Contents
+
+- [Setup](#setup)
+- [Configuration](#configuration)
+- [Environment Variables](#environment-variables)
+- [Databases](#databases)
+    - [MongoDB](#mongodb)
+    - [PostgreSQL](#postgres)
+    - [Redis](#redis)
+    - [Specify Storage Providers and Notifiers for each Database](#specify-storage-providers-and-notifiers-for-each-database)
+- [Storage Providers](#storage-providers)
+    - [S3](#s3)
+    - [Dropbox](#dropbox)
+- [Notifiers](#notifiers)
+    - [Discord](#discord)
+    - [Slack](#slack)
+- [Rotation](#rotation)
+
 # Setup
 This service can either be set up as a cron job (on UNIX systems), as a Kubernetes CronJob, or scheduled in your favorite alternative scheduler.
 
@@ -51,14 +69,22 @@ metadata:
 data:
   blackbox.yaml: |
     databases:
-      - mongodb://{{ MONGO_INITDB_ROOT_USERNAME }}:{{ MONGO_INITDB_ROOT_PASSWORD }}@mongodb.default.svc.cluster.local:27017
-      - postgres://{{ POSTGRES_USER }}:{{ POSTGRES_PASSWORD }}@postgres.default.svc.cluster.local:5432
+      mongodb:
+        main_mongodb:
+            connection_string: mongodb://{{ MONGO_INITDB_ROOT_USERNAME }}:{{ MONGO_INITDB_ROOT_PASSWORD }}@mongodb.default.svc.cluster.local:27017
 
     storage:
-      - s3://blackbox:my.s3.com?aws_access_key_id={{ AWS_ACCESS_KEY_ID }}&aws_secret_access_key={{ AWS_SECRET_ACCESS_KEY }}
+      s3:
+        main_s3:
+          bucket: blackbox
+          endpoint: my.s3.com
+          aws_access_key_id: {{ AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: {{ AWS_SECRET_ACCESS_KEY }}
 
     notifiers:
-      - {{ DISCORD_WEBHOOK }}
+      discord:
+        main_discord:
+          webhook: {{ DISCORD_WEBHOOK }}
 
     retention_days: 7
 ```
@@ -114,19 +140,54 @@ spec:
 # Configuration
 `blackbox` configuration is easy. You simply create a yaml file, `blackbox.yaml`, which contains something like this:
 
+See below for specific configuration information for each handler.
+
 ```yaml
 databases:
-  - mongodb://username:password@host:port
-  - postgres://username:password@host:port
-  - redis://password@host:port
+  postgres:  # Database type 
+    main_postgres:  # Database identifier
+      # Configuration (see below for further information on specific databases)
+      username: username
+      password: password
+      host: host
+      port: port
+
+      # Optionally specify storage and notifiers to use
+      # You can specify them by type or identifier
+      # Use a string for a single specifier, a list for multiple specifiers
+      storage_providers:
+        - s3
+        - secondary_dropbox
+      notifiers: slack
+
+  redis:
+    main_redis:
+      password: password
+      host: host
+      port: port
+      # No specified storage and notifiers, so all storage and notifiers are used
 
 storage:
-  - s3://bucket:s3.endpoint.com?aws_access_key_id=1234&aws_secret_access_key=lemondance
-  - dropbox://abyhhdhhfdbgdDjurajlgcfs?upload_directory=/testing/
+  s3:  # Storage type
+    main_s3:  # Storage identifier
+      bucket: bucket
+      endpoint: s3.endpoint.com
+    secondary_s3:
+      bucket: bucket
+      endpoint: s3.another_endpoint.com
+  dropbox:
+    main_dropbox:
+      access_token: XXXXXXXXXXX
+    secondary_dropbox:
+      access_token: XXXXXXXXXXX
 
 notifiers:
-  - https://discord.com/api/webhooks/797541821394714674/lzRM9DFggtfHZXGJTz3yE-MrYJ-4O-0AbdQg3uV2x4vFbu7HTHY2Njq8cx8oyMg0T3Wk
-  - https://hooks.slack.com/services/XXXXXXXXXXX/XXXXXXXXXXX/XXXXXXXXXXXXXXXXXXX
+  discord:  # Notifier type
+    main_discord:  # Notifier identifier
+      webhook:  https://discord.com/api/webhooks/797541821394714674/lzRM9DFggtfHZXGJTz3yE-MrYJ-4O-0AbdQg3uV2x4vFbu7HTHY2Njq8cx8oyMg0T3Wk
+  slack:
+    main_slack:
+      webhook:  https://hooks.slack.com/services/XXXXXXXXXXX/XXXXXXXXXXX/XXXXXXXXXXXXXXXXXXX
 
 retention_days: 7
 ```
@@ -150,21 +211,31 @@ Imagine your current config looks like this, but you want to move the username a
 
 ```yaml
 databases:
-  - mongodb://lemonsaurus:security-is-overrated@mongo.lemonsaur.us:1234
+  postgres:
+    main_postgres:
+      username: lemonsaurus
+      password: security-is-overrated
+      host: localhost
+      port: 5432
 ```
 
 So we'll create two environment variables like these:
 
 ```sh
-export MONGO_USERNAME=lemonsaurus
-export MONGO_PASSWORD=security-is-overrated
+export POSTGRES_USERNAME=lemonsaurus
+export POSTGRES_PASSWORD=security-is-overrated
 ```
 
 And now we can make use of these environment variables by using double curly brackets, like this:
 
 ```yaml
 databases:
-  - mongodb://{{ MONGO_USERNAME }}:{{ MONGO_PASSWORD }}@mongo.lemonsaur.us:1234
+  postgres:
+    main_postgres:
+      username: {{ POSTGRES_USERNAME }}
+      password: {{ POSTGRES_PASSWORD }}
+      host: localhost
+      port: 5432
 ```
 
 ## Databases
@@ -172,16 +243,32 @@ Right now, this app supports **MongoDB**, **PostgreSQL 12** and **Redis**. If yo
 
 **Note: It is currently not possible to configure more than one of each database.**
 
+To configure databases, add a section with this format:
+```yaml
+databases:
+  database_type:
+    identifier:
+      field: value
+  database_type:
+    ...
+```
+See below for the specific database types available and fields required. Identifiers can be any string of your choosing.
+
 ### MongoDB
-- Add a connstring to the `databases` list with this format: `mongodb://username:password@host:port`.
+- **Database Type**: `redis`
+- **Required fields**: `connection_string`
+- The `connection_string` field is in the format `mongodb://username:password@host:port`
 - To restore from the backup, use `mongorestore --gzip --archive=/path/to/backup.archive`
 
 ### Postgres
-- Add a connstring to the `databases` list with this format: `postgresql://username:password@host:port`.
+
+- **Database Type**: `postgres`
+- **Required fields**: `username`, `password`, `host`, `port`
 - To restore from the backup, use `psql -f /path/to/backup.sql`
 
 ### Redis
-- Add a connstring to the `databases` list with this format: `redis://password@host:port`.
+- **Database Type**: `redis`
+- **Required fields**: `password`, `host`, `port`
 
 #### To restore from the backup
 - Stop Redis server.
@@ -205,29 +292,59 @@ If you want to re-enable `appendonly`:
 - Set `appendonly` to `yes` in Redis configuration.
 - Start Redis server.
 
+### Specify Storage providers and Notifiers for each Database
+
+To specify specific storage providers or notifiers for databases, add the fields `storage_providers` and `notifiers` under each database entry. The entry can be a list or a string.
+```yaml
+databases:
+  postgres:  # Database type 
+    main_postgres:  # Database identifier
+      username: username
+      password: password
+      host: host
+      port: port
+
+      storage_providers:
+        - s3
+        - secondary_dropbox
+      notifiers: slack
+```
+
+The above example will backup `main_postgres` to every `s3` storage provider configured, as well as the storage provider with the identifier `secondary_dropbox`. Then, only the `slack` notifier gets notified.
+
+These fields are optional. If not given, all storage providers and all notifiers will be used.
+
 ## Storage providers
 **Blackbox** can work with different storage providers to save your logs and backups - usually so that you can automatically store them in the cloud. Right now we support **S3** and **Dropbox**.
 
-**Note: It is currently not possible to configure more than one of each storage type.**
+To configure storage providers, add a section with this format:
+```yaml
+storage:
+  storage_type:
+    # More than one type of storage provider can be configured
+    identifier_1:
+      field: value
+    identifier_2:
+      field: value
+  storage_type:
+    ...
+```
 
 ### S3
 We support any S3 object storage bucket, whether it's from **AWS**, **Linode**, **DigitalOcean**, **Scaleway**, or another S3-compatible object storage provider.
 
 **Blackbox** will respect the `retention_days` configuration setting and delete older files from the S3 storage. Please note that if you have a bucket expiration policy on your storage, **blackbox** will not do anything to disable it. So, for example, if your bucket expiration policy is 12 hours and blackbox is set to 7 `retention_days`, then your backups are all gonna be deleted after 12 hours unless you disable your policy.
 
-#### Connection string
-```json
-s3://<s3 base endpoint>:<s3 bucket endpoint>?<parameter=value>&...
-
-Valid strings:
-- s3://s3.eu-west-1.amazonaws.com:bucket.example.com?aws_access_key_id=1234&aws_secret_access_key=lemondance
-- s3://s3.eu-west-1.amazonaws.com:bucket.example.com
-```
+#### Configuration
+- **Storage Type**: `s3`
+- **Required fields**: `bucket`, `endpoint`
+- **Optional fields**: `aws_access_key_id`, `aws_secret_access_key`
+- The `endpoint` field can look something like this: `s3.eu-west-1.amazonaws.com`
 
 #### Credentials
 To upload stuff to S3, you'll need credentials. Your **AWS credentials** can be provided in several ways. This is the order in which blackbox looks for them:
 
-- First, we look for the optional parameters in the s3 connection string, called `aws_access_key_id` and `aws_secret_access_key`.
+- First, we look for the optional fields in the s3 configuration, called `aws_access_key_id` and `aws_secret_access_key`.
 - If these are not found, we'll check if the `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables are declared in the local environment where Blackbox is running.
 - If we can't find these, we'll look for an `.aws/config` file in the local environment.
 - NOTE: If the bucket is public, no credentials are necessary.
@@ -243,30 +360,47 @@ You can also define a custom location (root is App Folder) using the
 `upload_directory` optional parameter. This **should** begin with slash
 and **must** end with slash. Default is root.
 
-The configuration connections strings may look like the following:
+#### Configuration
 
-```
-dropbox://<access-token>
-dropbox://<access-token>?upload_directory=/foobar/
-```
+- **Storage Type**: `dropbox`
+- **Required fields**: `access_token`
+- **Optional fields**: `upload_directory`
 
 ## Notifiers
-`blackbox` also implements different _notifiers_, which is how it reports the result of one of its jobs to you. Right now we only support **Discord**, but if you need a specific notifier, feel free to open an issue.
+`blackbox` also implements different _notifiers_, which is how it reports the result of one of its jobs to you. Right now we only support **Discord** and **Slack**, but if you need a specific notifier, feel free to open an issue.
+
+To configure storage providers, add a section with this format:
+```yaml
+notifiers:
+  notifier_type:
+    # More than one type of notifier can be configured
+    identifier_1:
+      field: value
+    identifier_2:
+      field: value
+  notifier_type:
+    ...
+```
 
 ### Discord
-To set this up, simply add a valid Discord webhook URL to the `notifiers` list.
 
-These usually look something like `https://discord.com/api/webhooks/797541821394714674/lzRM9DFggtfHZXGJTz3yE-MrYJ-4O-0AbdQg3uV2x4vFbu7HTHY2Njq8cx8oyMg0T3Wk`, but we also support `ptb.discord.com` and `canary.discord.com` webhooks.
+- **Notifier Type**: `discord`
+- **Required fields**: `webhook`
+- The `webhook` field usually looks like `https://discord.com/api/webhooks/797541821394714674/lzRM9DFggtfHZXGJTz3yE-MrYJ-4O-0AbdQg3uV2x4vFbu7HTHY2Njq8cx8oyMg0T3Wk`
+- We also support `ptb.discord.com` and `canary.discord.com` webhooks.
 
 ![blackbox](https://github.com/lemonsaurus/blackbox/raw/main/img/blackbox_discord.png)
 ![blackbox](https://github.com/lemonsaurus/blackbox/raw/main/img/blackbox_discord_2.png)
 
 ### Slack
-To set this up, simply add a valid Slack incoming webhook URL to the `notifiers` list.
-These look like `https://hooks.slack.com/services/XXXXXXXXXXX/XXXXXXXXXXX/XXXXXXXXXXXXXXXXXXX`.
 
-Slack notifier have 2 styles: legacy attachment (default) and modern Block Kit version.
-To enable Block Kit version, add `?use_block_kit=1` to end of webhook URL.
+- **Notifier Type**: `slack`
+- **Required fields**: `webhook`
+- The `webhook` field usually looks like `https://hooks.slack.com/services/XXXXXXXXXXX/XXXXXXXXXXX/XXXXXXXXXXXXXXXXXXX`
+
+
+Slack notifiers have 2 styles: legacy attachment (default) and modern Block Kit version.
+To enable Block Kit version, set the optional field `use_block_kit` to anything.
 
 Default:
 
