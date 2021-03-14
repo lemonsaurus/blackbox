@@ -88,15 +88,33 @@ def cli(config, init, version):
             config_file.write_text(dedent(
                 """
                 databases:
-                  - mongodb://username:password@host:port
-                  - postgres://username:password@host:port
-                  - redis://password@host:port
+                  mongodb:
+                    main_mongodb:
+                      connection_string: mongodb://username:password@host:port
+                  postgres:
+                    main_postgres:
+                      username: username
+                      password: password
+                      host: host
+                      port: port
+                  redis:
+                    main_redis:
+                      password: password
+                      host: host
+                      port: port
 
                 storage:
-                  - s3://bucket:s3.endpoint.com?aws_access_key_id=1234&aws_secret_access_key=lemondance
+                  s3:
+                    main_s3:
+                      bucket: bucket
+                      endpoint: s3.endpoint.com
+                      aws_access_key_id: dancinglemon
+                      aws_secret_access_key: lemondance
 
                 notifiers:
-                  - https://web.hook/
+                  discord:
+                    test_server:
+                      webhook: https://web.hook/
 
                 retention_days: 7
                 """).lstrip()
