@@ -61,6 +61,10 @@ def run() -> bool:
 
     # Send a report for each notifier configured
     for notifier in notifier_handlers["all"]:
+        # Don't send a notification if no database uses the notifier
+        if notifier.report.is_empty:
+            continue
+
         notifier.notify()
         notifier.teardown()
 

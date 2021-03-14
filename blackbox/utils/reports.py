@@ -41,3 +41,8 @@ class Report:
     def output(self) -> str:
         """Return the combined outputs from all the database reports."""
         return "\n".join(report.output for report in self.databases)
+
+    @property
+    def is_empty(self) -> bool:
+        """Return whether or not there are no databases in the report."""
+        return self.databases == []
