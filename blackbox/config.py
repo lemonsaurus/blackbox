@@ -113,9 +113,9 @@ class YAMLGetter(type):
 class Blackbox(metaclass=YAMLGetter):
     """The configuration for the blackbox application."""
     # Handlers
-    databases: list
-    storage: list
-    notifiers: list
+    databases: dict
+    storage: dict
+    notifiers: dict
 
     # Configuration
     retention_days: int
