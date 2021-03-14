@@ -241,17 +241,19 @@ databases:
 ## Databases
 Right now, this app supports **MongoDB**, **PostgreSQL 12** and **Redis**. If you need support for an additional database, consider opening a pull request to add a new database handler.
 
-**Note: It is currently not possible to configure more than one of each database.**
-
 To configure databases, add a section with this format:
 ```yaml
 databases:
   database_type:
-    identifier:
+    # More than one of each database type can be configured
+    identifier_1:
+      field: value
+    identifier_2:
       field: value
   database_type:
     ...
 ```
+
 See below for the specific database types available and fields required. Identifiers can be any string of your choosing.
 
 ### MongoDB
@@ -321,7 +323,7 @@ To configure storage providers, add a section with this format:
 ```yaml
 storage:
   storage_type:
-    # More than one type of storage provider can be configured
+    # More than one of each storage provider type can be configured
     identifier_1:
       field: value
     identifier_2:
@@ -369,11 +371,11 @@ and **must** end with slash. Default is root.
 ## Notifiers
 `blackbox` also implements different _notifiers_, which is how it reports the result of one of its jobs to you. Right now we only support **Discord** and **Slack**, but if you need a specific notifier, feel free to open an issue.
 
-To configure storage providers, add a section with this format:
+To configure notifiers, add a section with this format:
 ```yaml
 notifiers:
   notifier_type:
-    # More than one type of notifier can be configured
+    # More than one of each notifier type can be configured
     identifier_1:
       field: value
     identifier_2:
