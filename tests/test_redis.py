@@ -1,19 +1,37 @@
 import datetime
 from pathlib import Path
 
+import pytest
+
+from blackbox.exceptions import MissingFields
 from blackbox.handlers.databases import Redis
 
 
-def test_redis_handler_can_be_instantiated(config_file):
-    """Test if the Redis database handler can be instantiated."""
+@pytest.fixture
+def mock_valid_redis_config():
+    return {"password": "citrus", "host": "localhost", "port": "5432"}
 
-    Redis()
+
+@pytest.fixture
+def mock_invalid_redis_config():
+    return {"password": "limoncello"}
 
 
-def test_redis_backup(config_file, mocker, fake_process):
+def test_redis_handler_can_be_instantiated_with_required_fields(mock_valid_redis_config):
+    """Test if the redis database handler can be instantiated."""
+    Redis(**mock_valid_redis_config)
+
+
+def test_redis_handler_fails_without_required_fields(mock_invalid_redis_config):
+    """Test if the redis database handler cannot be instantiated with missing fields."""
+    with pytest.raises(MissingFields):
+        Redis(**mock_invalid_redis_config)
+
+
+def test_redis_backup(mock_valid_redis_config, fake_process):
     """Test if the redis database handler executes a backup"""
 
-    redis = Redis()
+    redis = Redis(**mock_valid_redis_config)
 
     date = datetime.date.today().strftime("%d_%m_%Y")
     backup_path = Path.home() / f"redis_blackbox_{date}.rdb"

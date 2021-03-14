@@ -4,6 +4,8 @@ from textwrap import dedent
 
 import pytest
 
+from blackbox.utils import reports
+
 
 ########################
 # Config file Fixtures #
@@ -17,15 +19,33 @@ def config_file(mocker):
     config = dedent(
         """
         databases:
-            - mongodb://{{ MONGO_USER }}:{{ MONGO_PW }}@host:port
-            - postgres://username:password@host:port
-            - redis://password@host:port
+            mongodb:
+                main_mongo:
+                    connection_string: mongodb://{{ MONGO_USER }}:{{ MONGO_PW }}@host:port
+            postgres:
+                main_postgres:
+                    username: username
+                    password: password
+                    host: host
+                    port: "port"
+            redis:
+                main_redis:
+                    password: password
+                    host: host
+                    port: "port"
 
         storage:
-            - s3://username:password?fire=ice&magic=blue
+            s3:
+                main_s3:
+                    bucket: bucket
+                    endpoint: s3.eu-west-1.amazonaws.com
+                    aws_access_key_id: lemon
+                    aws_secret_access_key: citrus
 
         notifiers:
-            - https://web.hook/
+            discord:
+                test_server:
+                    webhook: https://discord.com/api/webhooks/XXXX/XXXX
 
         retention_days: 7
         """
@@ -48,7 +68,9 @@ def config_file_with_errors(mocker):
     config_with_missing_bracket = dedent(
         """
         databases:
-            - mongodb://{{ MONGO_USER} :mongopassword@host:port
+            mongodb:
+                main_mongo:
+                    connection_string: mongodb://{{ MONGO_USER }:mongopassword@host:port
         """
     )
 
@@ -68,7 +90,9 @@ def config_file_with_missing_value(mocker):
     missing_value = dedent(
         """
         databases:
-            - mongodb://{{ MONGO_USER }} :mongopassword@host:port
+            mongodb:
+                main_mongo:
+                    connection_string: mongodb://{{ MONGO_USER }} :mongopassword@host:port
         """
     )
 
@@ -83,22 +107,15 @@ def config_file_with_missing_value(mocker):
 @pytest.fixture
 def report():
     """
-    notification fixture for passing in report
+    Notification fixture for passing in report
     """
 
-    storage = [{
-        "type": "s3",
-        "success": "sortof"
-    }]
+    storage = reports.StorageReport(storage_id="main_s3", success=True)
 
-    report = {
-        "output": "salad",
-        "success": "maybe",
-        "databases": {
-            "mongo": {
-                "type": "mongo",
-                "storage": storage},
-        }
-    }
+    database = reports.DatabaseReport(database_id="main_mongo", success=True, output="salad")
+    database.storages = [storage]
+
+    report = reports.Report()
+    report.databases = [database]
 
     return report
