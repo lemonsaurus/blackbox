@@ -26,3 +26,18 @@ class DatabaseReport:
         # Add report to list of storages
         report = StorageReport(storage_id, success)
         self.storages.append(report)
+
+
+@dataclasses.dataclass
+class Report:
+    databases: list[DatabaseReport] = dataclasses.field(default_factory=list)
+
+    @property
+    def success(self) -> bool:
+        """Return whether or not the workflow is a success."""
+        return all(report.success for report in self.databases)
+
+    @property
+    def output(self) -> str:
+        """Return the combined outputs from all the database reports."""
+        return "\n".join(report.output for report in self.databases)
