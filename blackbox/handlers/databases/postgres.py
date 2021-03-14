@@ -19,7 +19,7 @@ class Postgres(BlackboxDatabase):
         # Run the backup, and store the outcome.
         self.success, self.output = run_command(
             f"pg_dumpall --file={backup_path}",
-            PGUSER=self.config["user"],
+            PGUSER=self.config["username"],
             PGPASSWORD=self.config["password"],
             PGHOST=self.config["host"],
             PGPORT=self.config["port"],

@@ -20,8 +20,8 @@ class Dropbox(BlackboxStorage):
 
     required_fields = ("access_token",)
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
         self.upload_base = self.config.get("upload_directory") or "/"
         self.client = DropboxClient(self.config["access_token"])

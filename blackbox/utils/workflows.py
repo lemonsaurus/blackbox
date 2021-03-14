@@ -4,7 +4,6 @@ from collections import defaultdict
 from itertools import chain
 
 from blackbox import exceptions
-from blackbox.config import Blackbox as CONFIG
 from blackbox.handlers import BlackboxDatabase
 from blackbox.handlers import BlackboxNotifier
 from blackbox.handlers import BlackboxStorage
@@ -84,18 +83,15 @@ def get_handlers_by_id(id_: t.Union[str, list[str]], handlers: HandlerById[Handl
     return match
 
 
-def get_workflows() -> list[Workflow]:
+def get_workflows(
+    database_handlers: HandlerById[BlackboxDatabase],
+    storage_handlers: HandlerById[BlackboxStorage],
+    notifier_handlers: HandlerById[BlackboxNotifier],
+) -> list[Workflow]:
     """Return a list of workflows based on configured handlers."""
     workflows = []
 
-    if not CONFIG.databases or not CONFIG.storage:
-        raise exceptions.ImproperlyConfigured("You have to define least one database and storage")
-
-    database_handlers = get_configured_handlers(CONFIG.databases)["all"]
-    storage_handlers = get_configured_handlers(CONFIG.storage)
-    notifier_handlers = get_configured_handlers(CONFIG.notifiers)
-
-    for database in database_handlers:
+    for database in database_handlers["all"]:
         workflow = Workflow(database)
 
         try:
