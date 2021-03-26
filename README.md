@@ -257,7 +257,7 @@ databases:
 See below for the specific database types available and fields required. Identifiers can be any string of your choosing.
 
 ### MongoDB
-- **Database Type**: `redis`
+- **Database Type**: `mongodb`
 - **Required fields**: `connection_string`
 - The `connection_string` field is in the format `mongodb://username:password@host:port`
 - To restore from the backup, use `mongorestore --gzip --archive=/path/to/backup.archive`
