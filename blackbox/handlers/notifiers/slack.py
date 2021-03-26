@@ -6,19 +6,16 @@ from blackbox.handlers.notifiers._base import BlackboxNotifier
 class Slack(BlackboxNotifier):
     """A notifier for sending webhooks to Slack."""
 
-    connstring_regex = r"(?P<webhook_url>https://hooks.slack.com/services/[^?]+)"
-    valid_prefixes = [
-        "https://hooks.slack.com",
-    ]
+    required_fields = ("webhook",)
 
-    def _parse_report(self, report: dict) -> dict:
+    def _parse_report(self) -> dict:
         """Turn the report from main.py into something the notify function can use."""
         if self.config.get("use_block_kit"):
-            return self._parse_report_modern(report)
+            return self._parse_report_modern()
 
-        return self._parse_report_classic(report)
+        return self._parse_report_classic()
 
-    def _parse_report_classic(self, report: dict) -> dict:
+    def _parse_report_classic(self) -> dict:
         """Turn the report from main.py into Slack webhook payload with secondary attachment."""
         attachment = {
             "mrkdwn_in": ["fields"],
@@ -28,24 +25,24 @@ class Slack(BlackboxNotifier):
         }
 
         # Combine and truncate total output to < 2000 characters, fields don't support more.
-        output = report['output'][:2000]
+        output = self.report.output[:2000]
 
         # Was this a success?
-        success = report['success']
+        success = self.report.success
         attachment["color"] = "#0FA031" if success else "#CC2020"
 
         # Make a list of database fields
         fields = []
-        for database in report['databases'].values():
+        for database in self.report.databases:
             field = {
-                "title": f"{database['type']}",
+                "title": f"{database.database_id}",
                 "short": True,
                 "value": ""
             }
 
-            for provider in database['storage']:
-                emoji = ":white_check_mark:" if provider['success'] else ":x:"
-                field['value'] += f"{emoji}  {provider['type']}\n"
+            for provider in database.storages:
+                emoji = ":white_check_mark:" if provider.success else ":x:"
+                field['value'] += f"{emoji}  {provider.storage_id}\n"
 
             # Indicate that backup have failed if no storage providers was used.
             if not field['value']:
@@ -67,7 +64,7 @@ class Slack(BlackboxNotifier):
             "attachments": [attachment]
         }
 
-    def _parse_report_modern(self, report: dict) -> dict:
+    def _parse_report_modern(self) -> dict:
         """Turn the report from main.py into Slack webhook payload with Block Kit."""
         blocks = [
             {
@@ -80,8 +77,8 @@ class Slack(BlackboxNotifier):
         ]
 
         # Was this a success?
-        success = report['success']
-        databases = list(report['databases'].values())
+        success = self.report.success
+        databases = list(self.report.databases)
 
         for i in range(0, len(databases), 2):
             dbs = [databases[i]]
@@ -92,15 +89,15 @@ class Slack(BlackboxNotifier):
             for db in dbs:
                 field = {
                     "type": "mrkdwn",
-                    "text": f"*{db['type']}*"
+                    "text": f"*{db.database_id}*"
                 }
 
-                for provider in db['storage']:
-                    emoji = ":white_check_mark:" if provider['success'] else ":x:"
-                    field["text"] += f"\n{emoji} {provider['type']}"
+                for provider in db.storages:
+                    emoji = ":white_check_mark:" if provider.success else ":x:"
+                    field["text"] += f"\n{emoji} {provider.storage_id}"
 
                 # Indicate that backup have failed if no storage providers was used.
-                if field["text"] == f"*{db['type']}*":
+                if field["text"] == f"*{db.database_id}*":
                     field["text"] += "\n:x:"
 
                 # Strip any trailing newlines and append
@@ -115,7 +112,7 @@ class Slack(BlackboxNotifier):
 
         if not success:
             # Combine and truncate total output to < 2000 characters, fields don't support more.
-            output = report['output'][:2000]
+            output = self.report.output[:2000]
             blocks += [
                 {
                     "type": "divider"
@@ -156,6 +153,6 @@ class Slack(BlackboxNotifier):
 
         return {"blocks": blocks}
 
-    def notify(self, report: dict) -> None:
+    def notify(self) -> None:
         """Send a webhook to Slack with a blackbox report."""
-        requests.post(self.config.get("webhook_url"), json=self._parse_report(report))
+        requests.post(self.config["webhook"], json=self._parse_report())

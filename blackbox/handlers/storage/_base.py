@@ -12,6 +12,15 @@ from blackbox.utils.logger import log
 class BlackboxStorage(BlackboxHandler):
     """An abstract interface for creating Blackbox Storage Providers."""
 
+    handler_type = "storage"
+
+    def __init__(self, **kwargs):
+        """Set up storage handler."""
+        super().__init__(**kwargs)
+
+        self.success = False  # Was the upload successful?
+        self.output = ""     # What did the storage upload output?
+
     @staticmethod
     def compress(file_path: Path) -> typing.IO:
         """

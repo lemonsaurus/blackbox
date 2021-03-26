@@ -14,10 +14,7 @@ class MongoDB(BlackboxDatabase):
     arguments, e.g. mongorestore --gzip --archive=/path/to/file.archive.
     """
 
-    connstring_regex = r"mongodb://(?P<user>.+):(?P<password>.+)@(?P<host>.+):(?P<port>.+)"
-    valid_prefixes = [
-        "mongodb"
-    ]
+    required_fields = ("connection_string",)
 
     def backup(self) -> Path:
         """Dump all the data to a file and then return the filepath."""
@@ -27,7 +24,7 @@ class MongoDB(BlackboxDatabase):
         # Run the backup, and store the outcome in this object.
         self.success, self.output = run_command(
             f"mongodump "
-            f"--uri={self.connstring} "
+            f"--uri={self.config['connection_string']} "
             "--gzip "
             "--forceTableScan "
             f"--archive={archive_file}"

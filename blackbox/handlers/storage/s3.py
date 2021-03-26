@@ -13,27 +13,17 @@ from blackbox.utils.logger import log
 
 
 class S3(BlackboxStorage):
-    connstring_regex = r"s3://(?P<bucket_name>[^:]+):(?P<s3_endpoint>[^:?]+)"
-    valid_prefixes = [
-        "s3",
-    ]
+    required_fields = ("bucket", "endpoint")
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
-        # We don't need to initialize handlers that aren't enabled.
-        if not self.enabled:
-            return
-
-        # Defaults
-        self.success = False
-        self.output = ""
-        self.bucket = self.config.get('bucket_name')
+        self.bucket = self.config["bucket"]
+        self.endpoint = self.config["endpoint"]
 
         # If the optional parameters for credentials have been provided, we use these.
         key_id = self.config.get("aws_access_key_id")
         secret_key = self.config.get("aws_secret_access_key")
-        s3_endpoint = self.config.get('s3_endpoint')
         configuration = dict()
 
         # If config was provided for both of these, we should use it!
@@ -48,22 +38,23 @@ class S3(BlackboxStorage):
         elif bool(key_id) ^ bool(secret_key):
             raise ImproperlyConfigured("You must configure either both or none of the S3 credential params.")
 
-        # If config hasn't been provided, we expect either environment variables or ~/.aws/
-        # credentials and config files to exist. If none of that exists, we should raise
-        # a convenient error.
-        has_environment_variables = (
-            os.environ.get("AWS_ACCESS_KEY_ID")
-            and os.environ.get("AWS_SECRET_ACCESS_KEY")
-        )
-        has_aws_config_files = (
-            (Path.home() / ".aws/config").exists()
-            and (Path.home() / ".aws/credentials").exists()
-        )
-        if not has_aws_config_files and not has_environment_variables:
-            raise ImproperlyConfigured(
-                "Blackbox could not find any valid S3 credentials. "
-                "See the readme under Configuration for more information on how to do this."
+        else:
+            # If config hasn't been provided, we expect either environment variables or ~/.aws/
+            # credentials and config files to exist. If none of that exists, we should raise
+            # a convenient error.
+            has_environment_variables = (
+                os.environ.get("AWS_ACCESS_KEY_ID")
+                and os.environ.get("AWS_SECRET_ACCESS_KEY")
             )
+            has_aws_config_files = (
+                (Path.home() / ".aws/config").exists()
+                and (Path.home() / ".aws/credentials").exists()
+            )
+            if not has_aws_config_files and not has_environment_variables:
+                raise ImproperlyConfigured(
+                    "Blackbox could not find any valid S3 credentials. "
+                    "See the readme under Configuration for more information on how to do this."
+                )
 
         # If we get to this point, the user has either environment variables or credentials files,
         # so Blackbox will make use of these.
@@ -73,7 +64,7 @@ class S3(BlackboxStorage):
         )
         self.client = self.session.client(
             's3',
-            endpoint_url=f"https://{s3_endpoint}",
+            endpoint_url=f"https://{self.endpoint}",
         )
 
     def sync(self, file_path: Path) -> None:

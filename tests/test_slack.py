@@ -1,19 +1,52 @@
+import pytest
 import requests_mock
 
+from blackbox.exceptions import MissingFields
 from blackbox.handlers.notifiers.slack import Slack
 
 
-def test_slack_notify(mocker, report):
-    """Test report parsing for Discord notifications"""
+WEBHOOK = "https://hooks.slack.com/services/x/x/x"
 
-    webhook_url = {
-        "webhook_url": "https://hooks.slack.com/services/x/x/x"
-    }
 
-    slack = Slack()
-    Slack.config = webhook_url
+@pytest.fixture
+def mock_valid_slack_config():
+    return {"webhook": WEBHOOK}
 
-    assert slack._parse_report(report) == {
+
+@pytest.fixture
+def mock_valid_slack_config_with_block_kit():
+    return {"webhook": WEBHOOK, "use_block_kit": True}
+
+
+@pytest.fixture
+def mock_invalid_slack_config():
+    return {}
+
+
+def test_slack_handler_can_be_instantiated_with_required_fields(mock_valid_slack_config):
+    """Test if the slack notifier handler can be instantiated."""
+    Slack(**mock_valid_slack_config)
+
+
+def test_slack_handler_fails_without_required_fields(mock_invalid_slack_config):
+    """Test if the slack notifier handler cannot be instantiated with missing fields."""
+    with pytest.raises(MissingFields):
+        Slack(**mock_invalid_slack_config)
+
+
+def test_slack_handler_instantiates_optional_fields(mock_valid_slack_config_with_block_kit):
+    """Test if the slack notifier handler instantiates optional fields."""
+    slack_instance = Slack(**mock_valid_slack_config_with_block_kit)
+    assert slack_instance.config["use_block_kit"] is True
+
+
+def test_slack_notify(mock_valid_slack_config, report):
+    """Test report parsing for slack notifications"""
+
+    slack = Slack(**mock_valid_slack_config)
+    slack.report = report
+
+    assert slack._parse_report() == {
         'attachments': [
             {
                 'author_icon': 'https://raw.githubusercontent.com/lemonsaurus/blackbox/main/img/blackbox_avatar.png',
@@ -21,8 +54,8 @@ def test_slack_notify(mocker, report):
                 'color': '#0FA031',
 
                 'fields': [{'short': True,
-                            'title': 'mongo',
-                            'value': ':white_check_mark:  s3'}],
+                            'title': 'main_mongo',
+                            'value': ':white_check_mark:  main_s3'}],
                 'mrkdwn_in': ['fields'],
                 'title': 'Backup'
             }
@@ -30,22 +63,17 @@ def test_slack_notify(mocker, report):
     }
 
     with requests_mock.Mocker() as m:
-        m.post(webhook_url["webhook_url"])
-        slack.notify(report)
+        m.post(WEBHOOK)
+        slack.notify()
 
 
-def test_slack_notify_modern(mocker, report):
-    """Test report parsing for Discord notifications"""
+def test_slack_notify_modern(mock_valid_slack_config_with_block_kit, report):
+    """Test report parsing for slack notifications"""
 
-    webhook_url = {
-        "webhook_url": "https://hooks.slack.com/services/x/x/x",
-        "use_block_kit": True
-    }
+    slack = Slack(**mock_valid_slack_config_with_block_kit)
+    slack.report = report
 
-    slack = Slack()
-    Slack.config = webhook_url
-
-    assert slack._parse_report(report) == {
+    assert slack._parse_report() == {
         'blocks': [
             {
                 'text': {
@@ -56,7 +84,7 @@ def test_slack_notify_modern(mocker, report):
             {
                 'fields': [
                     {
-                        'text': '*mongo*\n:white_check_mark: s3', 'type': 'mrkdwn'
+                        'text': '*main_mongo*\n:white_check_mark: main_s3', 'type': 'mrkdwn'
                     }
                 ], 'type': 'section'
             },
@@ -79,5 +107,5 @@ def test_slack_notify_modern(mocker, report):
     }
 
     with requests_mock.Mocker() as m:
-        m.post(webhook_url["webhook_url"])
-        slack.notify(report)
+        m.post(WEBHOOK)
+        slack.notify()

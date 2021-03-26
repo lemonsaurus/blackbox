@@ -1,13 +1,37 @@
 import datetime
 from pathlib import Path
 
+import pytest
+
+from blackbox.exceptions import MissingFields
 from blackbox.handlers.databases import MongoDB
 
 
-def test_mongodb_backup(config_file, mocker, fake_process):
+@pytest.fixture
+def mock_valid_mongodb_config():
+    return {"connection_string": "mongodb://mongouser:mongopassword@host:port"}
+
+
+@pytest.fixture
+def mock_invalid_mongodb_config():
+    return {}
+
+
+def test_mongodb_handler_can_be_instantiated_with_required_fields(mock_valid_mongodb_config):
+    """Test if the MongoDB database handler can be instantiated."""
+    MongoDB(**mock_valid_mongodb_config)
+
+
+def test_mongodb_handler_fails_without_required_fields(mock_invalid_mongodb_config):
+    """Test if the MongoDB database handler cannot be instantiated with missing fields."""
+    with pytest.raises(MissingFields):
+        MongoDB(**mock_invalid_mongodb_config)
+
+
+def test_mongodb_backup(mock_valid_mongodb_config, fake_process):
     """Test if the MongoDB database handler executes a backup"""
 
-    mongo = MongoDB()
+    mongo = MongoDB(**mock_valid_mongodb_config)
 
     date = datetime.datetime.today().strftime("%d_%m_%Y")
     archive = Path.home() / f"mongodb_blackbox_{date}.archive"

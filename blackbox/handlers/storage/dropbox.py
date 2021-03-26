@@ -18,23 +18,13 @@ from blackbox.utils.logger import log
 class Dropbox(BlackboxStorage):
     """Storage handler that uploads backups to Dropbox."""
 
-    connstring_regex = r"dropbox://(?P<access_token>[^?]+)"
-    valid_prefixes = [
-        "dropbox"
-    ]
+    required_fields = ("access_token",)
 
-    def __init__(self):
-        super().__init__()
-
-        # We don't need to initialize handlers that aren't enabled.
-        if not self.enabled:
-            return
-
-        self.success = False
-        self.output = ""
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
         self.upload_base = self.config.get("upload_directory") or "/"
-        self.client = DropboxClient(self.config.get("access_token"))
+        self.client = DropboxClient(self.config["access_token"])
 
     def sync(self, file_path: Path) -> None:
         """Sync a file to Dropbox."""
