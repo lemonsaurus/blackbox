@@ -1,5 +1,4 @@
 import pytest
-import requests_mock
 
 from blackbox.exceptions import MissingFields
 from blackbox.handlers.notifiers import Telegram
@@ -41,4 +40,3 @@ def test_telegram_parse_report(mock_valid_telegram_config, report):
         DatabaseReport(database_id='main_mongo', success=True, output='salad',
                        storages=[StorageReport(storage_id='main_s3',
                                                success=True)])])}
-
