@@ -4,6 +4,8 @@ from telebot.apihelper import ApiTelegramException
 from blackbox.handlers.notifiers._base import BlackboxNotifier
 from blackbox.utils.logger import log
 
+STRING_LIMIT = 2000  # Limit output
+
 
 class Telegram(BlackboxNotifier):
     """ Telegram notifier for Blackbox """
@@ -27,31 +29,25 @@ class Telegram(BlackboxNotifier):
         report = self._parse_report()["report"]
         welcome_message = "Blackbox Backup Status:\n"
         data_report = ""
+        log.debug(report)
 
-        # If we have at least one successful report let's show it
-        if report.success:
-            for db in report.databases:
-                data_report += f"{db.database_id}: \n"
-                if db.success:
-                    # Check storages one by one
-                    data_report += "".join(
-                        [
-                            f"\U00002705 {storage.storage_id}\n"
-                            if storage.success is True
-                            else
-                            f"\U0000274C {storage.storage_id}\n"
-                            for storage in db.storages
-                        ])
-                else:
-                    data_report = self.append_failed_report_to(
-                        data_report,
-                        fail_message="Backup failed",
-                        fail_output=db.output[:2000])
-        else:
-            data_report = self.append_failed_report_to(
-                data_report,
-                fail_message="All operations failed!",
-                fail_output=report.output[:2000])
+        for db in report.databases:
+            data_report += f"{db.database_id}: \n"
+            if db.success:
+                # Check storages one by one
+                data_report += "".join(
+                    [
+                        f"\U00002705 {storage.storage_id}\n"
+                        if storage.success is True
+                        else
+                        f"\U0000274C {storage.storage_id}\n"
+                        for storage in db.storages
+                    ])
+            else:
+                data_report = self.append_failed_report_to(
+                    data_report,
+                    fail_message="Backup failed",
+                    fail_output=db.output[:STRING_LIMIT])
 
         # Assign token to bot (safe operation)
         bot = telebot.TeleBot(self.config["token"])
