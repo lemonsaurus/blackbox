@@ -4,6 +4,7 @@ from telebot.apihelper import ApiTelegramException
 from blackbox.handlers.notifiers._base import BlackboxNotifier
 from blackbox.utils.logger import log
 
+
 STRING_LIMIT = 2000  # Limit output
 
 
@@ -28,7 +29,7 @@ class Telegram(BlackboxNotifier):
                         for storage in db.storages
                     ])
             else:
-                data_report += f"\U0000274C Backup failed\n"
+                data_report += "\U0000274C Backup failed\n"
                 data_report += f"\U000026A0 {db.output[:STRING_LIMIT]}\n"
         return data_report
 
