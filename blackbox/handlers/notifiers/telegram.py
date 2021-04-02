@@ -28,7 +28,7 @@ class Telegram(BlackboxNotifier):
         welcome_message = "Blackbox Backup Status:\n"
         data_report = ""
 
-        # If we have at least one successful report let"s show it
+        # If we have at least one successful report let's show it
         if report.success:
             for db in report.databases:
                 data_report += f"{db.database_id}: \n"
