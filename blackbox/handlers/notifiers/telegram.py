@@ -29,7 +29,6 @@ class Telegram(BlackboxNotifier):
         report = self._parse_report()["report"]
         welcome_message = "Blackbox Backup Status:\n"
         data_report = ""
-        log.debug(report)
 
         for db in report.databases:
             data_report += f"{db.database_id}: \n"
