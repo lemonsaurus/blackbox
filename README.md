@@ -23,6 +23,7 @@ Simply create a config file, fill in some connection strings for your favorite s
 - [Notifiers](#notifiers)
     - [Discord](#discord)
     - [Slack](#slack)
+    - [Telegram](#telegram)
 - [Rotation](#rotation)
 
 # Setup
@@ -413,6 +414,22 @@ Modern:
 
 ![blackbox](https://github.com/lemonsaurus/blackbox/raw/main/img/blackbox_slack_modern_success.png)
 ![blackbox](https://github.com/lemonsaurus/blackbox/raw/main/img/blackbox_slack_modern_fail.png)
+
+
+### Telegram
+
+- **Notifier Type**: `telegram`
+- **Required fields**: `token`, `chat_id`
+- YAML will look like this:
+```notifiers:
+  telegram:
+    telegram_1:
+      token: {{ TELEGRAM_TOKEN }}
+      chat_id: {{ TELEGRAM_CHAT_ID }}
+```
+- You can create bot and get token using `BotFather` account in Telegram. Follow [instruction](https://core.telegram.org/bots#6-botfather).
+- You can find out your `chat_id` using `userinfobot` account in Telegram. Just `/start` the bot.
+- Do not forget to `/start` your own bot to grant sending permissions.
 
 ## Rotation
 By default, `blackbox` will automatically remove all backup files older than 7 days in the folder you configure for your storage provider. To determine if something is a backup file or not, it will use a regex pattern that corresponds with the default file it saves, for example `blackbox-postgres-backup-11-12-2020.sql`.
