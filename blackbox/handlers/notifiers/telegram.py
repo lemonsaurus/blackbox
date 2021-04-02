@@ -11,26 +11,11 @@ class Telegram(BlackboxNotifier):
     """ Telegram notifier for Blackbox """
     required_fields = ("token", "chat_id",)
 
-    def _parse_report(self) -> dict:
-        """ Telegram needs a string so we will parse it on notification """
-        return {
-            "report": self.report,
-        }
+    def _parse_report(self) -> str:
+        """ Telegram needs a string. Parsing report """
+        data_report = "Blackbox Backup Status:\n"
 
-    @staticmethod
-    def append_failed_report_to(data_report, fail_message, fail_output):
-        """ Cross and warning emoji for fail message report """
-        data_report += f"\U0000274C {fail_message}\n"
-        data_report += f"\U000026A0 {fail_output}\n"
-        return data_report
-
-    def notify(self):
-        """ Convert report dict to string and send via Telegram """
-        report = self._parse_report()["report"]
-        welcome_message = "Blackbox Backup Status:\n"
-        data_report = ""
-
-        for db in report.databases:
+        for db in self.report.databases:
             data_report += f"{db.database_id}: \n"
             if db.success:
                 # Check storages one by one
@@ -43,16 +28,16 @@ class Telegram(BlackboxNotifier):
                         for storage in db.storages
                     ])
             else:
-                data_report = self.append_failed_report_to(
-                    data_report,
-                    fail_message="Backup failed",
-                    fail_output=db.output[:STRING_LIMIT])
+                data_report += f"\U0000274C Backup failed\n"
+                data_report += f"\U000026A0 {db.output[:STRING_LIMIT]}\n"
+        return data_report
 
-        # Assign token to bot (safe operation)
+    def notify(self):
+        """ Convert report dict to string and send via Telegram """
         bot = telebot.TeleBot(self.config["token"])
         try:
             bot.send_message(chat_id=self.config["chat_id"],
-                             text=welcome_message + data_report)
+                             text=self._parse_report())
         except ApiTelegramException:
             log.debug("Telegram API key or user_id is wrong "
                       "or you forgot to press /start in your bot")

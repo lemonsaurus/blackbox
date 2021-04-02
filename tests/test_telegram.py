@@ -2,7 +2,6 @@ import pytest
 
 from blackbox.exceptions import MissingFields
 from blackbox.handlers.notifiers import Telegram
-from blackbox.utils.reports import Report, DatabaseReport, StorageReport
 
 
 @pytest.fixture
@@ -36,7 +35,5 @@ def test_telegram_parse_report(mock_valid_telegram_config, report):
     telegram = Telegram(**mock_valid_telegram_config)
     telegram.report = report
 
-    assert telegram._parse_report() == {'report': Report(databases=[
-        DatabaseReport(database_id='main_mongo', success=True, output='salad',
-                       storages=[StorageReport(storage_id='main_s3',
-                                               success=True)])])}
+    assert telegram._parse_report() == 'Blackbox Backup Status:\n' \
+                                       'main_mongo: \n✅ main_s3\n'
