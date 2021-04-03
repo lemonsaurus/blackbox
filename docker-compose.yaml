@@ -8,6 +8,11 @@ services:
       POSTGRES_PASSWORD: blackbox
     volumes:
       - ./docker/postgres/postgres_init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U blackbox"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   mongo:
     container_name: blackbox-mongo
@@ -18,12 +23,22 @@ services:
     volumes:
       - ./docker/mongo/init_data:/init_data
       - ./docker/mongo/mongo_import.sh:/docker-entrypoint-initdb.d/mongo_import.sh
+    healthcheck:
+      test: echo 'db.stats().ok' | mongo localhost:27017/blackbox --quiet
+      interval: 5s
+      timeout: 5s
+      retries: 12
 
   redis:
     container_name: blackbox-redis
     build:
       context: .
       dockerfile: docker/redis/Dockerfile
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 1s
+      timeout: 3s
+      retries: 30
 
   maria:
     container_name: blackbox-maria
@@ -31,6 +46,8 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: example
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "--silent" ]
 
   mysql:
     container_name: blackbox-mysql
@@ -39,6 +56,8 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: example
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "--silent" ]
 
   blackbox:
     container_name: blackbox
@@ -52,8 +71,13 @@ services:
     env_file:
       - docker/.env
     depends_on:
-      - postgres
-      - mongo
-      - redis
-      - maria
-      - mysql
+      postgres:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      maria:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
