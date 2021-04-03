@@ -18,15 +18,6 @@ jobs:
           tag=$(cut -c 1-7 <<< $GITHUB_SHA)
           echo "::set-output name=tag::$tag"
 
-      # Create a version.month.day tag for the container repositories
-      - name: Create Container Tag
-        id: date
-        run: |
-          MONTH=`date +'%m'`
-          DAY=`date +'%d'`
-          tag=1.$MONTH.$DAY
-          echo "::set-output name=tag::$tag"
-
       # Check out the current repository
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -42,8 +33,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN  }}
 
       # Build and push the container to the GitHub Container
-      # Repository. The container will be tagged as "latest",
-      # "1.MONTH.DAY" (example "1.04.03")
+      # Repository. The container will be tagged as "latest"
       # and with the short SHA of the commit.
       - name: Build and push
         uses: docker/build-push-action@v2
@@ -56,4 +46,3 @@ jobs:
           tags: |
             lemonsaurus/blackbox:latest
             lemonsaurus/blackbox:${{ steps.sha_tag.outputs.tag }}
-            lemonsaurus/blackbox:${{ steps.date.outputs.tag }}
