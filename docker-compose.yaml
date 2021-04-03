@@ -1,15 +1,5 @@
 version: "3.7"
 services:
-  blackbox:
-    container_name: blackbox
-    build:
-      context: .
-      dockerfile: docker/Dockerfile
-    volumes:
-      - ./blackbox.yaml:/blackbox/blackbox.yaml
-      - ./main.py:/blackbox/main.py
-      - ./blackbox:/blackbox/blackbox
-
   postgres:
     container_name: blackbox-postgres
     image: postgres:12
@@ -34,3 +24,36 @@ services:
     build:
       context: .
       dockerfile: docker/redis/Dockerfile
+
+  maria:
+    container_name: blackbox-maria
+    image: mariadb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+
+  mysql:
+    container_name: blackbox-mysql
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+
+  blackbox:
+    container_name: blackbox
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    volumes:
+      - ./blackbox.yaml:/blackbox/blackbox.yaml
+      - ./main.py:/blackbox/main.py
+      - ./blackbox:/blackbox/blackbox
+    env_file:
+      - docker/.env
+    depends_on:
+      - postgres
+      - mongo
+      - redis
+      - maria
+      - mysql
