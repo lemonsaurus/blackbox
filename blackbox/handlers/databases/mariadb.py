@@ -31,6 +31,11 @@ class MariaDB(BlackboxDatabase):
             f"--port={port} --all-databases | gzip -7 > {backup_path}"
         )
         log.debug(self.output)
+        # Explicitly check if error message is occur
+        # Somehow mysqldump is always successful
+        if "error" in self.output:
+            self.success = False
+            log.debug("mysqldump has error(s) in log")
 
         # Return the path to the backup file
         return backup_path
