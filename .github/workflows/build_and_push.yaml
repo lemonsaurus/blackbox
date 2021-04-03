@@ -18,6 +18,16 @@ jobs:
           tag=$(cut -c 1-7 <<< $GITHUB_SHA)
           echo "::set-output name=tag::$tag"
 
+      # Create a version.month.day tag for the container repositories
+      - name: Create Container Tag
+        id: date
+        run: |
+          export MONTH=`date +'%m'`
+          export DAY=`date +'%d'`
+          TAG=1.$MONTH.$DAY
+          echo $TAG
+          export TAG
+
       # Check out the current repository
       - name: Checkout repository
         uses: actions/checkout@v2
