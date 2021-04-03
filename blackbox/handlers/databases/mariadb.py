@@ -23,7 +23,7 @@ class MariaDB(BlackboxDatabase):
         host = self.config["host"]
         port = self.config["port"]
 
-        backup_path = Path.home() / f"{host}_blackbox_{date}.sql"
+        backup_path = Path.home() / f"{self.config['id']}_blackbox_{date}.sql"
 
         # Run the backup, and store the outcome.
         self.success, self.output = run_command(
