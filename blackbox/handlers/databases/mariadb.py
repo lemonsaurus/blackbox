@@ -28,12 +28,12 @@ class MariaDB(BlackboxDatabase):
         # Run the backup, and store the outcome.
         self.success, self.output = run_command(
             f"mysqldump -h {host} -u {user} --password='{password}' "
-            f"--port={port} --all-databases | gzip -7 > {backup_path}"
+            f"--port={port} --all-databases > {backup_path}"
         )
         log.debug(self.output)
-        # Explicitly check if error message is occur
+        # Explicitly check if error message is occurred
         # Somehow mysqldump is always successful
-        if "error" in self.output:
+        if "error" in self.output.lower():
             self.success = False
             log.debug("mysqldump has error(s) in log")
 
