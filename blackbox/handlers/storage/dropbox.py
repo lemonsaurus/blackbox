@@ -98,7 +98,9 @@ class Dropbox(BlackboxStorage):
             entries += [
                 entry for entry in files_result.entries if isinstance(entry, FileMetadata)
             ]
-        retention_days = 7 if Blackbox.retention_days else Blackbox.retention_days
+        retention_days = 7
+        if Blackbox.retention_days:
+            retention_days = Blackbox.retention_days
 
         # Find all old files and delete them.
         for item in entries:
