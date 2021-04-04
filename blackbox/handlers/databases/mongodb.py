@@ -19,7 +19,7 @@ class MongoDB(BlackboxDatabase):
     def backup(self) -> Path:
         """Dump all the data to a file and then return the filepath."""
         date = datetime.date.today().strftime("%d_%m_%Y")
-        archive_file = Path.home() / f"mongodb_blackbox_{date}.archive"
+        archive_file = Path.home() / f"{self.config['id']}_blackbox_{date}.archive"
 
         # Run the backup, and store the outcome in this object.
         self.success, self.output = run_command(

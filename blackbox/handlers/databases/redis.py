@@ -14,7 +14,7 @@ class Redis(BlackboxDatabase):
     def backup(self) -> Path:
         """Dump all the data to a file and then return the filepath."""
         date = datetime.date.today().strftime("%d_%m_%Y")
-        backup_path = Path.home() / f"redis_blackbox_{date}.rdb"
+        backup_path = Path.home() / f"{self.config['id']}_blackbox_{date}.rdb"
 
         # Run the backup, and store the outcome.
         self.success, self.output = run_command(
