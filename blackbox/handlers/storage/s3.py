@@ -92,7 +92,9 @@ class S3(BlackboxStorage):
         those files fit certain regular expressions. We don't want to delete
         files that are not related to backup or logging.
         """
-        retention_days = Blackbox.retention_days
+        retention_days = 7
+        if Blackbox.retention_days:
+            retention_days = Blackbox.retention_days
 
         # Look through the items and figure out which ones are older than `retention_days`.
         # Catch all boto errors and log them to avoid return code 1.
