@@ -1,5 +1,7 @@
 import dataclasses
 
+from blackbox.utils.mixins import SanitizeReportMixin
+
 
 @dataclasses.dataclass
 class StorageReport:
@@ -33,7 +35,7 @@ class DatabaseReport:
 
 
 @dataclasses.dataclass
-class Report:
+class Report(SanitizeReportMixin):
     """Keep combined report."""
 
     databases: list[DatabaseReport] = dataclasses.field(default_factory=list)
@@ -46,7 +48,7 @@ class Report:
     @property
     def output(self) -> str:
         """Return the combined outputs from all the database reports."""
-        return "\n".join(report.output for report in self.databases)
+        return self.sanitize_output("\n".join(report.output for report in self.databases))
 
     @property
     def is_empty(self) -> bool:
