@@ -14,7 +14,7 @@ class BlackboxDatabase(BlackboxHandler):
         super().__init__(**kwargs)
 
         self.success = False  # Was the backup successful?
-        self.output = ""     # What did the backup output?
+        self.output = ""  # What did the backup output?
 
     @abstractmethod
     def backup(self) -> Path:
@@ -24,3 +24,19 @@ class BlackboxDatabase(BlackboxHandler):
         All subclasses must implement this method.
         """
         raise NotImplementedError
+
+    @property
+    def output(self):
+        """ Return sanitized output only """
+        return self.__output
+
+    @output.setter
+    def output(self, sensitive_output: str):
+        """ Set sanitized output """
+        self.__output = self.sanitize_output(sensitive_output)
+
+    def sanitize_output(self, output: str) -> str:
+        """ Replace all credentials with *** """
+        for sensitive_word in self.config.values():
+            output = output.replace(sensitive_word, "*" * len(sensitive_word))
+        return output
