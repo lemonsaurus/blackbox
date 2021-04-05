@@ -33,4 +33,4 @@ class BlackboxDatabase(BlackboxHandler):
     @output.setter
     def output(self, sensitive_output: str):
         """ Set sanitized output """
-        self.__output = self.sanitize_output(sensitive_output)
+        self.__output = self.sanitize_output(self.config, sensitive_output)

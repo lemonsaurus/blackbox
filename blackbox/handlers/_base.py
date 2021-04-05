@@ -1,9 +1,10 @@
 from abc import ABC
 
 from blackbox.exceptions import MissingFields
+from blackbox.utils.mixins import SanitizeReportMixin
 
 
-class BlackboxHandler(ABC):
+class BlackboxHandler(ABC, SanitizeReportMixin):
     """An abstract base handler."""
 
     required_fields = ()
@@ -31,11 +32,3 @@ class BlackboxHandler(ABC):
         teardown or cleanup after your handler has done whatever it is designed to do.
         """
         return None
-
-    def sanitize_output(self, sensitive_output: str) -> str:
-        """ Replace all self.config credentials with in any str *** """
-        for sensitive_word in self.config.values():
-            sensitive_output = sensitive_output.replace(
-                sensitive_word, "*" * len(sensitive_word))
-        sanitized_output = sensitive_output  # emphasize output is clear now
-        return sanitized_output
