@@ -12,7 +12,7 @@ class StorageReport:
 
 
 @dataclasses.dataclass
-class DatabaseReport:
+class DatabaseReport(SanitizeReportMixin):
     """Keep database report."""
 
     database_id: str
@@ -23,7 +23,7 @@ class DatabaseReport:
     def report_storage(self, storage_id: str, success: bool, output: str):
         """Add a storage report to the current report."""
         # Add to database output
-        self.output += output
+        self.output += self.sanitize_output(output)
 
         # If one storage handler failed, the database backup is a failure.
         if success is False:
