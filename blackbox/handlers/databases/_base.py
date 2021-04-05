@@ -34,9 +34,3 @@ class BlackboxDatabase(BlackboxHandler):
     def output(self, sensitive_output: str):
         """ Set sanitized output """
         self.__output = self.sanitize_output(sensitive_output)
-
-    def sanitize_output(self, output: str) -> str:
-        """ Replace all credentials with *** """
-        for sensitive_word in self.config.values():
-            output = output.replace(sensitive_word, "*" * len(sensitive_word))
-        return output

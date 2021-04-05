@@ -16,10 +16,12 @@ class BlackboxHandler(ABC):
     def _validate_config(self):
         """Ensure required configuration fields were passed to the handler."""
         handler_name = self.__class__.__name__
-        missing_fields = [field for field in self.required_fields if field not in self.config]
+        missing_fields = [field for field in self.required_fields if
+                          field not in self.config]
 
         if missing_fields:
-            raise MissingFields(self.handler_type, handler_name, self.config.get("id"), missing_fields)
+            raise MissingFields(self.handler_type, handler_name,
+                                self.config.get("id"), missing_fields)
 
     def teardown(self) -> None:
         """
@@ -29,3 +31,11 @@ class BlackboxHandler(ABC):
         teardown or cleanup after your handler has done whatever it is designed to do.
         """
         return None
+
+    def sanitize_output(self, sensitive_output: str) -> str:
+        """ Replace all self.config credentials with in any str *** """
+        for sensitive_word in self.config.values():
+            sensitive_output = sensitive_output.replace(
+                sensitive_word, "*" * len(sensitive_word))
+        sanitized_output = sensitive_output  # emphasize output is clear now
+        return sanitized_output
