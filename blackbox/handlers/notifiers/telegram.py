@@ -13,7 +13,7 @@ class Telegram(BlackboxNotifier):
     required_fields = ("token", "chat_id",)
 
     def _parse_report(self) -> str:
-        """ Telegram needs a string. Parsing report """
+        """Convert the report object to a Telegram-friendly string."""
         data_report = "Blackbox Backup Status:\n"
 
         for db in self.report.databases:
