@@ -1,4 +1,5 @@
 import os
+import re
 from datetime import datetime
 from pathlib import Path
 
@@ -75,7 +76,7 @@ class Dropbox(BlackboxStorage):
             self.success = False
             self.output = str(e)
 
-    def rotate(self) -> None:
+    def rotate(self, database_id: str) -> None:
         """
         Rotate the files in the Dropbox directory.
 
@@ -83,12 +84,17 @@ class Dropbox(BlackboxStorage):
         are older than `retention_days`, and because of this,
         it's better to have backups in isolated folder.
         """
+        # Let's rotate only this type of database
+        db_type_regex = rf"{database_id}_blackbox_\d{{2}}_\d{{2}}_\d{{4}}.+"
+
         # Receive first batch of files.
         files_result = self.client.files_list_folder(
             self.upload_base if self.upload_base != "/" else ""
         )
         entries = [
-            entry for entry in files_result.entries if isinstance(entry, FileMetadata)
+            entry for entry in files_result.entries if
+            isinstance(entry, FileMetadata) and re.match(db_type_regex,
+                                                         entry.name)
         ]
 
         # If there is more files, receive all of them.
@@ -96,7 +102,9 @@ class Dropbox(BlackboxStorage):
             cursor = files_result.cursor
             files_result = self.client.files_list_folder_continue(cursor)
             entries += [
-                entry for entry in files_result.entries if isinstance(entry, FileMetadata)
+                entry for entry in files_result.entries if
+                isinstance(entry, FileMetadata) and re.match(db_type_regex,
+                                                             entry.name)
             ]
         retention_days = 7
         if Blackbox.retention_days:

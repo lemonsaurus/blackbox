@@ -42,6 +42,7 @@ def run() -> bool:
 
         # Do a backup, then return the path to the backup file
         backup_file = database.backup()
+        database_id = database.get_id_for_retention()
         database.teardown()
 
         # Add report to notifiers
@@ -56,7 +57,7 @@ def run() -> bool:
         for storage in workflow.storage_providers:
             # Sync the provider, then rotate and cleanup
             storage.sync(backup_file)
-            storage.rotate()
+            storage.rotate(database_id)
             storage.teardown()
 
             # Store the outcome to the database report

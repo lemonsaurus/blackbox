@@ -14,7 +14,7 @@ class BlackboxDatabase(BlackboxHandler):
         super().__init__(**kwargs)
 
         self.success = False  # Was the backup successful?
-        self.output = ""  # What did the backup output?
+        self.output = ""      # What did the backup output?
 
     @abstractmethod
     def backup(self) -> Path:
@@ -34,3 +34,7 @@ class BlackboxDatabase(BlackboxHandler):
     def output(self, sensitive_output: str):
         """Set sanitized output."""
         self.__output = self.sanitize_output(sensitive_output)
+
+    def get_id_for_retention(self) -> str:
+        """Used for deleting only this kind of old backups."""
+        return self.config.get("id")
