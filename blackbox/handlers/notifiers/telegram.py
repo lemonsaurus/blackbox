@@ -9,7 +9,7 @@ STRING_LIMIT = 2000  # Limit output
 
 
 class Telegram(BlackboxNotifier):
-    """ Telegram notifier for Blackbox """
+    """Telegram notifier for Blackbox."""
     required_fields = ("token", "chat_id",)
 
     def _parse_report(self) -> str:
