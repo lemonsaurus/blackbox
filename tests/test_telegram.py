@@ -14,8 +14,7 @@ def mock_invalid_telegram_config():
     return {}
 
 
-def test_telegram_handler_can_be_instantiated_with_required_fields(
-        mock_valid_telegram_config):
+def test_can_be_instantiated_with_required_fields(mock_valid_telegram_config):
     """Test if the telegram handler can be instantiated."""
     Telegram(**mock_valid_telegram_config)
 
