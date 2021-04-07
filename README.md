@@ -427,8 +427,8 @@ Modern:
       token: {{ TELEGRAM_TOKEN }}
       chat_id: {{ TELEGRAM_CHAT_ID }}
 ```
-- You can create bot and get token using `BotFather` account in Telegram. Follow [instruction](https://core.telegram.org/bots#6-botfather).
-- You can find out your `chat_id` using `userinfobot` account in Telegram. Just `/start` the bot.
+- You can create a bot and get a bot token using the `BotFather` account in Telegram. Follow [these instructions](https://core.telegram.org/bots#6-botfather).
+- You can find your `chat_id` by using the `userinfobot` account in Telegram. Just `/start` the bot.
 - Do not forget to `/start` your own bot to grant sending permissions.
 
 ## Rotation
