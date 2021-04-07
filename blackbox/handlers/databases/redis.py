@@ -9,7 +9,7 @@ from blackbox.utils.logger import log
 class Redis(BlackboxDatabase):
     """A Database handler that will run a redis-cli command for Redis backup."""
 
-    required_fields = ("password", "host", "port")
+    required_fields = ("password", "host", )
 
     def backup(self) -> Path:
         """Dump all the data to a file and then return the filepath."""
@@ -20,7 +20,7 @@ class Redis(BlackboxDatabase):
         self.success, self.output = run_command(
             "redis-cli "
             f"-h {self.config.get('host')} "
-            f"-p {self.config.get('port')} "
+            f"-p {str(self.config.get('port', '6379'))} "
             f"--rdb {backup_path}",
             REDISCLI_AUTH=self.config.get("password")
         )
