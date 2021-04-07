@@ -21,8 +21,7 @@ class SanitizeReportMixin:
 
         # now it's time to mask all secrets in our output
         for sensitive_word in set(sensitive_words):
-            sensitive_output = sensitive_output.replace(
-                sensitive_word, "*" * len(sensitive_word))
+            sensitive_output = sensitive_output.replace(sensitive_word, "*****")
 
         # emphasize output is clear now
         sanitized_output = sensitive_output
