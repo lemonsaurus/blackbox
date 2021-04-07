@@ -86,7 +86,7 @@ class S3(BlackboxStorage):
             self.output = str(e)
             self.success = False
 
-    def rotate(self) -> None:
+    def rotate(self, database_id: str) -> None:
         """
         Rotate the files in the S3 bucket.
 
@@ -94,6 +94,7 @@ class S3(BlackboxStorage):
         those files fit certain regular expressions. We don't want to delete
         files that are not related to backup or logging.
         """
+        db_type_regex = rf"{database_id}_blackbox_\d{{2}}_\d{{2}}_\d{{4}}.+"
         retention_days = 7
         if Blackbox.retention_days:
             retention_days = Blackbox.retention_days
