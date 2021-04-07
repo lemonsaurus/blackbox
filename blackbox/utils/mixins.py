@@ -4,34 +4,36 @@ from blackbox.utils.logger import log
 
 class SanitizeReportMixin:
     """
-    Mixin class helper to mask all sensitive credentials
+    Mixin class helper to mask passwords and tokens set up in blackbox.yaml.
 
-    Could handle any string with sensitive output
+    Could mask any string with sensitive output because it has its own
+    method to get all credentials from blackbox config.
     """
 
     def sanitize_output(self, sensitive_output: str) -> str:
-        """ Replace all self.config credentials with in any str *** """
+        """Replace all self.config credentials values with ***** in any string."""
 
-        # first of all let's combine list of secrets from config
-        sensitive_words = []
-        mixed_secrets = [CONFIG.databases.values(), CONFIG.storage.values(),
-                         CONFIG.notifiers.values(), ]
-        for mixed_secret in mixed_secrets:
-            self.extract_secrets(sensitive_words, mixed_secret)
+        # First of all let's combine list of secrets from config.
+        sensitive_words = self._extract_secrets()
 
-        # now it's time to mask all secrets in our output
+        # Now it's time to mask all secrets in our output.
         for sensitive_word in set(sensitive_words):
-            sensitive_output = sensitive_output.replace(sensitive_word, "*****")
+            sensitive_output = sensitive_output.replace(str(sensitive_word), "*****")
 
-        # emphasize output is clear now
+        # Emphasize output is clear now
         sanitized_output = sensitive_output
         log.success("Secrets are masked!")
         return sanitized_output
 
     @staticmethod
-    def _extract_secrets(sensitive_words: list, mixed_secret) -> str:
-        """ Helper method to get secrets values only """
-        for database_name in mixed_secret:
-            for secrets in database_name.values():
-                sensitive_words += list(secrets.values())
+    def _extract_secrets() -> list:
+        """Helper method to get secrets values."""
+        sensitive_words = []
+        # Blackbox_Type -> Kind -> Unique ID (str) -> Keys and Values (passwords and tokens)
+        types = [CONFIG.databases.values(), CONFIG.storage.values(), CONFIG.notifiers.values(), ]
+
+        for blackbox_type in types:
+            for kind in blackbox_type:
+                for unique_id in kind.values():
+                    sensitive_words += list(unique_id.values())
         return sensitive_words

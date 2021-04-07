@@ -17,12 +17,11 @@ class BlackboxHandler(ABC, SanitizeReportMixin):
     def _validate_config(self):
         """Ensure required configuration fields were passed to the handler."""
         handler_name = self.__class__.__name__
-        missing_fields = [field for field in self.required_fields if
-                          field not in self.config]
+        missing_fields = [field for field in self.required_fields if field not in self.config]
 
         if missing_fields:
-            raise MissingFields(self.handler_type, handler_name,
-                                self.config.get("id"), missing_fields)
+            raise MissingFields(self.handler_type, handler_name, self.config.get("id"),
+                                missing_fields)
 
     def teardown(self) -> None:
         """

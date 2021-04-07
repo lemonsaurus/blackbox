@@ -27,10 +27,10 @@ class BlackboxDatabase(BlackboxHandler):
 
     @property
     def output(self):
-        """ Return sanitized output only """
+        """Return sanitized output only."""
         return self.__output
 
     @output.setter
     def output(self, sensitive_output: str):
-        """ Set sanitized output """
+        """Set sanitized output."""
         self.__output = self.sanitize_output(sensitive_output)
