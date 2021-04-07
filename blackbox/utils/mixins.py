@@ -29,7 +29,7 @@ class SanitizeReportMixin:
         return sanitized_output
 
     @staticmethod
-    def extract_secrets(sensitive_words: [], mixed_secret) -> str:
+    def _extract_secrets(sensitive_words: list, mixed_secret) -> str:
         """ Helper method to get secrets values only """
         for database_name in mixed_secret:
             for secrets in database_name.values():
