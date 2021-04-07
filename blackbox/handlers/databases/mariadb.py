@@ -12,7 +12,7 @@ class MariaDB(BlackboxDatabase):
     mysqldump for MariaDB, backing up all tables.
     """
 
-    required_fields = ("username", "password", "host", "port")
+    required_fields = ("username", "password", "host", )
 
     def backup(self) -> Path:
         """Dump all the data to a file and then return the filepath."""
@@ -21,7 +21,7 @@ class MariaDB(BlackboxDatabase):
         user = self.config["username"]
         password = self.config["password"]
         host = self.config["host"]
-        port = self.config["port"]
+        port = str(self.config.get("port", "3306"))
 
         backup_path = Path.home() / f"{self.config['id']}_blackbox_{date}.sql"
 
