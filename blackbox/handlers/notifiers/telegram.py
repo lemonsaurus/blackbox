@@ -37,8 +37,12 @@ class Telegram(BlackboxNotifier):
         """ Convert report dict to string and send via Telegram """
         bot = telebot.TeleBot(self.config["token"])
         try:
-            bot.send_message(chat_id=self.config["chat_id"],
-                             text=self._parse_report())
+            bot.send_message(
+                chat_id=self.config["chat_id"],
+                text=self._parse_report(),
+            )
         except ApiTelegramException:
-            log.debug("Telegram API key or user_id is wrong "
-                      "or you forgot to press /start in your bot")
+            log.debug(
+                "Telegram API key or user_id is wrong "
+                "or you forgot to press /start in your bot"
+            )
