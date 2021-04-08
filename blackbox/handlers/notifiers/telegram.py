@@ -4,6 +4,7 @@ from telebot.apihelper import ApiTelegramException
 from blackbox.handlers.notifiers._base import BlackboxNotifier
 from blackbox.utils.logger import log
 
+
 STRING_LIMIT = 2000  # Limit output
 CHECKMARK_EMOJI = "\U00002705"  # ✔
 FAIL_EMOJI = "\U0000274C"  # ❌

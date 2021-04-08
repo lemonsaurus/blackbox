@@ -431,6 +431,10 @@ Modern:
 - You can find your `chat_id` by using the `userinfobot` account in Telegram. Just `/start` the bot.
 - Do not forget to `/start` your own bot to grant sending permissions.
 
+![blackbox](https://github.com/lemonsaurus/blackbox/raw/main/img/blackbox_telegram_success.png)
+![blackbox](https://github.com/lemonsaurus/blackbox/raw/main/img/blackbox_telegram_fail.png)
+
+
 ## Rotation
 By default, `blackbox` will automatically remove all backup files older than 7 days in the folder you configure for your storage provider. To determine if something is a backup file or not, it will use a regex pattern that corresponds with the default file it saves, for example `blackbox-postgres-backup-11-12-2020.sql`.
 
