@@ -1,9 +1,7 @@
-# coding=utf-8
-
 """
-Blackbox is a plug-and-play service which magically backs up all your databases. 
+Blackbox is a plug-and-play service which magically backs up all your databases.
 
-The backups are stored on your favorite cloud storage providers, and Blackbox will notify 
+The backups are stored on your favorite cloud storage providers, and Blackbox will notify
 you on your chat platform of choice once the job is done.
 """
 
@@ -86,7 +84,7 @@ def run() -> bool:
 @click.option('--version', is_flag=True, help="Show version and exit")
 def cli(config, init, version):
     """
-    BLACKBOX.
+    BLACKBOX
 
     Backup database to external storage system
     """
