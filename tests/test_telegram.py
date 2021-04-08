@@ -19,8 +19,7 @@ def test_can_be_instantiated_with_required_fields(mock_valid_telegram_config):
     Telegram(**mock_valid_telegram_config)
 
 
-def test_telegram_handler_fails_without_required_fields(
-        mock_invalid_telegram_config):
+def test_fails_without_required_fields(mock_invalid_telegram_config):
     """
     Test if the telegram handler cannot be instantiated with missing fields.
     """
@@ -28,11 +27,10 @@ def test_telegram_handler_fails_without_required_fields(
         Telegram(**mock_invalid_telegram_config)
 
 
-def test_telegram_parse_report(mock_valid_telegram_config, report):
-    """Test report parsing for Discord notifications"""
+def test_parse_report(mock_valid_telegram_config, report):
+    """Test report parsing for telegram notifications."""
 
     telegram = Telegram(**mock_valid_telegram_config)
     telegram.report = report
 
-    assert telegram._parse_report() == 'Blackbox Backup Status:\n' \
-                                       'main_mongo: \n✅ main_s3\n'
+    assert telegram._parse_report() == 'Blackbox Backup Status:\nmain_mongo: \n✅ main_s3\n'
