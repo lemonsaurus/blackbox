@@ -24,4 +24,4 @@ COPY . .
 RUN pip install -e .
 
 # Start the application!
-ENTRYPOINT ["/blackbox/docker/entrypoint.sh"]
+CMD ["blackbox"]
