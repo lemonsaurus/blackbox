@@ -91,21 +91,16 @@ class Dropbox(BlackboxStorage):
         files_result = self.client.files_list_folder(
             self.upload_base if self.upload_base != "/" else ""
         )
-        entries = [
-            entry for entry in files_result.entries if
-            isinstance(entry, FileMetadata) and re.match(db_type_regex,
-                                                         entry.name)
-        ]
+        entries = [entry for entry in files_result.entries if
+                   self._is_backup_file(entry, db_type_regex)]
 
         # If there is more files, receive all of them.
         while files_result.has_more:
             cursor = files_result.cursor
             files_result = self.client.files_list_folder_continue(cursor)
-            entries += [
-                entry for entry in files_result.entries if
-                isinstance(entry, FileMetadata) and re.match(db_type_regex,
-                                                             entry.name)
-            ]
+            entries += [entry for entry in files_result.entries if
+                        self._is_backup_file(entry, db_type_regex)]
+
         retention_days = 7
         if Blackbox.retention_days:
             retention_days = Blackbox.retention_days
@@ -117,3 +112,8 @@ class Dropbox(BlackboxStorage):
             delta = now - last_modified
             if delta.days >= retention_days:
                 self.client.files_delete(item.path_lower)
+
+    @staticmethod
+    def _is_backup_file(entry, db_type_regex) -> bool:
+        """Check if file is actually this kind of database backup."""
+        return isinstance(entry, FileMetadata) and re.match(db_type_regex, entry.name)
