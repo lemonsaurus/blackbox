@@ -1,10 +1,10 @@
 # coding=utf-8
 
 """
-This is Blackbox.
+Blackbox is a plug-and-play service which magically backs up all your databases. 
 
-A simple service which magically backs up all your databases to all your favorite cloud storage
-providers, and then notifies you.
+The backups are stored on your favorite cloud storage providers, and Blackbox will notify 
+you on your chat platform of choice once the job is done.
 """
 
 from pathlib import Path

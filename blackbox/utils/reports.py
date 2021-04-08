@@ -3,7 +3,7 @@ import dataclasses
 
 @dataclasses.dataclass
 class StorageReport:
-    """Keep storage output."""
+    """A report created by one of the Storage Handlers."""
 
     storage_id: str
     success: bool
