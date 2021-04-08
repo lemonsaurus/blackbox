@@ -32,7 +32,7 @@ def test_fails_without_required_fields(mock_invalid_redis_config):
 
 
 def test_redis_backup(mock_valid_redis_config, fake_process):
-    """Test if the redis database handler executes a backup"""
+    """Test if the redis database handler executes a backup."""
     redis = Redis(**mock_valid_redis_config)
 
     date = datetime.date.today().strftime("%d_%m_%Y")

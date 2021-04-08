@@ -84,10 +84,10 @@ def run() -> bool:
 @click.option('--version', is_flag=True, help="Show version and exit")
 def cli(config, init, version):
     """
-    BLACKBOX
+    BLACKBOX 
 
     Backup database to external storage system
-    """
+    """  # noqa
     if version:
         print(__version__, flush=True)
         exit()
@@ -127,8 +127,7 @@ def cli(config, init, version):
                       webhook: https://web.hook/
 
                 retention_days: 7
-                """).lstrip()
-            )
+                """).lstrip())
             print("blackbox.yaml configuration created", flush=True)
 
         else:
