@@ -10,16 +10,19 @@ WEBHOOK = "https://hooks.slack.com/services/x/x/x"
 
 @pytest.fixture
 def mock_valid_slack_config():
+    """Mock valid Slack config."""
     return {"webhook": WEBHOOK}
 
 
 @pytest.fixture
 def mock_valid_slack_config_with_block_kit():
+    """Mock valid Slack config with block kit usage."""
     return {"webhook": WEBHOOK, "use_block_kit": True}
 
 
 @pytest.fixture
 def mock_invalid_slack_config():
+    """Mock invalid Slack config."""
     return {}
 
 
@@ -41,8 +44,7 @@ def test_slack_handler_instantiates_optional_fields(mock_valid_slack_config_with
 
 
 def test_slack_notify(mock_valid_slack_config, report):
-    """Test report parsing for slack notifications"""
-
+    """Test report parsing for slack notifications."""
     slack = Slack(**mock_valid_slack_config)
     slack.report = report
 
@@ -68,8 +70,7 @@ def test_slack_notify(mock_valid_slack_config, report):
 
 
 def test_slack_notify_modern(mock_valid_slack_config_with_block_kit, report):
-    """Test report parsing for slack notifications"""
-
+    """Test report parsing for slack notifications."""
     slack = Slack(**mock_valid_slack_config_with_block_kit)
     slack.report = report
 

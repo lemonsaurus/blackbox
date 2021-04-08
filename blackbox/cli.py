@@ -1,3 +1,12 @@
+# coding=utf-8
+
+"""
+This is Blackbox.
+
+A simple service which magically backs up all your databases to all your favorite cloud storage
+providers, and then notifies you.
+"""
+
 from pathlib import Path
 from textwrap import dedent
 
@@ -13,7 +22,7 @@ from blackbox.utils.reports import DatabaseReport
 
 def run() -> bool:
     """
-    The main blackbox process.
+    Implement the main blackbox process.
 
     Returns whether or not the process is a success.
     """
@@ -77,11 +86,10 @@ def run() -> bool:
 @click.option('--version', is_flag=True, help="Show version and exit")
 def cli(config, init, version):
     """
-    BLACKBOX
+    BLACKBOX.
 
     Backup database to external storage system
     """
-
     if version:
         print(__version__, flush=True)
         exit()

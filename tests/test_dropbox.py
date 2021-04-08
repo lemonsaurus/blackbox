@@ -6,11 +6,13 @@ from blackbox.handlers.storage import Dropbox
 
 @pytest.fixture
 def mock_valid_dropbox_config():
+    """Mock valid Dropbox config."""
     return {"access_token": "XXXXXXX", "upload_directory": "/home/dropbox_user/Documents/"}
 
 
 @pytest.fixture
 def mock_invalid_dropbox_config():
+    """Mock invalid Dropbox config."""
     return {}
 
 

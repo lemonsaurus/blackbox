@@ -8,6 +8,7 @@ from blackbox.handlers.storage import S3
 
 @pytest.fixture
 def mock_valid_s3_config_without_aws_credentials():
+    """Mock valid S3 config."""
     return {"bucket": "bigbucket", "endpoint": "s3.endpoint.com"}
 
 

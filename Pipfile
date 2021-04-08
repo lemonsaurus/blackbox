@@ -21,6 +21,7 @@ loguru = "~=0.5.3"
 jinja2 = "==2.11.3"
 click = "==7.1.2"
 dropbox = "~=11.0.0"
+flake8-docstrings = "*"
 
 [requires]
 python_version = "3.9"

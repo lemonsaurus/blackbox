@@ -14,8 +14,7 @@ from blackbox.utils import reports
 
 @pytest.fixture
 def config_file(mocker):
-    """ Mock reading config values"""
-
+    """Mock reading config values."""
     config = dedent(
         """
         databases:
@@ -63,8 +62,7 @@ def config_file(mocker):
 
 @pytest.fixture
 def config_file_with_errors(mocker):
-    """ Mock reading config values"""
-
+    """Mock reading config values."""
     config_with_missing_bracket = dedent(
         """
         databases:
@@ -85,8 +83,7 @@ def config_file_with_errors(mocker):
 
 @pytest.fixture
 def config_file_with_missing_value(mocker):
-    """ Mock reading config values"""
-
+    """Mock reading config values."""
     missing_value = dedent(
         """
         databases:
@@ -106,10 +103,7 @@ def config_file_with_missing_value(mocker):
 
 @pytest.fixture
 def report():
-    """
-    Notification fixture for passing in report
-    """
-
+    """Notification fixture for passing in report."""
     storage = reports.StorageReport(storage_id="main_s3", success=True)
 
     database = reports.DatabaseReport(database_id="main_mongo", success=True, output="salad")
