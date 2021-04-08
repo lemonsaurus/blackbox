@@ -3,12 +3,16 @@ import dataclasses
 
 @dataclasses.dataclass
 class StorageReport:
+    """A report created by one of the Storage Handlers."""
+
     storage_id: str
     success: bool
 
 
 @dataclasses.dataclass
 class DatabaseReport:
+    """Keep database report."""
+
     database_id: str
     success: bool
     output: str
@@ -30,6 +34,8 @@ class DatabaseReport:
 
 @dataclasses.dataclass
 class Report:
+    """Keep combined report."""
+
     databases: list[DatabaseReport] = dataclasses.field(default_factory=list)
 
     @property

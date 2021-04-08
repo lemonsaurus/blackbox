@@ -10,11 +10,13 @@ WEBHOOK = "https://discord.com/api/webhooks/x"
 
 @pytest.fixture
 def mock_valid_discord_config():
+    """Mock valid Discord config."""
     return {"webhook": WEBHOOK}
 
 
 @pytest.fixture
 def mock_invalid_discord_config():
+    """Mock invalid Discord config."""
     return {}
 
 
@@ -30,8 +32,7 @@ def test_discord_handler_fails_without_required_fields(mock_invalid_discord_conf
 
 
 def test_discord_notify(mock_valid_discord_config, report):
-    """Test report parsing for Discord notifications"""
-
+    """Test report parsing for Discord notifications."""
     discord = Discord(**mock_valid_discord_config)
     discord.report = report
 

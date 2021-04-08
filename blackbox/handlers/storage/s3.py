@@ -13,6 +13,8 @@ from blackbox.utils.logger import log
 
 
 class S3(BlackboxStorage):
+    """A storage handler for S3-compatible APIs."""
+
     required_fields = ("bucket", "endpoint")
 
     def __init__(self, **kwargs):

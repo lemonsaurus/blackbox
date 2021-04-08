@@ -1,3 +1,10 @@
+"""
+Blackbox is a plug-and-play service which magically backs up all your databases.
+
+The backups are stored on your favorite cloud storage providers, and Blackbox will notify
+you on your chat platform of choice once the job is done.
+"""
+
 from pathlib import Path
 from textwrap import dedent
 
@@ -13,7 +20,7 @@ from blackbox.utils.reports import DatabaseReport
 
 def run() -> bool:
     """
-    The main blackbox process.
+    Implement the main blackbox process.
 
     Returns whether or not the process is a success.
     """
@@ -77,11 +84,10 @@ def run() -> bool:
 @click.option('--version', is_flag=True, help="Show version and exit")
 def cli(config, init, version):
     """
-    BLACKBOX
+    BLACKBOX 
 
     Backup database to external storage system
-    """
-
+    """  # noqa
     if version:
         print(__version__, flush=True)
         exit()
@@ -121,8 +127,7 @@ def cli(config, init, version):
                       webhook: https://web.hook/
 
                 retention_days: 7
-                """).lstrip()
-            )
+                """).lstrip())
             print("blackbox.yaml configuration created", flush=True)
 
         else:

@@ -10,7 +10,6 @@ class Discord(BlackboxNotifier):
 
     def _parse_report(self) -> dict:
         """Turn the report into something the notify function can use."""
-
         # Combine and truncate total output to < 2000 characters, fields don't support more.
         output = self.report.output[:2000]
 

@@ -9,12 +9,14 @@ from blackbox.handlers.databases import MongoDB
 
 @pytest.fixture
 def mock_valid_mongodb_config():
+    """Mock valid MongoDB config."""
     return {"connection_string": "mongodb://mongouser:mongopassword@host:port",
             "id": "main_mongo", }
 
 
 @pytest.fixture
 def mock_invalid_mongodb_config():
+    """Mock invalid MongoDB config."""
     return {}
 
 
@@ -32,8 +34,7 @@ def test_mongodb_handler_fails_without_required_fields(
 
 
 def test_mongodb_backup(mock_valid_mongodb_config, fake_process):
-    """Test if the MongoDB database handler executes a backup"""
-
+    """Test if the MongoDB database handler executes a backup."""
     mongo = MongoDB(**mock_valid_mongodb_config)
 
     date = datetime.datetime.today().strftime("%d_%m_%Y")

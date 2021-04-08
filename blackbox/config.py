@@ -36,6 +36,7 @@ class YAMLGetter(type):
         print(Prefixes.direct_message)
         print(Prefixes.guild)
     """
+
     section = None
     subsection = None
     _config = None
@@ -112,6 +113,7 @@ class YAMLGetter(type):
 
 class Blackbox(metaclass=YAMLGetter):
     """The configuration for the blackbox application."""
+
     # Handlers
     databases: dict
     storage: dict
