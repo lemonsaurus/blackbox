@@ -8,8 +8,7 @@ from blackbox.utils.logger import log
 
 class MariaDB(BlackboxDatabase):
     """
-    A Database handler that will do a
-    mysqldump for MariaDB, backing up all tables.
+    A Database handler that will do a mysqldump for MariaDB, backing up all tables.
     """
 
     required_fields = ("username", "password", "host", )
@@ -31,8 +30,8 @@ class MariaDB(BlackboxDatabase):
             f"--port={port} --all-databases > {backup_path}"
         )
         log.debug(self.output)
-        # Explicitly check if error message is occurred
-        # Somehow mysqldump is always successful
+        # Explicitly check if error message is occurred.
+        # Somehow mysqldump is always successful.
         if "error" in self.output.lower():
             self.success = False
             log.debug("mysqldump has error(s) in log")
