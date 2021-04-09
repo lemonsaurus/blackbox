@@ -21,8 +21,8 @@ jinja2 = "==2.11.3"
 click = "==7.1.2"
 dropbox = "~=11.0.0"
 flake8-docstrings = "~=1.6.0"
-pytelegrambotapi = "*"
-loguru = "*"
+pytelegrambotapi = "~=3.7.7"
+loguru = "~=0.5.3"
 
 [requires]
 python_version = "3.9"

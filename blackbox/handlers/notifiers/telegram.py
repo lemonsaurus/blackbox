@@ -13,6 +13,7 @@ WARNING_EMOJI = "\U000026A0"  # ⚠
 
 class Telegram(BlackboxNotifier):
     """Telegram notifier for Blackbox."""
+
     required_fields = ("token", "chat_id",)
 
     def _parse_report(self) -> str:
