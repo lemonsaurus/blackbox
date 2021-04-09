@@ -12,7 +12,6 @@ class SanitizeReportMixin:
 
     def sanitize_output(self, sensitive_output: str) -> str:
         """Replace all self.config credentials values with ***** in any string."""
-
         # First of all let's combine list of secrets from config.
         sensitive_words = self._extract_secrets()
 
