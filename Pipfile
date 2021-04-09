@@ -12,6 +12,8 @@ flake8 = "*"
 flake8-isort = "*"
 pytest-subprocess = "*"
 requests-mock = "*"
+flake8-docstrings = "~=1.6.0"
+pytest-testdox = "~=2.0.1"
 
 [packages] # Remember to update setup.py with these requirements
 pyyaml = "~=5.4"
@@ -21,8 +23,6 @@ loguru = "~=0.5.3"
 jinja2 = "==2.11.3"
 click = "==7.1.2"
 dropbox = "~=11.0.0"
-flake8-docstrings = "~=1.6.0"
-pytest-testdox = "~=2.0.1"
 
 [requires]
 python_version = "3.9"
