@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "blackbox-cli"
+name = "blackbox"
 version = "2.1.0"
 description = "Tool for automatic backups of databases"
 authors = ["Leon Sandøy <leon.sandoy@gmail.com>"]
