@@ -1,12 +1,25 @@
 [tool.poetry]
-name = "blackbox"
+name = "blackbox-cli"
 version = "2.1.0"
 description = "Tool for automatic backups of databases"
 authors = ["Leon Sandøy <leon.sandoy@gmail.com>"]
 license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/lemonsaurus/blackbox"
+repository = "https://github.com/lemonsaurus/blackbox"
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Development Status :: 3 - Alpha",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.9",
+    "Topic :: Database",
+    "Topic :: System :: Archiving :: Backup"
+]
+exclude = ["tests", "tests.*"]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.9"
 pyyaml = "^5.3.1"
 requests = "^2.25.1"
 boto3 = "^1.16.51"
