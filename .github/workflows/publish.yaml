@@ -5,7 +5,7 @@ on:
     types: [published]
 
 jobs:
-  build:
+  publish-pipy:
     name: publish to pypi.org
     runs-on: ubuntu-latest
 
