@@ -32,7 +32,7 @@ jobs:
       - name: Install poetry dependencies
         run: poetry install --no-interaction --no-root
 
-      - name: Install poethepoet
+      - name: Install poethepoet to use poe
         run: pip install poethepoet
 
       - name: Linting
