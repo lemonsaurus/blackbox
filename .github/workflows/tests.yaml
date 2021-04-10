@@ -33,7 +33,7 @@ jobs:
         run: poetry install --no-interaction --no-root
 
       - name: Linting
-        run: poetry run poe lint
+        run: poetry run flake8
 
       - name: Testing
-        run: poetry run poe test
+        run: poetry run pytest
