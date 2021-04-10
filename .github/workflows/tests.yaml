@@ -32,8 +32,11 @@ jobs:
       - name: Install poetry dependencies
         run: poetry install --no-interaction --no-root
 
+      - name: Install poethepoet
+        run: pip install poethepoet
+
       - name: Linting
-        run: poetry run flake8
+        run: poe lint
 
       - name: Testing
-        run: poetry run pytest
+        run: poe test
