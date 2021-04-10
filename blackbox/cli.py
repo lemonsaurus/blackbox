@@ -11,13 +11,13 @@ from textwrap import dedent
 import click
 
 from blackbox import exceptions
-from blackbox.__version__ import __version__
 from blackbox.config import Blackbox as CONFIG
 from blackbox.config import YAMLGetter
 from blackbox.utils import workflows
 from blackbox.utils.cooldown import is_on_cooldown
 from blackbox.utils.logger import log
 from blackbox.utils.reports import DatabaseReport
+from blackbox.utils.version import get_project_version
 
 
 def run() -> bool:
@@ -115,7 +115,8 @@ def cli(config, init, version):
     Backup database to external storage system
     """  # noqa
     if version:
-        print(__version__, flush=True)
+        # Get accurate version from poetry toml file.
+        print(str(get_project_version()), flush=True)
         exit()
 
     if init:
