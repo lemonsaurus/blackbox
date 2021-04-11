@@ -8,6 +8,7 @@ from blackbox.utils.logger import log
 
 
 def get_project_root() -> Path:
+    """Fancy way to retrieve project root."""
     return Path(__file__).parent.parent
 
 
