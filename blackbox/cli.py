@@ -79,7 +79,8 @@ def run() -> bool:
             continue
 
         # If frequency is not set just notify.
-        if CONFIG['notifier_frequency'] is None:
+        frequency = CONFIG['notifier_frequency']
+        if frequency is None or frequency <= 0:
             notifier.notify()
         # But otherwise let's check do we have a right to notify
         else:
