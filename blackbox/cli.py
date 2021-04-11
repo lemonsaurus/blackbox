@@ -15,6 +15,7 @@ from blackbox.__version__ import __version__
 from blackbox.config import Blackbox as CONFIG
 from blackbox.config import YAMLGetter
 from blackbox.utils import workflows
+from blackbox.utils.frequency import can_we_notify_now
 from blackbox.utils.logger import log
 from blackbox.utils.reports import DatabaseReport
 
@@ -77,7 +78,17 @@ def run() -> bool:
         if notifier.report.is_empty:
             continue
 
-        notifier.notify()
+        # If frequency is not set just notify.
+        if CONFIG['notifier_frequency'] is None:
+            notifier.notify()
+        # But otherwise let's check do we have a right to notify
+        else:
+            we_can_notify, attempts = can_we_notify_now()
+            if we_can_notify:
+                if attempts > 0:
+                    log.debug(f"By the way there were {attempts} successful backups.")
+                notifier.notify()
+
         notifier.teardown()
 
     # Clean up databases backups.
