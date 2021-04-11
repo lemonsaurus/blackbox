@@ -13,9 +13,11 @@ jobs:
     steps:
       # Create a commit SHA-based tag for the container repositories
       - name: Create SHA Container Tag
-        id: sha_tag
+        id: tags_generator
         run: |
           tag=$(cut -c 1-7 <<< $GITHUB_SHA)
+          semver=$(python blackbox/utils/version.py)
+          echo "::set-output name=semver::$semver"
           echo "::set-output name=tag::$tag"
 
       # Check out the current repository
@@ -45,4 +47,5 @@ jobs:
           cache-to: type=inline
           tags: |
             lemonsaurus/blackbox:latest
-            lemonsaurus/blackbox:${{ steps.sha_tag.outputs.tag }}
+            lemonsaurus/blackbox:${{ steps.tags_generator.outputs.tag }}
+            lemonsaurus/blackbox:${{ steps.tags_generator.outputs.semver }}
