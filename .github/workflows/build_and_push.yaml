@@ -12,7 +12,7 @@ jobs:
 
     steps:
       # Create a commit SHA-based tag for the container repositories
-      - name: Create SHA Container Tag
+      - name: Create Container Tags
         id: tags_generator
         run: |
           tag=$(cut -c 1-7 <<< $GITHUB_SHA)
