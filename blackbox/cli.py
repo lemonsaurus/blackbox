@@ -78,10 +78,11 @@ def run() -> bool:
         if notifier.report.is_empty:
             continue
 
-        # If frequency is not set just notify.
+        # If frequency is not set, set to zero or if report is failed: just notify.
         frequency = CONFIG['notifier_frequency']
-        if frequency is None or frequency <= 0:
+        if frequency is None or frequency <= 0 or not notifier.report.success:
             notifier.notify()
+
         # But otherwise let's check do we have a right to notify
         else:
             we_can_notify, attempts = can_we_notify_now()
