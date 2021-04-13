@@ -4,7 +4,7 @@ Blackbox is a plug-and-play service which magically backs up all your databases.
 The backups are stored on your favorite cloud storage providers, and Blackbox will notify
 you on your chat platform of choice once the job is done.
 """
-
+import os
 from pathlib import Path
 from textwrap import dedent
 
@@ -15,6 +15,7 @@ from blackbox.__version__ import __version__
 from blackbox.config import Blackbox as CONFIG
 from blackbox.config import YAMLGetter
 from blackbox.utils import workflows
+from blackbox.utils.logger import log
 from blackbox.utils.reports import DatabaseReport
 
 
@@ -37,11 +38,14 @@ def run() -> bool:
 
     all_workflows = workflows.get_workflows(database_handlers, storage_handlers, notifier_handlers)
 
+    backup_files = []
+
     for workflow in all_workflows:
         database = workflow.database
 
         # Do a backup, then return the path to the backup file
         backup_file = database.backup()
+        backup_files.append(backup_file)
         database_id = database.get_id_for_retention()
         database.teardown()
 
@@ -76,6 +80,13 @@ def run() -> bool:
         notifier.notify()
         notifier.teardown()
 
+    # Clean up databases backups.
+    for file in backup_files:
+        try:
+            os.remove(file)
+            log.info(f"{file} deleted.")
+        except OSError:
+            log.info(f"{file} is not deleted.")
     return success
 
 
