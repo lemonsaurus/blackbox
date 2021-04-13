@@ -33,6 +33,7 @@ setup(
         "jinja2==2.11.2",
         "click==7.1.2",
         "dropbox~=11.0.0",
+        "pytelegrambotapi~=3.7.7",
     ],
     python_requires='~=3.9',
     extras_require={},

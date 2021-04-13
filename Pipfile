@@ -19,10 +19,11 @@ pytest-testdox = "~=2.0.1"
 pyyaml = "~=5.4"
 requests = "~=2.25.1"
 boto3 = "~=1.16.51"
-loguru = "~=0.5.3"
 jinja2 = "==2.11.3"
 click = "==7.1.2"
 dropbox = "~=11.0.0"
+pytelegrambotapi = "~=3.7.7"
+loguru = "~=0.5.3"
 
 [requires]
 python_version = "3.9"
