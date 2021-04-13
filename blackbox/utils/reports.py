@@ -1,5 +1,7 @@
 import dataclasses
 
+from blackbox.utils.mixins import SanitizeReportMixin
+
 
 @dataclasses.dataclass
 class StorageReport:
@@ -10,7 +12,7 @@ class StorageReport:
 
 
 @dataclasses.dataclass
-class DatabaseReport:
+class DatabaseReport(SanitizeReportMixin):
     """Keep database report."""
 
     database_id: str
@@ -21,7 +23,7 @@ class DatabaseReport:
     def report_storage(self, storage_id: str, success: bool, output: str):
         """Add a storage report to the current report."""
         # Add to database output
-        self.output += output
+        self.output += self.sanitize_output(output)
 
         # If one storage handler failed, the database backup is a failure.
         if success is False:
@@ -33,7 +35,7 @@ class DatabaseReport:
 
 
 @dataclasses.dataclass
-class Report:
+class Report(SanitizeReportMixin):
     """Keep combined report."""
 
     databases: list[DatabaseReport] = dataclasses.field(default_factory=list)
@@ -46,7 +48,7 @@ class Report:
     @property
     def output(self) -> str:
         """Return the combined outputs from all the database reports."""
-        return "\n".join(report.output for report in self.databases)
+        return self.sanitize_output("\n".join(report.output for report in self.databases))
 
     @property
     def is_empty(self) -> bool:
