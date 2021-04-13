@@ -50,7 +50,7 @@ class BlackboxStorage(BlackboxHandler):
         raise NotImplementedError
 
     @abstractmethod
-    def rotate(self):
+    def rotate(self, database_id: str):
         """
         Rotate the files in the storage provider.
 

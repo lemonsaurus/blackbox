@@ -1,5 +1,6 @@
 import datetime
 import os
+import re
 from pathlib import Path
 
 import boto3
@@ -38,7 +39,8 @@ class S3(BlackboxStorage):
         # If config was provided for only one of them, that's too weird of a state for us to accept,
         # so we'll raise an exception. (That weird ^ operator is an XOR).
         elif bool(key_id) ^ bool(secret_key):
-            raise ImproperlyConfigured("You must configure either both or none of the S3 credential params.")
+            raise ImproperlyConfigured(
+                "You must configure either both or none of the S3 credential params.")
 
         else:
             # If config hasn't been provided, we expect either environment variables or ~/.aws/
@@ -86,7 +88,7 @@ class S3(BlackboxStorage):
             self.output = str(e)
             self.success = False
 
-    def rotate(self) -> None:
+    def rotate(self, database_id: str) -> None:
         """
         Rotate the files in the S3 bucket.
 
@@ -94,14 +96,22 @@ class S3(BlackboxStorage):
         those files fit certain regular expressions. We don't want to delete
         files that are not related to backup or logging.
         """
+        db_type_regex = rf"{database_id}_blackbox_\d{{2}}_\d{{2}}_\d{{4}}.+"
         retention_days = 7
         if Blackbox.retention_days:
             retention_days = Blackbox.retention_days
 
+        # Get files object from remote S3 bucket.
+        remote_objects = self.client.list_objects_v2(Bucket=self.bucket).get("Contents")
+
+        # Filter their names with only this kind of database.
+        relevant_backups = [item for item in remote_objects
+                            if re.match(db_type_regex, item.get("Key"))]
+
         # Look through the items and figure out which ones are older than `retention_days`.
         # Catch all boto errors and log them to avoid return code 1.
         try:
-            for item in self.client.list_objects(Bucket=self.bucket)["Contents"]:
+            for item in relevant_backups:
                 last_modified = item.get("LastModified")
                 now_tz = datetime.datetime.now(tz=last_modified.tzinfo)
                 delta = now_tz - item.get("LastModified")
