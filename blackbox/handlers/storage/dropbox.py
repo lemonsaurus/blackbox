@@ -101,6 +101,10 @@ class Dropbox(BlackboxStorage):
         are older than `retention_days`, and because of this,
         it's better to have backups in isolated folder.
         """
+        # Check if Dropbox token is valid.
+        if self.valid is False:
+            log.warning("Dropbox token is invalid. Can't delete old backups")
+            return None
         # Let's rotate only this type of database
         db_type_regex = rf"{database_id}_blackbox_\d{{2}}_\d{{2}}_\d{{4}}.+"
 
