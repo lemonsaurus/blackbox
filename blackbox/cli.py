@@ -38,7 +38,6 @@ def run() -> bool:
 
     all_workflows = workflows.get_workflows(database_handlers, storage_handlers, notifier_handlers)
 
-    # Backups files we need to clean up
     backup_files = []
 
     for workflow in all_workflows:
