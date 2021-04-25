@@ -22,15 +22,12 @@ class Telegram(BlackboxNotifier):
 
         for db in self.report.databases:
             data_report += f"{db.database_id}: \n"
-            if db.success:
-                # Check storages one by one.
-                for storage in db.storages:
-                    if storage.success:
-                        data_report += f"{CHECKMARK_EMOJI} {storage.storage_id}\n"
-                    else:
-                        data_report += f"{FAIL_EMOJI} {storage.storage_id}\n"
-            else:
-                data_report += f"{FAIL_EMOJI} Backup failed.\n"
+            for storage in db.storages:
+                if storage.success:
+                    data_report += f"{CHECKMARK_EMOJI} {storage.storage_id}\n"
+                else:
+                    data_report += f"{FAIL_EMOJI} {storage.storage_id}\n"
+            if db.success is False:
                 data_report += f"{WARNING_EMOJI} {db.output[:STRING_LIMIT]}\n"
         return data_report
 
