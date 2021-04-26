@@ -40,10 +40,10 @@ class Dropbox(BlackboxStorage):
         """Sync a file to Dropbox."""
         # Check if Dropbox token is valid.
         if self.valid is False:
-            error = "Dropbox token is invalid"
+            error = "Dropbox token is invalid!"
             self.success = False
             self.output = error
-            log.warning(error)
+            log.error(error)
             return None
 
         # This is size what can be uploaded as one chunk.
@@ -103,7 +103,7 @@ class Dropbox(BlackboxStorage):
         """
         # Check if Dropbox token is valid.
         if self.valid is False:
-            log.warning("Dropbox token is invalid. Can't delete old backups")
+            log.error("Dropbox token is invalid - Can't delete old backups!")
             return None
         # Let's rotate only this type of database
         db_type_regex = rf"{database_id}_blackbox_\d{{2}}_\d{{2}}_\d{{4}}.+"
