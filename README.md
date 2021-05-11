@@ -17,7 +17,7 @@ like `cron`, or a Kubernetes CronJob.
 - [Environment Variables](#environment-variables)
 - [Databases](#databases)
     - [MongoDB](#mongodb)
-    - [PostgreSQL](#postgres)
+    - [PostgreSQL](#postgresql-12)
     - [MariaDB](#mariadb)
     - [MySQL](#mysql)
     - [Redis](#redis)
@@ -276,7 +276,7 @@ databases:
 
 ## Databases
 
-Right now, this app supports **MongoDB**, **PostgreSQL 12** and **Redis**. If
+Right now, this app supports **MongoDB**, **PostgreSQL 12**, **MariaDB** and **Redis**. If
 you need support for an additional database, consider opening a pull request to
 add a new database handler.
 
@@ -312,7 +312,7 @@ Identifiers can be any string of your choosing.
       connection_string: "mongodb://blackbox:blackbox@mongo:27017"
 ```
 
-### Postgres
+### PostgreSQL 12
 
 - **Database Type**: `postgres`
 - **Required fields**: `username`, `password`, `host`, `port`
@@ -493,14 +493,14 @@ one, do the following:
   incorrectly.
 
 You can also define a custom location (root is App Folder) using the
-`upload_directory` optional parameter. This **should** begin with slash and **
-must** end with slash. Default is root.
+`upload_directory` optional parameter. This **should** begin with slash and 
+**must** end with slash. Default is root.
 
 ## Notifiers
 
 `blackbox` also implements different _notifiers_, which is how it reports the
-result of one of its jobs to you. Right now we only support **Discord** and **
-Slack**, but if you need a specific notifier, feel free to open an issue.
+result of one of its jobs to you. Right now we only support **Discord** and **Slack**
+and **Telegram**, but if you need a specific notifier, feel free to open an issue.
 
 To configure notifiers, add a section with this format:
 
