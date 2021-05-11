@@ -5,6 +5,7 @@ from pathlib import Path
 
 from dropbox import Dropbox as DropboxClient
 from dropbox.exceptions import ApiError
+from dropbox.exceptions import AuthError
 from dropbox.exceptions import HttpError
 from dropbox.files import CommitInfo
 from dropbox.files import FileMetadata
@@ -26,9 +27,25 @@ class Dropbox(BlackboxStorage):
 
         self.upload_base = self.config.get("upload_directory") or "/"
         self.client = DropboxClient(self.config["access_token"])
+        self.valid = self._validate_token()
+
+    def _validate_token(self):
+        """Check if dropbox token is valid."""
+        try:
+            return self.client.check_user("test").result == "test"
+        except AuthError:
+            return False
 
     def sync(self, file_path: Path) -> None:
         """Sync a file to Dropbox."""
+        # Check if Dropbox token is valid.
+        if self.valid is False:
+            error = "Dropbox token is invalid!"
+            self.success = False
+            self.output = error
+            log.error(error)
+            return None
+
         # This is size what can be uploaded as one chunk.
         # When file is bigger than that, this will be uploaded
         # in multiple parts.
@@ -84,6 +101,10 @@ class Dropbox(BlackboxStorage):
         are older than `retention_days`, and because of this,
         it's better to have backups in isolated folder.
         """
+        # Check if Dropbox token is valid.
+        if self.valid is False:
+            log.error("Dropbox token is invalid - Can't delete old backups!")
+            return None
         # Let's rotate only this type of database
         db_type_regex = rf"{database_id}_blackbox_\d{{2}}_\d{{2}}_\d{{4}}.+"
 
