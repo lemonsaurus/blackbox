@@ -15,6 +15,7 @@ from blackbox.__version__ import __version__
 from blackbox.config import Blackbox as CONFIG
 from blackbox.config import YAMLGetter
 from blackbox.utils import workflows
+from blackbox.utils.cooldown import is_not_cooldown_period, parse_config_cooldown
 from blackbox.utils.frequency import can_we_notify_now
 from blackbox.utils.logger import log
 from blackbox.utils.reports import DatabaseReport
@@ -79,16 +80,13 @@ def run() -> bool:
             continue
 
         # If frequency is not set, set to zero or if report is failed: just notify.
-        frequency = CONFIG['notifier_frequency']
-        if frequency is None or frequency <= 0 or not notifier.report.success:
+        cooldown = CONFIG['cooldown']
+        if cooldown is None or cooldown <= 0 or not notifier.report.success:
             notifier.notify()
 
         # But otherwise let's check do we have a right to notify
         else:
-            we_can_notify, attempts = can_we_notify_now()
-            if we_can_notify:
-                if attempts > 0:
-                    log.debug(f"By the way there were {attempts} successful backups.")
+            if is_not_cooldown_period(cooldown):
                 notifier.notify()
 
         notifier.teardown()
