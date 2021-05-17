@@ -1,4 +1,5 @@
 import re
+from datetime import datetime
 from typing import Optional
 
 from dateutil.relativedelta import relativedelta
@@ -25,5 +26,5 @@ def parse_config_cooldown(cooldown) -> Optional[relativedelta]:
     return delta
 
 
-def should_we_send(last_send, delta):
-    pass
+def should_we_send(last_send: datetime, delta: relativedelta) -> bool:
+    return True if datetime.now() - delta >= last_send else False

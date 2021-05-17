@@ -20,9 +20,9 @@ def test_regex_cooldown_setting(cooldown_config):
 def test_should_we_send_notification(cooldown_config):
     delta = parse_config_cooldown(cooldown_config)
     now = datetime.now()
-    last_send = now - delta
-    assert should_we_send(last_send, delta) is True
-    last_send = now - delta - relativedelta(seconds=10)
-    assert should_we_send(last_send, delta) is True
-    last_send = now - delta + relativedelta(seconds=10)
-    assert should_we_send(last_send, delta) is False
+    last_send_exact = now - delta
+    assert should_we_send(last_send_exact, delta) is True
+    last_send_long_ago = now - delta - relativedelta(hours=1)
+    assert should_we_send(last_send_long_ago, delta) is True
+    last_send_recent = now - delta + relativedelta(seconds=10)
+    assert should_we_send(last_send_recent, delta) is False
