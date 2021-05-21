@@ -17,7 +17,7 @@ like `cron`, or a Kubernetes CronJob.
 - [Environment Variables](#environment-variables)
 - [Databases](#databases)
     - [MongoDB](#mongodb)
-    - [PostgreSQL](#postgresql-12)
+    - [PostgreSQL](#postgresql-13)
     - [MariaDB](#mariadb)
     - [MySQL](#mysql)
     - [Redis](#redis)
@@ -276,7 +276,7 @@ databases:
 
 ## Databases
 
-Right now, this app supports **MongoDB**, **PostgreSQL 12**, **MariaDB** and **Redis**. If
+Right now, this app supports **MongoDB**, **PostgreSQL 13**, **MariaDB** and **Redis**. If
 you need support for an additional database, consider opening a pull request to
 add a new database handler.
 
@@ -312,7 +312,7 @@ Identifiers can be any string of your choosing.
       connection_string: "mongodb://blackbox:blackbox@mongo:27017"
 ```
 
-### PostgreSQL 12
+### PostgreSQL 13
 
 - **Database Type**: `postgres`
 - **Required fields**: `username`, `password`, `host`, `port`
