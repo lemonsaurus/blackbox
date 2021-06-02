@@ -64,4 +64,5 @@ jobs:
           cache-from: type=registry,ref=lemonsaurus/blackbox:latest
           cache-to: type=inline
           tags: |
+            lemonsaurus/blackbox:latest
             lemonsaurus/blackbox:${{ steps.tags_generator.outputs.semver }}
