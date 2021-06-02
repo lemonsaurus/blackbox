@@ -15,7 +15,7 @@ from blackbox.__version__ import __version__
 from blackbox.config import Blackbox as CONFIG
 from blackbox.config import YAMLGetter
 from blackbox.utils import workflows
-from blackbox.utils.cooldown import is_not_cooldown_period
+from blackbox.utils.cooldown import is_on_cooldown
 from blackbox.utils.logger import log
 from blackbox.utils.reports import DatabaseReport
 
@@ -72,6 +72,9 @@ def run() -> bool:
         if report.success is False:
             success = False
 
+    cooldown = CONFIG['cooldown']
+    is_on_cooldown_ = is_on_cooldown(cooldown)
+
     # Send a report for each notifier configured
     for notifier in notifier_handlers["all"]:
         # Don't send a notification if no database uses the notifier
@@ -79,14 +82,14 @@ def run() -> bool:
             continue
 
         # If cooldown is not set or if report is failed: just notify.
-        cooldown = CONFIG['cooldown']
+
         if cooldown is None or not notifier.report.success:
             log.debug('Config not found or backup failed, sending notification.')
             notifier.notify()
 
         # But otherwise let's check do we have a right to notify
         else:
-            if is_not_cooldown_period(cooldown):
+            if not is_on_cooldown_:
                 notifier.notify()
 
         notifier.teardown()

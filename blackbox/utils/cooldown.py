@@ -33,7 +33,7 @@ def parse_config_cooldown(cooldown) -> Optional[relativedelta]:
     return delta
 
 
-def should_we_send(last_send: datetime, delta: relativedelta) -> bool:
+def should_notify(last_send: datetime, delta: relativedelta) -> bool:
     """Check if we can send now."""
     return True if datetime.now() - delta >= last_send else False
 
@@ -41,6 +41,7 @@ def should_we_send(last_send: datetime, delta: relativedelta) -> bool:
 def write_config():
     """Write down successful notification."""
     data = {'last_send': datetime.now().strftime("%m/%d/%Y, %H:%M:%S")}
+    log.debug(f"Sending notification at {data}")
     with open(get_project_root() / 'notify.json', 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
 
@@ -58,16 +59,18 @@ def get_project_root() -> Path:
     return Path(__file__).parent.parent
 
 
-def is_not_cooldown_period(cooldown) -> bool:
+def is_on_cooldown(cooldown) -> bool:
     """Check if we can send notification, main function."""
-    log.debug(f'Cool down period set to {cooldown}')
+    log.debug(f'Cooldown period set to {cooldown}')
     delta = parse_config_cooldown(cooldown)
     if os.path.exists(get_project_root() / 'notify.json'):
         data = read_config()
         last_send = datetime.strptime(data['last_send'], "%m/%d/%Y, %H:%M:%S")
-        if should_we_send(last_send, delta):
+        if should_notify(last_send, delta):
             write_config()
-            return True
+            return False
+        log.debug('On cooldown')
+        return True
     else:
         write_config()
-        return True
+        return False
