@@ -5,7 +5,7 @@ on:
     types: [ published ]
 
 jobs:
-  publish-pipy:
+  publish-to-pipy:
     name: publish to pypi.org
     runs-on: ubuntu-latest
 
@@ -26,3 +26,42 @@ jobs:
           pypi_token: ${{ secrets.PYPI_TOKEN }}
           repository_name: 'blackbox-cli'
           repository_url: 'https://pypi.org/project/blackbox-cli/'
+
+  build-and-push-on-release:
+    name: Build and push
+    runs-on: ubuntu-latest
+    needs: publish-to-pipy
+
+    steps:
+      # Create a commit SHA-based tag for the container repositories
+      - name: Create Container Tags
+        id: tags_generator
+        run: |
+          semver=$(python blackbox/utils/version.py)
+          echo "::set-output name=semver::$semver"
+
+      # Check out the current repository
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # Set up Docker Buildx and log into DockerHub
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN  }}
+
+      # Build and push the container to the GitHub Container
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./docker/Dockerfile
+          push: true
+          cache-from: type=registry,ref=lemonsaurus/blackbox:latest
+          cache-to: type=inline
+          tags: |
+            lemonsaurus/blackbox:${{ steps.tags_generator.outputs.semver }}
