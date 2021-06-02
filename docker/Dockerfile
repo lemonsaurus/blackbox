@@ -13,7 +13,7 @@ RUN apt-get -y update && apt-get install -y \
 
 # Install and setup poetry
 RUN pip install -U pip \
-    && apt install -y curl netcat \
+    && apt install -y curl \
     && curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
 ENV PATH="${PATH}:/root/.poetry/bin"
 
