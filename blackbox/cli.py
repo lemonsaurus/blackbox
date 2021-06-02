@@ -4,6 +4,7 @@ Blackbox is a plug-and-play service which magically backs up all your databases.
 The backups are stored on your favorite cloud storage providers, and Blackbox will notify
 you on your chat platform of choice once the job is done.
 """
+import logging
 import os
 from pathlib import Path
 from textwrap import dedent
@@ -73,7 +74,9 @@ def run() -> bool:
             success = False
 
     cooldown = CONFIG['cooldown']
-    is_on_cooldown_ = is_on_cooldown(cooldown)
+    logging.debug(f"Cooldown setting is {cooldown}")
+    if cooldown:
+        is_on_cooldown_ = is_on_cooldown(cooldown)
 
     # Send a report for each notifier configured
     for notifier in notifier_handlers["all"]:
