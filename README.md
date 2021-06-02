@@ -30,6 +30,7 @@ like `cron`, or a Kubernetes CronJob.
     - [Slack](#slack)
     - [Telegram](#telegram)
 - [Rotation](#rotation)
+- [Cooldown](#cooldown)
 
 # Setup
 
@@ -578,3 +579,25 @@ example `blackbox-postgres-backup-11-12-2020.sql`.
 
 You can configure the number of days before rotating by altering
 the `retention_days` parameter in `blackbox.yaml`.
+
+
+## Cooldown
+
+By default, `blackbox` will send all notification at every backup attempt. 
+You can specify a `cooldown` period in `blackbox.yaml` during which all notifications will be muted.
+This option will not mute failed backups.
+
+### Example usage
+
+```yaml
+cooldown: 120s
+```
+```yaml
+cooldown: 3 hours
+```
+```yaml
+cooldown: 2 days 4 hours
+```
+```yaml
+cooldown: 4h 32M 16s
+```

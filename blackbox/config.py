@@ -121,3 +121,4 @@ class Blackbox(metaclass=YAMLGetter):
 
     # Configuration
     retention_days: int
+    notifier_frequency: int
