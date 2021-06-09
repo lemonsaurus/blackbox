@@ -21,7 +21,7 @@ class Slack(BlackboxNotifier):
             "mrkdwn_in": ["fields"],
             "title": "Backup",
             "author_name": "blackbox",
-            "author_icon": "https://raw.githubusercontent.com/lemonsaurus/blackbox/main/img/blackbox_avatar.png"
+            "author_icon": "https://raw.githubusercontent.com/lemonsaurus/blackbox/main/img/blackbox_avatar.png"  # NOQA: E501
         }
 
         # Combine and truncate total output to < 2000 characters, fields don't support more.
@@ -139,7 +139,7 @@ class Slack(BlackboxNotifier):
                 "elements": [
                     {
                         "type": "image",
-                        "image_url": "https://raw.githubusercontent.com/lemonsaurus/blackbox/main/img/blackbox_avatar.png",
+                        "image_url": "https://raw.githubusercontent.com/lemonsaurus/blackbox/main/img/blackbox_avatar.png",  # NOQA: E501
                         "alt_text": "blackbox"
                     },
                     {

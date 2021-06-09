@@ -51,7 +51,8 @@ def run() -> bool:
             database = workflow.database
 
             # Do a backup, then return the path to the backup file
-            backup_path = backup_dir / f"{database.config['id']}_blackbox_{date}{database.backup_extension}"
+            backup_filename = f"{database.config['id']}_blackbox_{date}{database.backup_extension}"
+            backup_path = backup_dir / backup_filename
             database.backup(backup_path)
             backup_files.append(backup_path)
             database_id = database.get_id_for_retention()
@@ -110,7 +111,7 @@ def run() -> bool:
 @click.option('--version', is_flag=True, help="Show version and exit")
 def cli(config, init, version):
     """
-    BLACKBOX 
+    BLACKBOX
 
     Backup database to external storage system
     """  # noqa

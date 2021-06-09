@@ -59,7 +59,7 @@ class Discord(BlackboxNotifier):
                 }
             ],
             "username": "blackbox",
-            "avatar_url": "https://raw.githubusercontent.com/lemonsaurus/blackbox/main/img/blackbox_avatar.png"
+            "avatar_url": "https://raw.githubusercontent.com/lemonsaurus/blackbox/main/img/blackbox_avatar.png"  # NOQA: E501
         }
 
     def notify(self):
