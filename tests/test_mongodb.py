@@ -41,7 +41,11 @@ def test_mongodb_backup(mock_valid_mongodb_config, fake_process):
     archive = Path.cwd() / f"main_mongo_blackbox_{date}.archive"
 
     command_to_run = [
-        f"mongodump --uri=mongodb://mongouser:mongopassword@host:port --gzip --forceTableScan --archive={archive}"
+        "mongodump "
+        "--uri=mongodb://mongouser:mongopassword@host:port "
+        "--gzip "
+        "--forceTableScan "
+        f"--archive={archive}"
     ]
 
     fake_process.register_subprocess(
