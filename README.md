@@ -277,7 +277,7 @@ databases:
 
 ## Databases
 
-Right now, this app supports **MongoDB**, **PostgreSQL 13**, **MariaDB** and **Redis**. If
+Right now, this app supports **MongoDB**, **PostgreSQL 13**, **MariaDB**, **Redis** and **Zip archiving**. If
 you need support for an additional database, consider opening a pull request to
 add a new database handler.
 
@@ -370,6 +370,14 @@ Identifiers can be any string of your choosing.
       host: redis
       port: "6379"
 ```
+
+### Zip archiving
+
+- **Database type**: `zip`
+- **Required field**: `path`
+- **Optional field**: `compression_level`
+- The compression level must be an integer between 0 and 9.
+- The archive will contain the full structure, starting from the root folder.
 
 #### To restore from the backup
 

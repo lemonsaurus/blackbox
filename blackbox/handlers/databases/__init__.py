@@ -4,3 +4,4 @@ from .mongodb import MongoDB
 from .mysql import MySQL
 from .postgres import Postgres
 from .redis import Redis
+from .zip import Zip
