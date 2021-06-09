@@ -277,7 +277,7 @@ databases:
 
 ## Databases
 
-Right now, this app supports **MongoDB**, **PostgreSQL 13**, **MariaDB**, **Redis** and **Zip archiving**. If
+Right now, this app supports **MongoDB**, **PostgreSQL 13**, **MariaDB**, **Redis** and **LocalStorage archiving**. If
 you need support for an additional database, consider opening a pull request to
 add a new database handler.
 
@@ -371,13 +371,20 @@ Identifiers can be any string of your choosing.
       port: "6379"
 ```
 
-### Zip archiving
+### Local Storage
 
-- **Database type**: `zip`
+- **Database type**: `localstorage`
 - **Required field**: `path`
 - **Optional field**: `compression_level`
 - The compression level must be an integer between 0 and 9.
 - The archive will contain the full structure, starting from the root folder.
+
+```yaml
+  localstorage:
+    main_localstorage:
+      path: /path/to/folder
+      compression_level: 7
+```
 
 #### To restore from the backup
 

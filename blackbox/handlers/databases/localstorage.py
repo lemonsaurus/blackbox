@@ -8,7 +8,7 @@ from blackbox.exceptions import ImproperlyConfigured
 from blackbox.handlers.databases._base import BlackboxDatabase
 
 
-class Zip(BlackboxDatabase):
+class LocalStorage(BlackboxDatabase):
     """A Database handler that will zip a local folder."""
 
     required_fields = ("path",)
@@ -38,4 +38,5 @@ class Zip(BlackboxDatabase):
                     elif file.is_dir():
                         directories.append(file)
 
+        self.success = True
         return backup_path
