@@ -91,7 +91,6 @@ def run() -> bool:
                 continue
 
             # If cooldown is not set or if report is failed: just notify.
-
             if cooldown is None or not notifier.report.success:
                 log.debug('Config not found or backup failed, sending notification.')
                 notifier.notify()
