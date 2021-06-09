@@ -1,6 +1,3 @@
-import datetime
-from pathlib import Path
-
 from blackbox.handlers.databases._base import BlackboxDatabase
 from blackbox.utils import run_command
 from blackbox.utils.logger import log
@@ -15,21 +12,16 @@ class MongoDB(BlackboxDatabase):
     """
 
     required_fields = ("connection_string",)
+    backup_extension = ".archive"
 
-    def backup(self) -> Path:
+    def backup(self, backup_path) -> None:
         """Dump all the data to a file and then return the filepath."""
-        date = datetime.date.today().strftime("%d_%m_%Y")
-        archive_file = Path.home() / f"{self.config['id']}_blackbox_{date}.archive"
-
         # Run the backup, and store the outcome in this object.
         self.success, self.output = run_command(
             f"mongodump "
             f"--uri={self.config['connection_string']} "
             "--gzip "
             "--forceTableScan "
-            f"--archive={archive_file}"
+            f"--archive={backup_path}"
         )
         log.debug(self.output)
-
-        # Return the path to the backup file
-        return archive_file

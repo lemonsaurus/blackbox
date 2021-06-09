@@ -45,6 +45,5 @@ def test_postgres_backup(mock_valid_postgres_config, fake_process):
         command_to_run, stdout=["thing", "stuff"]
     )
 
-    res = postgres.backup()
-
-    assert res == backup_path
+    postgres.backup(backup_path)
+    assert fake_process.call_count(command_to_run) == 1
