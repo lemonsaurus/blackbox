@@ -38,7 +38,7 @@ def test_mongodb_backup(mock_valid_mongodb_config, fake_process):
     mongo = MongoDB(**mock_valid_mongodb_config)
 
     date = datetime.datetime.today().strftime("%d_%m_%Y")
-    archive = Path.home() / f"main_mongo_blackbox_{date}.archive"
+    archive = Path.cwd() / f"main_mongo_blackbox_{date}.archive"
 
     command_to_run = [
         f"mongodump --uri=mongodb://mongouser:mongopassword@host:port --gzip --forceTableScan --archive={archive}"
@@ -48,6 +48,5 @@ def test_mongodb_backup(mock_valid_mongodb_config, fake_process):
         command_to_run, stdout=["thing", "stuff"]
     )
 
-    res = mongo.backup()
-
-    assert res == archive
+    mongo.backup(archive)
+    assert fake_process.call_count(command_to_run) == 1

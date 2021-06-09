@@ -8,6 +8,7 @@ class BlackboxDatabase(BlackboxHandler):
     """An abstract database handler."""
 
     handler_type = "database"
+    backup_extension = ""
 
     def __init__(self, **kwargs):
         """Set up database handler."""
@@ -17,9 +18,9 @@ class BlackboxDatabase(BlackboxHandler):
         self.output = ""      # What did the backup output?
 
     @abstractmethod
-    def backup(self) -> Path:
+    def backup(self, backup_path: Path):
         """
-        Back up a database and return the Path for the backup file.
+        Back up a database to the provided backup Path.
 
         All subclasses must implement this method.
         """
