@@ -51,8 +51,8 @@ class Dropbox(BlackboxStorage):
         # in multiple parts.
         chunk_size = 4 * 1024 * 1024
 
-        temp_file = self.compress(file_path)
-        upload_path = f"{self.upload_base}{file_path.name}.gz"
+        temp_file, recompressed = self.compress(file_path)
+        upload_path = f"{self.upload_base}{file_path.name}{'.gz' if recompressed else ''}"
 
         try:
             with temp_file as f:
