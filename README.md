@@ -277,7 +277,7 @@ databases:
 
 ## Databases
 
-Right now, this app supports **MongoDB**, **PostgreSQL 13**, **MariaDB**, **Redis** and **LocalStorage archiving**. If
+Right now, this app supports **MongoDB**, **PostgreSQL 13**, **MariaDB**, **Redis** and **local storage archiving**. If
 you need support for an additional database, consider opening a pull request to
 add a new database handler.
 
@@ -371,7 +371,7 @@ Identifiers can be any string of your choosing.
       port: "6379"
 ```
 
-### Local Storage
+### Local storage
 
 - **Database type**: `localstorage`
 - **Required field**: `path`
