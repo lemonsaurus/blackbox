@@ -1,4 +1,3 @@
-import datetime
 from pathlib import Path
 from zipfile import ZIP_DEFLATED
 from zipfile import ZipFile
@@ -19,18 +18,15 @@ class LocalStorage(BlackboxDatabase):
         if compression_level := kwargs.get("compression_level"):
             if compression_level < 0 or compression_level > 9:
                 raise ImproperlyConfigured(
-                    f"Invalid compression level. Must be an integer between 0 and 9, got {compression_level}."
+                    f"Invalid compression level. "
+                    f"Must be an integer between 0 and 9, got {compression_level}."
                 )
 
         super().__init__(**kwargs)
 
-    def backup(self) -> Path:
-        date = datetime.date.today().strftime("%d_%m_%Y")
-
+    def backup(self, backup_path: Path) -> Path:
         path = self.config["path"]
         compression_level = self.config.get("compression_level", 5)
-
-        backup_path = Path.home() / f"{self.config['id']}_blackbox_{date}.zip"
 
         # Store evey file in the archive
         # We use deflate (Gzip) for compression and the level has already been validated in __init__
@@ -39,6 +35,5 @@ class LocalStorage(BlackboxDatabase):
                 if subpath.is_file():
                     zipfile.write(subpath)
 
-        # The compression was successful, we can return the archive
+        # The compression was successful
         self.success = True
-        return backup_path

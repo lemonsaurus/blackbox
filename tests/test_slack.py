@@ -51,7 +51,7 @@ def test_slack_notify(mock_valid_slack_config, report):
     assert slack._parse_report() == {
         'attachments': [
             {
-                'author_icon': 'https://raw.githubusercontent.com/lemonsaurus/blackbox/main/img/blackbox_avatar.png',
+                'author_icon': 'https://raw.githubusercontent.com/lemonsaurus/blackbox/main/img/blackbox_avatar.png',  # NOQA: E501
                 'author_name': 'blackbox',
                 'color': '#0FA031',
 
@@ -93,7 +93,7 @@ def test_slack_notify_modern(mock_valid_slack_config_with_block_kit, report):
                 'elements': [
                     {
                         'alt_text': 'blackbox',
-                        'image_url': 'https://raw.githubusercontent.com/lemonsaurus/blackbox/main/img/blackbox_avatar.png',
+                        'image_url': 'https://raw.githubusercontent.com/lemonsaurus/blackbox/main/img/blackbox_avatar.png',  # NOQA: E501
                         'type': 'image'
                     },
                     {

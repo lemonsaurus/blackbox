@@ -37,7 +37,7 @@ def test_discord_notify(mock_valid_discord_config, report):
     discord.report = report
 
     assert discord._parse_report() == {
-        'avatar_url': 'https://raw.githubusercontent.com/lemonsaurus/blackbox/main/img/blackbox_avatar.png',
+        'avatar_url': 'https://raw.githubusercontent.com/lemonsaurus/blackbox/main/img/blackbox_avatar.png',  # NOQA: E501
         'content': None,
         'embeds': [{'color': 1024049,
                     'fields': [{'inline': True,

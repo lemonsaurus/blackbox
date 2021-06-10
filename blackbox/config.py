@@ -11,8 +11,10 @@ class YAMLGetter(type):
 
     Supports getting configuration from up to two levels
     of nested configuration through `section` and `subsection`.
-    - `section` specifies the YAML configuration section (or "key") in which the configuration lives.
-    - `subsection` specifies the section within the section from which configuration should be loaded.
+    - `section` specifies the YAML configuration section
+      (or "key") in which the configuration lives.
+    - `subsection` specifies the section within the
+      section from which configuration should be loaded.
 
     If neither are these are set, it'll just try to get it from the root level.
 
@@ -79,8 +81,9 @@ class YAMLGetter(type):
         # allows us to comfortably modify the `_config` at some point before we start using
         # any of the Handlers, without worrying about any race conditions.
         #
-        # If you need this config to be set before or after the first call to __getattr__, simply call
-        # YAMLGetter.parse_config(). You can pass in a configuration file path if you need to.
+        # If you need this config to be set before or after the first call to __getattr__,
+        # simply call YAMLGetter.parse_config().
+        # You can pass in a configuration file path if you need to.
         if not cls._config:
             cls.parse_config()
 
@@ -93,7 +96,10 @@ class YAMLGetter(type):
                 return cls._config[cls.section][cls.subsection][name]
         except KeyError:
             # If one of the handler lists isn't defined, return an empty list.
-            log.warning(f"{name} is not defined in the blackbox.yaml file -- returning an falsy value.")
+            log.warning(
+                f"{name} is not defined in the blackbox.yaml file -- "
+                "returning an falsy value."
+            )
             if cls._get_annotation(name) == list:
                 return []
             elif cls._get_annotation(name) == dict:

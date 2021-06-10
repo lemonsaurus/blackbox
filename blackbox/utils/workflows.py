@@ -63,7 +63,10 @@ def get_configured_handlers(config: dict) -> dict:
     return handler_dict
 
 
-def get_handlers_by_id(id_: t.Union[str, list[str]], handlers: HandlerById[Handler]) -> set[Handler]:
+def get_handlers_by_id(
+    id_: t.Union[str, list[str]],
+    handlers: HandlerById[Handler]
+) -> set[Handler]:
     """
     Given ids and a mapping of id to handlers, return handlers matching the ids.
 

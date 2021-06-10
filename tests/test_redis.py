@@ -46,6 +46,5 @@ def test_redis_backup(mock_valid_redis_config, fake_process):
         command_to_run, stdout=["redis backup"]
     )
 
-    res = redis.backup()
-
-    assert res == backup_path
+    redis.backup(backup_path)
+    assert fake_process.call_count(command_to_run) == 1
