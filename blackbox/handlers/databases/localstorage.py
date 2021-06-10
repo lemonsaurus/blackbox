@@ -35,9 +35,9 @@ class LocalStorage(BlackboxDatabase):
         # Store evey file in the archive
         # We use deflate (Gzip) for compression and the level has already been validated in __init__
         with ZipFile(backup_path, "w", ZIP_DEFLATED, compresslevel=compression_level) as zipfile:
-            for file in path.rglob("*"):
-                if file.is_file():
-                    zipfile.write(file)
+            for subpath in path.rglob("*"):
+                if subpath.is_file():
+                    zipfile.write(subpath)
 
         # The compression was successful, we can return the archive
         self.success = True
