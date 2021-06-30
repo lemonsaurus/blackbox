@@ -3,6 +3,7 @@
 [![PyPI version](https://badge.fury.io/py/blackbox-cli.svg)](https://pypi.org/project/blackbox-cli/)
 
 ![blackbox](https://github.com/lemonsaurus/blackbox/raw/main/img/blackbox_banner.png)
+
 A simple service which magically backs up all your databases to all your
 favorite cloud storage providers, and then notifies you.
 
@@ -46,7 +47,7 @@ Requires Python 3.9 or newer
 pip install blackbox-cli
 
 # Create a configuration file
-blacbox --init
+blackbox --init
 
 # Run blackbox with a specific config file
 blackbox --config=/path/to/blackbox.yaml
