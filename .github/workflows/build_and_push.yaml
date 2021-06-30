@@ -41,7 +41,7 @@ jobs:
           context: .
           file: ./docker/Dockerfile
           push: true
-          cache-from: type=registry,ref=lemonsaurus/blackbox:latest
+          cache-from: type=registry,ref=lemonsaurus/blackbox:main
           cache-to: type=inline
           tags: |
             lemonsaurus/blackbox:main
