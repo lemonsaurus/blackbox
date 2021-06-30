@@ -73,13 +73,13 @@ class S3(BlackboxStorage):
 
     def sync(self, file_path: Path) -> None:
         """Sync a file to an S3 bucket."""
-        file_ = self.compress(file_path)
+        file_, recompressed = self.compress(file_path)
 
         try:
             self.client.upload_fileobj(
                 file_,
                 self.bucket,
-                f"{file_path.name}.gz",
+                f"{file_path.name}{'.gz' if recompressed else ''}",
                 ExtraArgs={"ContentEncoding": "gzip"}
             )
             self.success = True
