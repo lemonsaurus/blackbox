@@ -36,13 +36,6 @@ jobs:
       # Check out the current repository
       - name: Checkout repository
         uses: actions/checkout@v2
-        
-      # Create a commit SHA-based tag for the container repositories
-      - name: Create Container Tags
-        id: tags_generator
-        run: |
-          semver=$(python blackbox/utils/version.py)
-          echo "::set-output name=semver::$semver"
 
       # Set up Docker Buildx and log into DockerHub
       - name: Set up Docker Buildx
@@ -65,4 +58,4 @@ jobs:
           cache-to: type=inline
           tags: |
             lemonsaurus/blackbox:latest
-            lemonsaurus/blackbox:${{ steps.tags_generator.outputs.semver }}
+            lemonsaurus/blackbox:${{ github.event.release.tag_name }}
