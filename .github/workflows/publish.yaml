@@ -22,7 +22,7 @@ jobs:
         uses: JRubics/poetry-publish@v1  # https://github.com/marketplace/actions/publish-python-poetry-package
         with:
           python_version: '3.9.0'
-          poetry_version: '==1.1.5'  # PIP version specifier syntax
+          poetry_version: '>=1.2.0a1'
           pypi_token: ${{ secrets.PYPI_TOKEN }}
           repository_name: 'blackbox-cli'
           repository_url: 'https://pypi.org/project/blackbox-cli/'
