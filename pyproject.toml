@@ -3,7 +3,7 @@ name = "blackbox-cli"
 packages = [
     { include = "blackbox" }
 ]
-version = "2.1.2"
+version = "0"  # This is not in use. The version is fetched from the most recent git tag.
 description = "Tool for automatic backups of databases"
 authors = ["Leon Sandøy <leon.sandoy@gmail.com>"]
 license = "MIT"
@@ -44,8 +44,11 @@ requests-mock = "^1.8.0"
 win32-setctime = "^1.0.3"
 poethepoet = "^0.10.0"
 
+[tool.poetry-version-plugin]
+source = "git-tag"
+
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["poetry-core>=1.1.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
