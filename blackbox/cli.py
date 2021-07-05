@@ -105,14 +105,20 @@ def run() -> bool:
 
 
 @click.command()
-@click.option('--config', help="Path to blackbox.yaml file")
-@click.option('--init', is_flag=True, help="Generate blackbox.yaml file and exit")
-def cli(config, init):
+@click.option('--config', help="Path to blackbox.yaml file.")
+@click.option('--init', is_flag=True, help="Generate blackbox.yaml file and exit.")
+@click.option('--version', is_flag=True, help="Show version and exit.")
+def cli(config, init, version):
     """
     BLACKBOX
 
     Backup database to external storage system
     """  # noqa
+    if version:
+        from blackbox import __version__
+        print(f"Blackbox {__version__}")
+        exit()
+
     if init:
         config_file = Path("blackbox.yaml")
         if not config_file.exists():
