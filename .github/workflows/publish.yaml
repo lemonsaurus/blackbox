@@ -24,11 +24,11 @@ jobs:
       - name: Bump the version
         run: poetry version ${{ github.event.release.tag_name }}
 
-      - name: Commit the changes
-        run: |
-          git add pyproject.toml
-          git commit -m "Bump version to ${{ github.event.release.tag_name }}"
-          git push origin main
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          file_pattern: pyproject.toml
+          commit_message: Bump version to ${{ github.event.release.tag_name }}
 
   publish-to-pipy:
     name: Publish to pypi.org
