@@ -40,6 +40,8 @@ jobs:
     steps:
       - name: Checkout the repo.
         uses: actions/checkout@v2
+        with:
+          ref: main
 
       - name: Set up Python
         uses: actions/setup-python@v1
