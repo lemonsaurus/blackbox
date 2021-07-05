@@ -19,7 +19,6 @@ from blackbox.utils import workflows
 from blackbox.utils.cooldown import is_on_cooldown
 from blackbox.utils.logger import log
 from blackbox.utils.reports import DatabaseReport
-from blackbox.utils.version import get_project_version
 
 
 def run() -> bool:
@@ -108,18 +107,12 @@ def run() -> bool:
 @click.command()
 @click.option('--config', help="Path to blackbox.yaml file")
 @click.option('--init', is_flag=True, help="Generate blackbox.yaml file and exit")
-@click.option('--version', is_flag=True, help="Show version and exit")
-def cli(config, init, version):
+def cli(config, init):
     """
     BLACKBOX
 
     Backup database to external storage system
     """  # noqa
-    if version:
-        # Get accurate version from poetry toml file.
-        print(str(get_project_version()), flush=True)
-        exit()
-
     if init:
         config_file = Path("blackbox.yaml")
         if not config_file.exists():
