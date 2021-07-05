@@ -54,8 +54,9 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.scripts]
 blackbox = "blackbox.cli:cli"
 
+# Use 'poetry run poe <taskname>' to run these.
 [tool.poe.tasks]
-test = "pytest --cov blackbox -vv --cov-report=term-missing ."
+tests = "pytest --cov blackbox -vv --cov-report=term-missing ."
 lint = "flake8 ."
 isort = "isort ."
 html = "pytest --cov blackbox --cov-report=html ."

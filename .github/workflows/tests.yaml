@@ -33,4 +33,4 @@ jobs:
         run: poe lint
 
       - name: Testing
-        run: poe test
+        run: poe tests
