@@ -18,8 +18,11 @@ RUN pip install -U pip \
 ENV PATH="${PATH}:/root/.poetry/bin"
 
 # Install mongotools, used for getting mongo backups
-# and redis-tools, used for redis backups.
-RUN apt-get install -y mongo-tools redis-tools
+RUN wget https://fastdl.mongodb.org/tools/db/mongodb-database-tools-ubuntu2004-x86_64-100.5.0.deb -O mongo-tools.deb \
+    && apt install -y ./mongo-tools.deb
+
+# Install redis-tools, used for redis backups.
+RUN apt install -y redis-tools
 
 # Install the Postgres 13 client, needed for pg_dumpall
 # And MariaDB client for mysqldump
