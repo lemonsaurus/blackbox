@@ -71,7 +71,7 @@ crontab -e
 To set this up as a Kubernetes CronJob, you'll want three manifests and a
 secret.
 
-Before we start, you'll probably want to create a Secret where you expose
+Before we start, you'll probably want to create a secret named `blackbox-secrets` where you expose
 environment variables containing stuff like passwords for your databases,
 credentials for your storage, and webhooks as environment variables. We'll be
 interpolating those into the config file.
@@ -109,21 +109,6 @@ data:
     retention_days: 7
 ```
 
-Next, we'll need to configure the `BLACKBOX_CONFIG_PATH`, which tells Blackbox
-where to find the config file. This doesn't need to be a secret, so we'll just
-put that into a regular ConfigMap.
-
-```yaml
-# env-configmap.yaml
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: blackbox-env
-data:
-  # Set the config file location
-  BLACKBOX_CONFIG_PATH: "/blackbox/config_file/blackbox.yaml"
-```
-
 Finally, we need the CronJob itself. This one is configured to run once a day,
 at midnight.
 
@@ -146,8 +131,10 @@ spec:
               envFrom:
                 - secretRef:
                     name: blackbox-secrets
-                - configMapRef:
-                    name: blackbox-env
+              # Tell blackbox where to find the config file.
+              env:
+              - name: BLACKBOX_CONFIG_PATH
+                value: "/blackbox/config_file/blackbox.yaml"
               volumeMounts:
                 # Take care not to mount this in the root folder!
                 # That will replace everything in the root folder with
