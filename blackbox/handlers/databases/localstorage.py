@@ -24,14 +24,14 @@ class LocalStorage(BlackboxDatabase):
 
         super().__init__(**kwargs)
 
-    def backup(self, backup_path: Path) -> Path:
+    def backup(self, backup_path: Path) -> None:
         path = self.config["path"]
         compression_level = self.config.get("compression_level", 5)
 
         # Store evey file in the archive
         # We use deflate (Gzip) for compression and the level has already been validated in __init__
         with ZipFile(backup_path, "w", ZIP_DEFLATED, compresslevel=compression_level) as zipfile:
-            for subpath in path.rglob("*"):
+            for subpath in Path(path).rglob("*"):
                 if subpath.is_file():
                     zipfile.write(subpath)
 
