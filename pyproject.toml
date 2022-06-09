@@ -3,7 +3,7 @@ name = "blackbox-cli"
 packages = [
     { include = "blackbox" }
 ]
-version = "2.1.11"
+version = "v2.2.0"
 description = "Tool for automatic backups of databases"
 authors = ["Leon Sandøy <leon.sandoy@gmail.com>"]
 license = "MIT"
