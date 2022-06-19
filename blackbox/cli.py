@@ -91,8 +91,11 @@ def run() -> bool:
                 continue
 
             # If cooldown is not set or if report is failed: just notify.
-            if cooldown is None or not notifier.report.success:
-                log.debug('Config not found or backup failed, sending notification.')
+            if not notifier.report.success:
+                log.debug("Backup failed, sending notification.")
+                notifier.notify()
+            elif cooldown is None:
+                log.debug('Cooldown config is None, sending notification.')
                 notifier.notify()
 
             # But otherwise let's check do we have a right to notify
