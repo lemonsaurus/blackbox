@@ -24,12 +24,12 @@ RUN wget https://fastdl.mongodb.org/tools/db/mongodb-database-tools-ubuntu2004-x
 # Install redis-tools, used for redis backups.
 RUN apt install -y redis-tools
 
-# Install the Postgres 14 client, needed for pg_dumpall
+# Install the Postgres 15 client, needed for pg_dumpall
 # And MariaDB client for mysqldump
 RUN sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
 RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 RUN apt-get update -y && \
-    apt-get install -y postgresql-client-14 mariadb-client
+    apt-get install -y postgresql-client-15 mariadb-client
 
 # Create and set the working directory, so we don't make a mess in the Docker filesystem.
 WORKDIR /blackbox
