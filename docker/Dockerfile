@@ -14,7 +14,7 @@ RUN apt-get -y update && apt-get install -y \
 # Install and setup poetry
 RUN pip install -U pip \
     && apt install -y curl \
-    && curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
+    && curl -sSL https://install.python-poetry.org | POETRY_HOME=/root/.poetry python
 ENV PATH="${PATH}:/root/.poetry/bin"
 
 # Install mongotools, used for getting mongo backups
