@@ -593,21 +593,29 @@ files = [
 
 [[package]]
 name = "pytelegrambotapi"
-version = "3.7.7"
+version = "4.11.0"
 description = "Python Telegram bot api."
 category = "main"
 optional = false
 python-versions = "*"
 files = [
-    {file = "pyTelegramBotAPI-3.7.7.tar.gz", hash = "sha256:43c760b080534f545f89c7c8aada118bef1e1b1df7ac479ecb466ccaf8fe9539"},
+    {file = "pyTelegramBotAPI-4.11.0.tar.gz", hash = "sha256:dba9184bae3bb6a56c70ad3216202cd734a63b6b508ec1b1a2f23afa399d3c47"},
 ]
 
 [package.dependencies]
 requests = "*"
 
 [package.extras]
+aiohttp = ["aiohttp"]
+aioredis = ["aioredis"]
+coloredlogs = ["coloredlogs"]
+fastapi = ["fastapi"]
 json = ["ujson"]
+pil = ["Pillow"]
+psutil = ["psutil"]
 redis = ["redis (>=3.4.1)"]
+uvicorn = ["uvicorn"]
+watchdog = ["watchdog"]
 
 [[package]]
 name = "pytest"
@@ -934,4 +942,4 @@ dev = ["black (>=19.3b0)", "pytest (>=4.6.2)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "751df7348b9ebe1f4803d86fb3de4a84988f503ab09c5a72f00b16277f9b4a37"
+content-hash = "d47cdfbf6b929b9567a2eb05e8561b74e3336efc6e493c07ac29f25db989324f"
