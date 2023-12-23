@@ -26,7 +26,8 @@ class Json(BlackboxNotifier):
 
             storages_payload = []
             # A single database can be backed up in multiple storage points
-            # For each database, we include the storage provider and whether the backup succeeded or not
+            # For each database, we include the storage provider and
+            # whether the backup succeeded or not
             # for that particular storage point.
             for provider in database.storages:
                 storages_payload.append({"name": provider.storage_id, "success": provider.success})
