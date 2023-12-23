@@ -30,6 +30,7 @@ like `cron`, or a Kubernetes CronJob.
     - [Discord](#discord)
     - [Slack](#slack)
     - [Telegram](#telegram)
+    - [Json](#json)
 - [Rotation](#rotation)
 - [Cooldown](#cooldown)
 
@@ -503,8 +504,8 @@ You can also define a custom location (root is App Folder) using the
 ## Notifiers
 
 `blackbox` also implements different _notifiers_, which is how it reports the
-result of one of its jobs to you. Right now we only support **Discord** and **Slack**
-and **Telegram**, but if you need a specific notifier, feel free to open an issue.
+result of one of its jobs to you. Right now we only support the below listed notifiers, 
+but if you need a specific notifier, feel free to open an issue.
 
 To configure notifiers, add a section with this format:
 
@@ -570,6 +571,39 @@ Modern:
 
 ![blackbox](https://github.com/lemonsaurus/blackbox/raw/main/img/blackbox_telegram_success.png)
 ![blackbox](https://github.com/lemonsaurus/blackbox/raw/main/img/blackbox_telegram_fail.png)
+
+
+### Json
+- **Notifier Type**: `json`
+- **Required fields**: `url`
+- YAML will look like this:
+```notifiers:
+  json:
+    json_1:
+      url: https://mydomain.com/api/blackbox-notifications
+```
+
+**Note**: All notifications are sent as a `POST` request because the data will live within the request's body.
+
+The body of the HTTP request will look like this
+
+```json
+{
+    "backup-data": [
+        {
+            "source": "main_postgres",
+            "success": true,
+            "output": "",
+            "backup": [
+                {
+                    "name": "main_dropbox",
+                    "success": true
+                }
+            ]
+        }
+    ]
+}
+```
 
 
 ## Rotation
