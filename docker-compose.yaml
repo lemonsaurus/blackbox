@@ -2,7 +2,7 @@ version: "3.7"
 services:
   postgres:
     container_name: blackbox-postgres
-    image: postgres:15
+    image: postgres:16
     environment:
       POSTGRES_USER: blackbox
       POSTGRES_PASSWORD: blackbox
