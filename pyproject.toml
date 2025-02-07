@@ -23,7 +23,7 @@ exclude = ["tests", "tests.*"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-pyyaml = "5.3.1"
+pyyaml = "^6.0"
 requests = "^2.25.1"
 boto3 = "^1.16.51"
 loguru = "^0.5.3"
