@@ -209,8 +209,6 @@ class GoogleDrive(BlackboxStorage):
         isolated folder.
         """
 
-        log.info("Rotating Google Drive files...")
-
         retention_days = 7  # Default
         if Blackbox.retention_days:
             retention_days = Blackbox.retention_days  # Overwrite if this is configuired
