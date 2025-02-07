@@ -136,6 +136,9 @@ class GoogleDrive(BlackboxStorage):
             # Create all folders in the path if none exist. Otherwise, only create
             # the ones that don't exist yet.
             new_folder_path = path if not folder else path.split(folder["name"])[1]
+            new_folder_path = (new_folder_path[1:]  # Remove leading slash
+                               if new_folder_path.startswith("/")
+                               else new_folder_path)
             parent_id = "root" if not folder else folder["id"]
             return self._create_folder(
                 folder_path=new_folder_path,
