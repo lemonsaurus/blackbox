@@ -31,6 +31,10 @@ class GoogleDrive(BlackboxStorage):
         self.refresh_token = self.config["refresh_token"]
         self.client_id = self.config["client_id"]
         self.client_secret = self.config["client_secret"]
+        self._initialize_drive_client()
+
+    def _initialize_drive_client(self) -> None:
+        """Initialize the Google API Python client."""
         # Build the Credentials object required for initializing the client
         self.credentials = Credentials(
             None,  # No access token initially
