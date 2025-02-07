@@ -24,7 +24,7 @@ class GoogleDrive(BlackboxStorage):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        # The upload base path should not have a trailing slash
+        # The upload base path should not have a leading or trailing slash
         self.upload_base = self.config.get("upload_directory") or ""
 
         # Get credentials and initialize the Google Drive API client
