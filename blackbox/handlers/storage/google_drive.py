@@ -24,7 +24,8 @@ class GoogleDrive(BlackboxStorage):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.upload_base = self.config.get("upload_directory") or "Blackbox/"
+        # The upload base path should not have a trailing slash
+        self.upload_base = self.config.get("upload_directory") or ""
 
         # Get credentials and initialize the Google Drive API client
         self.oauth_uri = "https://oauth2.googleapis.com/token"
@@ -160,11 +161,13 @@ class GoogleDrive(BlackboxStorage):
         mimetype, _ = mimetypes.guess_type(file_path)
 
         # Get the folder
-        folder_path = "/".join(file_path.split("/")[:-1])  # Path excluding the filename
-        folder_id = self._get_and_ensure_deepest_folder_id(path=folder_path)
+        folder_id = "root"  # Use the root folder as a default
+        folder_path = "/".join(file_path.split("/")[:-1])  # Path excluding filename
+        if self.upload_base:
+            folder_id = self._get_and_ensure_deepest_folder_id(path=folder_path)
 
         # Prepare the file metadata
-        file_name = file_path[len(folder_path)+1::]
+        file_name = file_path.split("/")[-1]
         file_metadata = {"name": file_name, "parents": [folder_id]}
 
         # Upload the file to Google Drive
@@ -189,7 +192,7 @@ class GoogleDrive(BlackboxStorage):
         # Compress the file and build the destination file path
         temp_file, recompressed = self.compress(file_path)
         ext = ".gz" if recompressed else ""
-        upload_path = f"{self.upload_base}{file_path.name}{ext}"
+        upload_path = f"{self.upload_base}/{file_path.name}{ext}"
         try:
             with temp_file as f:
                 # Upload the file
@@ -214,7 +217,9 @@ class GoogleDrive(BlackboxStorage):
             retention_days = Blackbox.retention_days  # Overwrite if this is configuired
 
         # Get the folder (remove the trailing slash from the base folder)
-        folder_id = self._get_and_ensure_deepest_folder_id(path=self.upload_base[:-1])
+        folder_id = "root"  # Default to the root folder
+        if self.upload_base:
+            folder_id = self._get_and_ensure_deepest_folder_id(path=self.upload_base)
 
         # Fetch database backup files
         db_type_regex = rf"{database_id}_blackbox_\d{{2}}_\d{{2}}_\d{{4}}.+"
