@@ -4,6 +4,7 @@ import mimetypes
 from datetime import datetime
 from pathlib import Path
 import re
+from typing import Optional, Union
 
 from blackbox.config import Blackbox
 from blackbox.handlers.storage._base import BlackboxStorage
@@ -65,22 +66,29 @@ class GoogleDrive(BlackboxStorage):
         # Establish the Google Drive client
         self.client: Resource = build("drive", "v3", credentials=self.credentials)
 
-    def _find_folder(self, folder_path: str, parent_id: str = "root") -> str | None:
+    def _find_folder(self, folder_path: str, parent_id: str = "root") -> Optional[dict]:
         """
         Search for an existing folder by path within a specific parent.
 
         Args
-            folder_path: The path to the folder. It does not matter if there is a
-                         leading or trailing slash.
+            folder_path: The path to the folder.
             parent_id: The ID of the parent folder. Default is "root".
 
         Return
-            The ID of the found folder, or None if no folder was found.
+            The folder matching the provided path, or None if it wasn't found.
         """
 
         folder_names = folder_path.split("/")
+        current_path: list[str] = []  # Track how far along we've gone down the path
         last_folder_found = None
+
         for folder_name in folder_names:
+            # No need to make a request if `folder_name` is an empty string. The path
+            # should be cleaned to strip leading/trailing/duplicate slashes before
+            # calling this function, so we shouldn't encounter this, but it's good to
+            # have a fallback, just in case.
+            if not len(folder_name):
+                continue
             # Search for folders with this name, of type folder, that are not in the
             # trash, and who have the provided parent folder ID as an ancestor
             query = (
@@ -91,46 +99,55 @@ class GoogleDrive(BlackboxStorage):
             response = self.client.files().list(
                 q=query,
                 spaces="drive",
-                fields="files(id, name)",
+                fields="files(id, name, parents)",
             ).execute()
             folders = response.get("files", [])
             if folders:
                 parent_id = folders[0]["id"]
                 last_folder_found = folders[0]
+                current_path.append(folder_name)
             else:
                 break
 
-        return last_folder_found
+        if current_path == folder_names:
+            return last_folder_found
+        return None
 
     def _create_folder(self, folder_path: str, parent_id: str = "root") -> str:
         """
-        Create a folder in Google Drive.
-
-        Important note: If a folder with this name already exists, another will be
-        created. The original will not be overwritten.
+        Create a folder in Google Drive if it does not already exist.
 
         Args
-            folder_path: The path to the folder. It does not matter if there is a
-                         leading or trailing slash.
+            folder_path: The path to the folder.
             parent_id: The ID of the parent folder. Default is "root".
 
         Return
-            The ID of the created folder.
+            The ID of the created folder, or the ID of the folder with the given path
+            if it already exists.
         """
 
+        last_folder_id = parent_id
         folder_names = folder_path.split("/")
         for folder_name in folder_names:
+            # Check if a folder with this path already exists by searching for it
+            if existing_folder := self._find_folder(
+                folder_path=folder_name,
+                parent_id=last_folder_id,
+            ):
+                last_folder_id = existing_folder.get("id")
+                continue
+            # The folder doesn't exist, so let's create it!
             metadata = {
                 "name": folder_name,
                 "mimeType": "application/vnd.google-apps.folder",
-                "parents": [parent_id],
+                "parents": [last_folder_id],
             }
             folder = self.client.files().create(
                 body=metadata,
                 fields="id",
             ).execute()
-            parent_id = folder.get("id")
-        return parent_id
+            last_folder_id = folder.get("id")
+        return last_folder_id
     
     def _get_and_ensure_deepest_folder_id(self, path: str) -> str:
         """
@@ -139,31 +156,23 @@ class GoogleDrive(BlackboxStorage):
         Any folders in the path that do not already exist will be created.
 
         Args
-            path: The folder path, excluding a file. It does not matter if there is a
-                  leading or trailing slash.
+            path: The folder path, excluding a file.
         
         Return
             The ID of the deepest folder.
         """
 
-        deepest_folder = path.split("/")[-1]  # Get the last part of the path
-        folder = self._find_folder(path)  # Get the folder object from Google Drive
-        if not folder or folder["name"] != deepest_folder:
-            # Create all folders in the path if none exist. Otherwise, only create
-            # the ones that don't exist yet.
-            new_folder_path = path if not folder else path.split(folder["name"])[1]
-            new_folder_path = (new_folder_path[1:]  # Remove leading slash
-                               if new_folder_path.startswith("/")
-                               else new_folder_path)
-            parent_id = "root" if not folder else folder["id"]
+        folder = self._find_folder(path)
+        if not folder:
+            parent_id = "root"
             return self._create_folder(
-                folder_path=new_folder_path,
+                folder_path=path,
                 parent_id=parent_id,
             )
         else:
             return folder["id"]
 
-    def _upload(self, file_path: str, file_content: bytes | str) -> str:
+    def _upload(self, file_path: str, file_content: Union[bytes, str]) -> str:
         """
         Upload a file to Google Drive.
 
