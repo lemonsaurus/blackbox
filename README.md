@@ -26,6 +26,7 @@ like `cron`, or a Kubernetes CronJob.
 - [Storage Providers](#storage-providers)
     - [S3](#s3)
     - [Dropbox](#dropbox)
+    - [Google Drive](#google-drive)
 - [Notifiers](#notifiers)
     - [Discord](#discord)
     - [Slack](#slack)
@@ -52,6 +53,12 @@ blackbox --init
 
 # Run blackbox with a specific config file
 blackbox --config=/path/to/blackbox.yaml
+```
+
+To run Blackbox manually in the Poetry environment, run:
+
+```
+poetry run python -m blackbox
 ```
 
 ### Setting up as a cron job
@@ -500,6 +507,36 @@ one, do the following:
 You can also define a custom location (root is App Folder) using the
 `upload_directory` optional parameter. This **should** begin with slash and 
 **must** end with slash. Default is root.
+
+### Google Drive
+
+- **Storage Type**: `googledrive`
+- **Required fields**: `refresh_token, client_id, client_secret`
+- **Optional fields**: `upload_directory`
+
+The Google Drive storage handler needs a refresh token, client ID, and client secret in order to work. To get
+these, do the following:
+
+- Create a Google account (if you don't already have one).
+- Go to https://console.cloud.google.com
+- Create a project
+- In the OAuth Overview page, click Get Started
+- Follow the prompts and fill out the presented forms
+- When you're finished, go to the Clients tab, and click Create Client
+- Select Web Application for Application Type
+- The required scopes are: `/auth/drive.file` and `/auth/drive.appdata`
+- Click your newly created client to view the client ID and secret
+- Use your client ID and secret to obtain a refresh token using the tool of your choice, such as Postman
+- Make sure you add your own email as a user in the Audience tab
+
+If you decide to use Postman to obtain your refresh token:
+
+- Ensure you set the authorized redirect URI to `https://oauth.pstmn.io/v1/callback` in your Google client configuration
+- Set the `Auth URL` to `https://accounts.google.com/o/oauth2/v2/auth?access_type=offline&prompt=consent` in Postman to ensure Google responds with a refresh token, and not only an access token
+- Read the [Postman authorization docs](https://learning.postman.com/docs/sending-requests/authorization/authorization/)
+
+You can define a custom location in which to store backups (the default is the root folder) using the
+`upload_directory` optional parameter. This should be in the format `Cool/Example`.
 
 ## Notifiers
 
