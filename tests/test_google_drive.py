@@ -12,7 +12,7 @@ def mock_valid_google_drive_config():
         "refresh_token": "XXXXXXX",
         "client_id": "XXXXXXX",
         "client_secret": "XXXXXXX",
-        "upload_directory": "Blackbox/",
+        "upload_directory": "Blackbox",
     }
 
 
@@ -45,5 +45,18 @@ def test_google_drive_handler_instantiates_optional_fields(
         mock_initialize_drive_client, mock_valid_google_drive_config):
     """Test if the Google Drive storage handler instantiates optional fields."""
     google_drive_instance = GoogleDrive(**mock_valid_google_drive_config)
-    assert google_drive_instance.upload_base == "Blackbox/"
+    assert google_drive_instance.upload_base == "Blackbox"
     mock_initialize_drive_client.assert_called_once()
+
+def test_google_drive_handler_cleans_and_formats_upload_directory():
+    """Test if the dropbox storage handler instantiates optional fields."""
+    directories = [
+        ("Blackbox", "Blackbox"),
+        ("/Blackbox", "Blackbox"),
+        ("/Blackbox//", "Blackbox"),
+        ("////Foo/Bar", "Foo/Bar"),
+        ("/Foo//Bar///Baz", "Foo/Bar/Baz"),
+        ("Hello/World/////", "Hello/World"),
+    ]
+    for directory in directories:
+        assert GoogleDrive.clean_upload_directory(directory[0]) == directory[1]

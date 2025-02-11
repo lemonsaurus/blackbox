@@ -21,11 +21,27 @@ class GoogleDrive(BlackboxStorage):
 
     required_fields = ("refresh_token", "client_id", "client_secret")
 
+    @staticmethod
+    def clean_upload_directory(upload_directory: str) -> str:
+        """Clean up the upload directory by removing leading and/or trailing slashes."""
+        # Clean up duplicate slashes
+        while "//" in upload_directory:
+            upload_directory = upload_directory.replace("//", "/")
+        # Strip leading slash
+        if upload_directory.startswith("/"):
+            upload_directory = upload_directory[1:]
+        # Strip trailing slash
+        if upload_directory.endswith("/"):
+            upload_directory = upload_directory[:-1]
+        return upload_directory
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        # The upload base path should not have a leading or trailing slash
-        self.upload_base = self.config.get("upload_directory") or ""
+        # The upload base path should not have a leading or trailing slash, but in case
+        # it does, let's ensure we strip those away.
+        upload_directory = self.config.get("upload_directory") or ""
+        self.upload_base = GoogleDrive.clean_upload_directory(upload_directory)
 
         # Get credentials and initialize the Google Drive API client
         self.oauth_uri = "https://oauth2.googleapis.com/token"
