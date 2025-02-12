@@ -536,7 +536,8 @@ If you decide to use Postman to obtain your refresh token:
 - Read the [Postman authorization docs](https://learning.postman.com/docs/sending-requests/authorization/authorization/)
 
 You can define a custom location in which to store backups (the default is the root folder) using the
-`upload_directory` optional parameter. This should be in the format `Cool/Example`.
+`upload_directory` optional parameter. This should be in the format `Cool/Example`. Any folders in the path
+that do not already exist will be created for you.
 
 ## Notifiers
 
