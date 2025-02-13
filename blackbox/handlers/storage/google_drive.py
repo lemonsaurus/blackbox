@@ -24,7 +24,16 @@ class GoogleDrive(BlackboxStorage):
 
     @staticmethod
     def clean_upload_directory(upload_directory: str) -> str:
-        """Clean up the upload directory by removing leading and/or trailing slashes."""
+        """
+        Clean up the provided upload directory path string.
+        
+        Leading and trailing slashes will be removed. Duplicate slashes will be cleaned
+        up, so that no slash can exist directly beside another one.
+
+        Example input: /Hello//World///
+        Example output: Hello/World
+        """
+
         # Clean up duplicate slashes
         while "//" in upload_directory:
             upload_directory = upload_directory.replace("//", "/")
