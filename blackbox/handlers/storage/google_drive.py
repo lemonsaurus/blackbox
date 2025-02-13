@@ -1,20 +1,22 @@
 """Google Drive database backup storage integration."""
-from io import BytesIO
 import mimetypes
-from datetime import datetime
-from pathlib import Path
 import re
-from typing import Optional, Union
+from datetime import datetime
+from io import BytesIO
+from pathlib import Path
+from typing import Optional
+from typing import Union
+
+from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
+from googleapiclient.discovery import Resource
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
+from googleapiclient.http import MediaIoBaseUpload
 
 from blackbox.config import Blackbox
 from blackbox.handlers.storage._base import BlackboxStorage
 from blackbox.utils.logger import log
-
-from googleapiclient.discovery import build, Resource
-from googleapiclient.errors import HttpError
-from googleapiclient.http import MediaIoBaseUpload
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
 
 
 class GoogleDrive(BlackboxStorage):
@@ -26,7 +28,7 @@ class GoogleDrive(BlackboxStorage):
     def clean_upload_directory(upload_directory: str) -> str:
         """
         Clean up the provided upload directory path string.
-        
+
         Leading and trailing slashes will be removed. Duplicate slashes will be cleaned
         up, so that no slash can exist directly beside another one.
 
@@ -157,7 +159,7 @@ class GoogleDrive(BlackboxStorage):
             ).execute()
             last_folder_id = folder.get("id")
         return last_folder_id
-    
+
     def _get_and_ensure_deepest_folder_id(self, path: str) -> str:
         """
         Get the ID of the deepest folder in the provided path.
@@ -166,7 +168,7 @@ class GoogleDrive(BlackboxStorage):
 
         Args
             path: The folder path, excluding a file.
-        
+
         Return
             The ID of the deepest folder.
         """
@@ -188,7 +190,7 @@ class GoogleDrive(BlackboxStorage):
         Args
             file_path: The path to upload the file to.
             file_content: The content of the file to upload.
-    
+
         Return
             The ID of the uploaded file.
         """

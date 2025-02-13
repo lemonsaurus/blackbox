@@ -1,4 +1,5 @@
 from unittest.mock import patch
+
 import pytest
 
 from blackbox.exceptions import MissingFields
@@ -47,6 +48,7 @@ def test_google_drive_handler_instantiates_optional_fields(
     google_drive_instance = GoogleDrive(**mock_valid_google_drive_config)
     assert google_drive_instance.upload_base == "Blackbox"
     mock_initialize_drive_client.assert_called_once()
+
 
 def test_google_drive_handler_cleans_and_formats_upload_directory():
     """Test if the dropbox storage handler instantiates optional fields."""
