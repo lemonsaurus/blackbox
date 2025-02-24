@@ -112,9 +112,16 @@ class S3(BlackboxStorage):
         # Get files object from remote S3 bucket.
         remote_objects = self.client.list_objects_v2(Bucket=self.bucket).get("Contents")
 
-        # Filter their names with only this kind of database.
-        relevant_backups = [item for item in remote_objects
-                            if re.match(db_type_regex, item.get("Key"))]
+        # Filter their names with only this kind of database, sorted in order of last
+        # modified datetime, with the most recent backups first.
+        relevant_backups = sorted(
+            [
+                item for item in remote_objects
+                if re.match(db_type_regex, item.get("Key"))
+            ],
+            key=lambda obj: obj.get("LastModified"),
+            reverse=True,
+        )
 
         # Look through the items and figure out which ones are older than `retention_days`.
         # Catch all boto errors and log them to avoid return code 1.

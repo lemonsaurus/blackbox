@@ -132,6 +132,13 @@ class Dropbox(BlackboxStorage):
             entries += [entry for entry in files_result.entries if
                         self._is_backup_file(entry, db_type_regex)]
 
+        # Sort the backups in order of most recent to last.
+        entries = sorted(
+            entries,
+            key=lambda entry: entry.server_modified,
+            reverse=True,
+        )
+
         # Find all old files and delete them.
         for item in entries:
             last_modified = item.server_modified
