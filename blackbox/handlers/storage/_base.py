@@ -102,7 +102,8 @@ class BlackboxStorage(BlackboxHandler):
             # Backup doesn't match any of the retention configs (whether using retention
             # days or rotation strategies) - delete it!
             self._delete_backup(file_id=file_id)
-        else:
+
+        elif self.rotation_strategies:
             # Determine whether we should delete this backup, based on the rotation
             # strategies config representing the maximum number of backups to retain
             if len(retention_config_matches) == 1:
@@ -134,11 +135,11 @@ class BlackboxStorage(BlackboxHandler):
                 dt=modified_time,
             ):
                 self._delete_backup(file_id=file_id)
-
-            # Otherwise, we've retained the backup, so we should increment the
-            # corresponding expression(s) in our retention tracker
-            for exp in retention_config_matches:
-                self.backups_retained[exp]["num_retained"] += 1
+            else:
+                # Otherwise, we've retained the backup, so we should increment the
+                # corresponding expression(s) in our retention tracker
+                for exp in retention_config_matches:
+                    self.backups_retained[exp]["num_retained"] += 1
 
     @abstractmethod
     def _delete_backup(self, file_id: str) -> None:
