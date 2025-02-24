@@ -14,7 +14,6 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaIoBaseUpload
 
-from blackbox.config import Blackbox
 from blackbox.handlers.storage._base import BlackboxStorage
 from blackbox.utils.logger import log
 
@@ -226,6 +225,11 @@ class GoogleDrive(BlackboxStorage):
         ).execute()
         return response["id"]
 
+    def _delete_backup(self, file_id: str) -> None:
+        """Delete a backup file."""
+        print("running _delete_backup")
+        self.client.files().delete(fileId=file_id).execute()
+
     def sync(self, file_path: Path) -> None:
         """Sync a file to Google Drive."""
         # Compress the file and build the destination file path
@@ -251,11 +255,7 @@ class GoogleDrive(BlackboxStorage):
         isolated folder.
         """
 
-        retention_days = 7  # Default
-        if Blackbox.retention_days:
-            retention_days = Blackbox.retention_days  # Overwrite if this is configuired
-
-        # Get the folder (remove the trailing slash from the base folder)
+        # Get the folder
         folder_id = "root"  # Default to the root folder
         if self.upload_base:
             folder_id = self._get_and_ensure_deepest_folder_id(path=self.upload_base)
@@ -268,21 +268,21 @@ class GoogleDrive(BlackboxStorage):
                 q=query,
                 spaces="drive",
                 fields="files(id, name, modifiedTime)",
+                orderBy="modifiedTime desc",  # Order by most recent backup
             ).execute()
             files = response.get("files", [])
+
         except HttpError as e:
             log.error(e)
             self.success = False
             self.output = str(e)
+
         else:
-            # Delete database backups that are older than the configured retention days
+            # Delete database backups that are do not match the user's retention config
             for file_ in files:
-                if re.match(db_type_regex, file_['name']):
+                if re.match(db_type_regex, file_["name"]):
                     last_modified = file_["modifiedTime"]
                     modified_time = datetime.fromisoformat(
                         last_modified.replace("Z", "+00:00"))
-                    now = datetime.now(tz=modified_time.tzinfo)
-                    delta = now - modified_time
-                    if delta.days >= retention_days:
-                        self.client.files().delete(fileId=file_["id"]).execute()
+                    self._do_rotate(file_id=file_["id"], modified_time=modified_time)
             self.success = True

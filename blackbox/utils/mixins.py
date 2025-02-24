@@ -34,5 +34,8 @@ class SanitizeReportMixin:
         for blackbox_type in types:
             for kind in blackbox_type:
                 for unique_id in kind.values():
-                    sensitive_words += list(unique_id.values())
+                    sensitive_words += [
+                        val if not isinstance(val, list) else ",".join(val)
+                        for val in unique_id.values()
+                    ]
         return sensitive_words
