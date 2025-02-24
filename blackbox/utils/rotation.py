@@ -62,7 +62,7 @@ def matches_cron(cron_expression: str, dt: datetime) -> bool:
     Check if the given datetime matches the cron expression.
 
     Args
-        cron_expression: Cron expression.
+        cron_expression: A cron expression, cleaned to ensure only 5 "parts".
         dt: Datetime to check.
     Return
         True if the datetime fits within the cron expression, False otherwise.
@@ -90,16 +90,16 @@ def matches_cron(cron_expression: str, dt: datetime) -> bool:
     )
 
 
-def match_field(value: int, field: str, is_weekday: bool = False) -> bool:
+def match_field(dt_value: int, cron_value: str, is_weekday: bool = False) -> bool:
     """
     Match a cron expression field to a datetime "part" value.
 
     Args
-        value: A datetime "part" value. ex. 12 for day, 3 for hour, etc.
-        field: The value of the cron expression field corresponding with the datetime
-            value. ex. If the datetime is 2025, 2, 23, 6, 12, 45, 17, and the cron
-            expression is * * * 3 *, and the `value` arg is 2, the `field` arg should
-            be 3.
+        dt_value: A datetime "part" value. ex. 12 for day, 3 for hour, etc.
+        cron_value: The value of the cron expression field corresponding with the
+            datetime value. ex. If the datetime is 2025, 2, 23, 6, 12, 45, 17, and the
+            cron expression is * * * 3 *, and the `dt_value` arg is 2, the `cron_value`
+            arg should be 3.
         is_weekday: Whether the cron expression field we are evaluating is a weekday.
 
     Return
@@ -108,46 +108,46 @@ def match_field(value: int, field: str, is_weekday: bool = False) -> bool:
     """
 
     # For weekday, allow both 0 and 7 to represent Sunday
-    if is_weekday and field == "0":
-        field = "7"
+    if is_weekday and cron_value == "0":
+        cron_value = "7"
 
     # Wildcard matches any value
-    if field == "*":
+    if cron_value == "*":
         return True
 
     # Comma-separated list, ex. "1,5,10"
-    if "," in field:
+    if "," in cron_value:
         options = []
-        for part in field.split(","):
+        for part in cron_value.split(","):
             part = part.strip()
             if is_weekday and part == "0":
                 options.append(7)
             else:
                 options.append(int(part))
-        return value in options
+        return dt_value in options
 
     # Ranges, ex. "1-5"
-    if "-" in field:
-        start_str, end_str = field.split("-")
+    if "-" in cron_value:
+        start_str, end_str = cron_value.split("-")
         start = int(start_str) if not (is_weekday and start_str == "0") else 7
         end = int(end_str) if not (is_weekday and end_str == "0") else 7
-        return start <= value <= end
+        return start <= dt_value <= end
 
     # Step values, ex. "*/15" or "5/10"
-    if "/" in field:
-        base, step_str = field.split("/")
+    if "/" in cron_value:
+        base, step_str = cron_value.split("/")
         step = int(step_str)
         if base == "*":
-            return value % step == 0
+            return dt_value % step == 0
         else:
             base_val = int(base)
-            return (value - base_val) % step == 0
+            return (dt_value - base_val) % step == 0
 
     # Direct number match
     try:
-        return value == int(field)
+        return dt_value == int(cron_value)
     except ValueError:
-        raise ValueError(f"Cannot parse field: {field}")
+        raise ValueError(f"Cannot parse cron value: {cron_value}")
 
 
 def within_retention_days(days: int, dt: datetime) -> bool:
@@ -167,7 +167,7 @@ def construct_retention_tracker(
     unlimited = 9999999  # Who's going to have 9999999 backups? Probably no-one.
     tracker = {}
     if not cron_expressions:
-        return {}  # No expressions configured
+        return tracker  # No expressions configured
     for exp in cron_expressions:
         exp = exp.split()
         if len(exp) == 6:

@@ -77,10 +77,7 @@ class S3(BlackboxStorage):
             file_id: The identifier of the file. For S3, this would be its Key.
         """
 
-        self.client.delete_object(
-            Bucket=self.bucket,
-            Key=file_id,
-        )
+        self.client.delete_object(Bucket=self.bucket, Key=file_id)
 
     def sync(self, file_path: Path) -> None:
         """Sync a file to an S3 bucket."""

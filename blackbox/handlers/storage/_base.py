@@ -127,7 +127,6 @@ class BlackboxStorage(BlackboxHandler):
             #   retention_days is not configured
             #   OR retention_days is configured, but the retention window has passed
             num_retained = self.backups_retained[highest_expression]["num_retained"]
-
             if rotation.meets_delete_criteria(
                 max_to_retain=maximum,
                 num_retained=num_retained,

@@ -320,35 +320,24 @@ def test_datetime_field_matching():
     # Test that matching returns True when expected
     exp = "38 15 24 2 1"
     exp_parts = exp.split()
-    assert rotation.match_field(value=SAMPLE_DATETIME_1.minute, field=exp_parts[0])
-    assert rotation.match_field(value=SAMPLE_DATETIME_1.hour, field=exp_parts[1])
-    assert rotation.match_field(value=SAMPLE_DATETIME_1.day, field=exp_parts[2])
-    assert rotation.match_field(value=SAMPLE_DATETIME_1.month, field=exp_parts[3])
+    assert rotation.match_field(SAMPLE_DATETIME_1.minute, exp_parts[0])
+    assert rotation.match_field(SAMPLE_DATETIME_1.hour, exp_parts[1])
+    assert rotation.match_field(SAMPLE_DATETIME_1.day, exp_parts[2])
+    assert rotation.match_field(SAMPLE_DATETIME_1.month, exp_parts[3])
     assert rotation.match_field(
-        value=SAMPLE_DATETIME_1.isoweekday(),
-        field=exp_parts[4],
+        SAMPLE_DATETIME_1.isoweekday(),
+        exp_parts[4],
         is_weekday=True,
     )
+
     # Test that matching returns False when expected
+    assert not rotation.match_field(SAMPLE_DATETIME_2.minute, exp_parts[0])
+    assert not rotation.match_field(SAMPLE_DATETIME_2.hour, exp_parts[1])
+    assert not rotation.match_field(SAMPLE_DATETIME_2.day, exp_parts[2])
+    assert not rotation.match_field(SAMPLE_DATETIME_2.month, exp_parts[3])
     assert not rotation.match_field(
-        value=SAMPLE_DATETIME_2.minute,
-        field=exp_parts[0],
-    )
-    assert not rotation.match_field(
-        value=SAMPLE_DATETIME_2.hour,
-        field=exp_parts[1],
-    )
-    assert not rotation.match_field(
-        value=SAMPLE_DATETIME_2.day,
-        field=exp_parts[2],
-    )
-    assert not rotation.match_field(
-        value=SAMPLE_DATETIME_2.month,
-        field=exp_parts[3],
-    )
-    assert not rotation.match_field(
-        value=SAMPLE_DATETIME_2.isoweekday(),
-        field=exp_parts[4],
+        SAMPLE_DATETIME_2.isoweekday(),
+        exp_parts[4],
         is_weekday=True,
     )
 

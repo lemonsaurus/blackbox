@@ -277,7 +277,7 @@ class GoogleDrive(BlackboxStorage):
             self.output = str(e)
 
         else:
-            # Delete database backups that are do not match the user's retention config
+            # Delete database backups that do not match the user's retention config
             for file_ in files:
                 if re.match(db_type_regex, file_["name"]):
                     last_modified = file_["modifiedTime"]
