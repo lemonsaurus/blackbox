@@ -30,7 +30,7 @@ class BlackboxStorage(BlackboxHandler):
         self.output = ""     # What did the storage upload output?
 
         # Enable us to track how many backups matching each strategy have been retained
-        self.rotation_strategies = self.config.get("rotation_strategies")
+        self.rotation_strategies = self.config.get("rotation_strategies", [])
         self.backups_retained = rotation.construct_retention_tracker(
             cron_expressions=self.rotation_strategies,
         )
@@ -71,9 +71,7 @@ class BlackboxStorage(BlackboxHandler):
         using the retention days algorithm if this configuration is set by the user.
         """
 
-        if Blackbox.retention_days:
-            return partial(rotation.within_retention_days, days=Blackbox.retention_days)
-        else:
+        if self.rotation_strategies:
             return partial(
                 rotation.matches_crons,
                 cron_expressions=[
@@ -81,6 +79,8 @@ class BlackboxStorage(BlackboxHandler):
                     for exp in self.rotation_strategies
                 ],
             )
+        else:
+            return partial(rotation.within_retention_days, days=Blackbox.retention_days)
 
     def _do_rotate(self, file_id: str, modified_time: datetime) -> None:
         """
@@ -105,32 +105,40 @@ class BlackboxStorage(BlackboxHandler):
         else:
             # Determine whether we should delete this backup, based on the rotation
             # strategies config representing the maximum number of backups to retain
-            if not Blackbox.retention_days:
-                # Get the retention config with the highest max number of
-                # backups to retain
-                if len(retention_config_matches) == 1:
-                    # There's only one matching cron/config, so use its max
-                    highest_expression = retention_config_matches[0]
-                    maximum = self.backups_retained[highest_expression]["max"]
-                else:
-                    # There are multiple matching crons/configs, find the one with the
-                    # highest configured max backups to retain, and use this max to
-                    # determine whether the backup should be deleted
-                    highest_expression, maximum = (
-                        rotation.get_highest_max_retention_count(
-                            retention_tracker=self.backups_retained,
-                            cron_expressions=retention_config_matches,
-                        ))
-                # If the max is set to 0, or we've exceeded the max, delete the backup
-                num_retained_this_expression = (
-                    self.backups_retained[highest_expression]["num_retained"])
-                if maximum == 0 or num_retained_this_expression >= maximum:
-                    self._delete_backup(file_id=file_id)
+            if len(retention_config_matches) == 1:
+                # There's only one matching cron/config, so use its max
+                highest_expression = retention_config_matches[0]
+                maximum = self.backups_retained[highest_expression]["max"]
+            else:
+                # There are multiple matching crons/configs, find the one with the
+                # highest configured max backups to retain, and use this max to
+                # determine whether the backup should be deleted
+                highest_expression, maximum = (
+                    rotation.get_highest_max_retention_count(
+                        retention_tracker=self.backups_retained,
+                        cron_expressions=retention_config_matches,
+                    ))
 
-                # Otherwise, we've retained the backup. Increment the corresponding
-                # expression(s) in our retention tracker.
-                for exp in retention_config_matches:
-                    self.backups_retained[exp]["num_retained"] += 1
+            # Delete the backup if the following conditions are met:
+            #   Configured max is 0
+            #   OR We've reached the configured max number of backups
+            #   AND
+            #   retention_days is not configured
+            #   OR retention_days is configured, but the retention window has passed
+            num_retained = self.backups_retained[highest_expression]["num_retained"]
+
+            if rotation.meets_delete_criteria(
+                max_to_retain=maximum,
+                num_retained=num_retained,
+                days=Blackbox.retention_days,
+                dt=modified_time,
+            ):
+                self._delete_backup(file_id=file_id)
+
+            # Otherwise, we've retained the backup, so we should increment the
+            # corresponding expression(s) in our retention tracker
+            for exp in retention_config_matches:
+                self.backups_retained[exp]["num_retained"] += 1
 
     @abstractmethod
     def _delete_backup(self, file_id: str) -> None:

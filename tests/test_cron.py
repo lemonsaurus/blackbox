@@ -1,12 +1,27 @@
+"""Test the cron/rotation strategy helpers."""
 from datetime import datetime
+from datetime import timezone
+from unittest.mock import patch
 
 import pytest
+from pytest_mock import Tuple
 
 import blackbox.utils.rotation as rotation
 
 
-SAMPLE_DATETIME_1 = datetime.fromisoformat("2025-02-24 15:38:45.000265+00:00")
-SAMPLE_DATETIME_2 = datetime.fromisoformat("2025-01-05 10:18:36.000265+00:00")
+SAMPLE_DATETIME_1 = datetime(2025, 2, 24, 15, 38, 45, tzinfo=timezone.utc)
+SAMPLE_DATETIME_2 = datetime(2025, 1, 5, 10, 18, 36, tzinfo=timezone.utc)
+
+
+@pytest.fixture(autouse=True)
+def mock_datetime_now():
+    """Mock the value of datetime.now() so it's consistent whenever tests are run."""
+    # Fix now() to: February 25th, 2025 at 12:00 UTC
+    fixed_now = datetime(2025, 2, 25, 12, 0, 0, tzinfo=timezone.utc)
+    with patch("blackbox.utils.rotation.datetime") as mock_datetime:
+        mock_datetime.now.return_value = fixed_now
+        mock_datetime.side_effect = lambda *args, **kwargs: datetime(*args, **kwargs)
+        yield
 
 
 @pytest.fixture
@@ -173,11 +188,11 @@ def mock_retention_tracker():
     return {
         "* * * 2 *": {
             "num_retained": 0,
-            "max": 999999,
+            "max": 9999999,
         },
         "25 10 * * *": {
             "num_retained": 0,
-            "max": 999999,
+            "max": 9999999,
         },
         "* 11 * * 1": {
             "num_retained": 0,
@@ -193,13 +208,79 @@ def mock_retention_tracker():
         },
         "1 1 3 4 7": {
             "num_retained": 0,
-            "max": 999999,
+            "max": 9999999,
         },
         "* * * * *": {
             "num_retained": 0,
-            "max": 999999,
+            "max": 9999999,
         },
     }
+
+
+@pytest.fixture
+def mock_meets_delete_criteria_params():
+    """Mock params for the `meets_delete_criteria` helper."""
+    return [
+        {
+            "args": {
+                "max_to_retain": 1,
+                "num_retained": 1,
+                "days": 5,
+                "dt": SAMPLE_DATETIME_1,
+            },
+            "expected_response": False,
+        },
+        {
+            "args": {
+                "max_to_retain": 2,
+                "num_retained": 1,
+                "days": 5,
+                "dt": SAMPLE_DATETIME_1,
+            },
+            "expected_response": False,
+        },
+        {
+            "args": {
+                "max_to_retain": 0,
+                "num_retained": 2,
+                "days": 7,
+                "dt": SAMPLE_DATETIME_1,
+            },
+            "expected_response": False,
+        },
+        {
+            "args": {
+                "max_to_retain": 1,
+                "num_retained": 1,
+                "days": 5,
+                "dt": SAMPLE_DATETIME_2,
+            },
+            "expected_response": True,
+        },
+        {
+            "args": {
+                "max_to_retain": 10,
+                "num_retained": 1,
+                "days": 5,
+                "dt": SAMPLE_DATETIME_2,
+            },
+            "expected_response": False,
+        },
+    ]
+
+
+@pytest.fixture
+def mock_retention_days() -> list[Tuple[int | None, datetime, bool]]:
+    """Mock different retention days configurations."""
+    return [
+        (None, SAMPLE_DATETIME_1, True),
+        (0, SAMPLE_DATETIME_1, True),
+        (7, SAMPLE_DATETIME_1, True),
+        (20, SAMPLE_DATETIME_2, False),
+        (45, SAMPLE_DATETIME_2, False),
+        (55, SAMPLE_DATETIME_2, True),
+        (100, SAMPLE_DATETIME_2, True),
+    ]
 
 
 def test_cron_datetime_matcher_works(mock_cron_expression_datetime_cases):
@@ -272,18 +353,14 @@ def test_datetime_field_matching():
     )
 
 
-def test_date_within_retention_days():
+def test_date_within_retention_days(mock_retention_days):
     """Test that `within_retention_days` correctly returns whether a provided datetime
     is within the provided number of days ago."""
-    retention_days = 7
-    assert rotation.within_retention_days(
-        days=retention_days,
-        dt=SAMPLE_DATETIME_1,
-    )
-    assert not rotation.within_retention_days(
-        days=retention_days,
-        dt=SAMPLE_DATETIME_2,
-    )
+    for retention_days in mock_retention_days:
+        assert rotation.within_retention_days(
+            days=retention_days[0],
+            dt=retention_days[1],
+        ) == retention_days[2]
 
 
 def test_construct_retention_tracker(mock_rotation_strategies, mock_retention_tracker):
@@ -300,3 +377,12 @@ def test_correct_highest_max_retention_count(mock_retention_tracker):
         cron_expressions=["* 3/2 1,3,4 5-9 *", "* 11 * * 1"],
     )
     assert highest_max_exp == ("* 3/2 1,3,4 5-9 *", 5)
+
+
+def test_meets_delete_criteria(mock_meets_delete_criteria_params):
+    """Test whether the `meets_delete_criteria` helper returns the expected value."""
+    for params in mock_meets_delete_criteria_params:
+        assert (
+            rotation.meets_delete_criteria(**params["args"])
+            == params["expected_response"]
+        )

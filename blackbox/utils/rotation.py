@@ -3,15 +3,50 @@ from datetime import datetime
 from typing import Tuple
 
 
+def meets_delete_criteria(
+    max_to_retain: int,
+    num_retained: int,
+    days: int,
+    dt: datetime,
+) -> bool:
+    """
+    Return whether the item associated with the given datetime is eligible for deletion.
+
+    It is eligible for deletion if:
+        The delta between now and the datetime is less than or equal to `days`.
+        OR `days` is None
+        AND
+        The `num_retained` is less than or equal to `max_to_retain`.
+
+    Args
+        max_to_retain: The maximum number of items to retain.
+        num_retained: The current number of items retained.
+        days: The age in days of the oldest item to keep.
+        dt: Datetime to check.
+    Return
+        Whether the item associated with the given datetime is eligible for deletion.
+    """
+
+    return (
+        (
+            not days  # No configured retention days
+            or days and not within_retention_days(days=days, dt=dt)  # Window has passed
+        )
+        and (
+            max_to_retain == 0 or num_retained >= max_to_retain  # Retained max backups
+        )
+    )
+
+
 def matches_crons(cron_expressions: list[str], dt: datetime) -> list[str]:
     """
     Check if the given datetime matches at least one of the provided cron expressions.
 
-    Args:
+    Args
         cron_expressions: A list of cron expressions, cleaned to ensure only 5 "parts".
         dt: Datetime to check.
 
-    Returns:
+    Return
         A list of matching cron expressions.
     """
 
@@ -117,6 +152,8 @@ def match_field(value: int, field: str, is_weekday: bool = False) -> bool:
 
 def within_retention_days(days: int, dt: datetime) -> bool:
     """Return whether the provided datetime is between now and `days` days ago."""
+    if not days:
+        return True
     now = datetime.now(tz=dt.tzinfo)
     delta = now - dt
     return delta.days <= days
@@ -127,7 +164,7 @@ def construct_retention_tracker(
 ) -> dict[str, dict[str, int]]:
     """Construct a dictionary tracking how many retentions have occurred for a file
     matching each cron expression."""
-    unlimited = 999999  # Who's actually going to have 999999 backups? Probably no-one.
+    unlimited = 9999999  # Who's going to have 9999999 backups? Probably no-one.
     tracker = {}
     if not cron_expressions:
         return {}  # No expressions configured
