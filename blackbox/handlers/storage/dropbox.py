@@ -1,6 +1,5 @@
 import os
 import re
-from datetime import datetime
 from pathlib import Path
 
 from dropbox import Dropbox as DropboxClient
@@ -12,7 +11,6 @@ from dropbox.files import FileMetadata
 from dropbox.files import UploadSessionCursor
 from dropbox.files import WriteMode
 
-from blackbox.config import Blackbox
 from blackbox.handlers.storage._base import BlackboxStorage
 from blackbox.utils.logger import log
 
@@ -37,6 +35,16 @@ class Dropbox(BlackboxStorage):
             return True
         except (AuthError, ApiError, HttpError):
             return False
+
+    def _delete_backup(self, file_id: str) -> None:
+        """
+        Delete a backup file.
+
+        Args
+            file_id: The file's identifier. For Dropbox, this would be the file path.
+        """
+
+        self.client.files_delete(path=file_id)
 
     def sync(self, file_path: Path) -> None:
         """Sync a file to Dropbox."""
@@ -124,17 +132,10 @@ class Dropbox(BlackboxStorage):
             entries += [entry for entry in files_result.entries if
                         self._is_backup_file(entry, db_type_regex)]
 
-        retention_days = 7
-        if Blackbox.retention_days:
-            retention_days = Blackbox.retention_days
-
         # Find all old files and delete them.
         for item in entries:
             last_modified = item.server_modified
-            now = datetime.now(tz=last_modified.tzinfo)
-            delta = now - last_modified
-            if delta.days >= retention_days:
-                self.client.files_delete(item.path_lower)
+            self._do_rotate(file_id=item.path_lower, modified_time=last_modified)
 
     @staticmethod
     def _is_backup_file(entry, db_type_regex) -> bool:

@@ -87,7 +87,10 @@ class BlackboxStorage(BlackboxHandler):
         Remove or retain the backup file with the given ID based on rotation strategies.
 
         Args
-            file_id: The ID of the backup file, from the storage system.
+            file_id: The unique identifier of the backup file, from the storage system.
+                Its format will vary depending on the system. For example, in Google
+                Drive, this is the value of the resource's "id" attribute, but in S3,
+                this would be the file's Key.
             modified_time: The datetime the file was last modified.
         """
 
@@ -96,9 +99,8 @@ class BlackboxStorage(BlackboxHandler):
             dt=modified_time)
 
         if not retention_config_matches:
-            # Backup doesn't match any of the retention configs - delete it!
-            print(f"Removing {file_id} per rotation strategy. File "
-                  f"was last modified on {modified_time}.")
+            # Backup doesn't match any of the retention configs (whether using retention
+            # days or rotation strategies) - delete it!
             self._delete_backup(file_id=file_id)
         else:
             # Determine whether we should delete this backup, based on the rotation
@@ -119,8 +121,7 @@ class BlackboxStorage(BlackboxHandler):
                             retention_tracker=self.backups_retained,
                             cron_expressions=retention_config_matches,
                         ))
-                # If the max is set to 0, or we've exceeded the max, delete
-                # the backup
+                # If the max is set to 0, or we've exceeded the max, delete the backup
                 num_retained_this_expression = (
                     self.backups_retained[highest_expression]["num_retained"])
                 if maximum == 0 or num_retained_this_expression >= maximum:

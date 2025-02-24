@@ -227,7 +227,6 @@ class GoogleDrive(BlackboxStorage):
 
     def _delete_backup(self, file_id: str) -> None:
         """Delete a backup file."""
-        print("running _delete_backup")
         self.client.files().delete(fileId=file_id).execute()
 
     def sync(self, file_path: Path) -> None:
