@@ -1,6 +1,7 @@
 """Test the cron/rotation strategy helpers."""
 from datetime import datetime
 from datetime import timezone
+from typing import Union
 from unittest.mock import patch
 
 import pytest
@@ -270,7 +271,7 @@ def mock_meets_delete_criteria_params():
 
 
 @pytest.fixture
-def mock_retention_days() -> list[Tuple[int | None, datetime, bool]]:
+def mock_retention_days() -> list[Tuple[Union[int, None], datetime, bool]]:
     """Mock different retention days configurations."""
     return [
         (None, SAMPLE_DATETIME_1, True),
