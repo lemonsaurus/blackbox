@@ -646,15 +646,65 @@ The body of the HTTP request will look like this
 
 ## Rotation
 
-By default, `blackbox` will automatically remove all backup files older than 7
-days in the folder you configure for your storage provider. To determine if
+Blackbox supports multiple rotation strategies using cron expressions, as well as
+rotation via the legacy `retention_days` configuration. To determine if
 something is a backup file or not, it will use a regex pattern that corresponds
-with the default file it saves, for
-example `blackbox-postgres-backup-11-12-2020.sql`.
+with the default file it saves, for example `blackbox-postgres-backup-11-12-2020.sql`.
 
 You can configure the number of days before rotating by altering
-the `retention_days` parameter in `blackbox.yaml`.
+the `retention_days` parameter in `blackbox.yaml`. Or, you can configure
+`rotation_strategies` for _any_ or _each_ storage handler. The `rotation_strategies` can
+be different for different storage handlers.
 
+If _both_ `retention_days` and `rotation_strategies` are configured, then any backups
+made within the `retention_days` window will be retained, _regardless_ of the configured
+`rotation_strategies`. Any backups made outside this window will adhere to the
+corresponding `rotation_strategies` configuration.
+
+If _neither_ `rotation_strategies` nor `retention_days` is configured, Blackbox will
+retain _all_ backups.
+
+This [cron expression generator tool](https://crontab.guru/) may be useful to you for
+configuring rotation strategies if you are unfamiliar with cron expressions. Blackbox
+supports `,`, `-`, and `/` notation, and uses digits `1-7` to represent weekdays, with
+`1` representing Monday and `7` or (`0`) representing Sunday.
+
+### The optional sixth parameter
+
+Blackbox will accept an optional sixth parameter for each cron expression, representing
+the number of matching backups to retain. These will be the most recent backups. For
+example:
+```
+* * * * 1 5        ---   Retain 5 backups made on a Monday
+30 0-12 * * * 10   ---   Retain 10 backups made on the 30th minute of any hour from 0-12
+* * * 5 * 3        ---   Retain 3 backups made during May
+* * * 6 * 0        ---   Don't retain any backups made in June
+11 12/15 * 1,2,3 * ---   Retain ALL backups made at 12:11 or 15:11 in Jan, Feb, or Mar
+* * * * 2 *        ---   Retain ALL backups made on a Tuesday
+```
+
+If two strategies _overlap_, Blackbox will use the _higher_ configured maximum (sixth
+parameter) when determining whether to retain or remove the backup. Using the examples
+above, if a backup were created at 11:30 on any day in May, and if fewer than 10
+backups created on the 30th minute of any hour from 0-12 were already retained, this
+May backup would _also_ be retained, even if more than three May backups had previously
+been retained.
+
+### Syntax
+
+The `rotation_strategies` configuration is added to the storage handler options like so:
+```
+storage:
+  googledrive:
+    main_gdrive:
+      rotation_strategies:
+        - "* * 1 * * 1"
+        - "* * * * 7 3"
+      refresh_token: 123
+      client_id: 123
+      client_secret: 123
+      upload_directory: Blackbox
+```
 
 ## Cooldown
 
