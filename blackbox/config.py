@@ -128,3 +128,39 @@ class Blackbox(metaclass=YAMLGetter):
     # Configuration
     retention_days: int
     notifier_frequency: int
+    filename_format: str
+    date_format: str
+
+    @classmethod
+    def get_filename_format(cls) -> str:
+        """Get filename format with default fallback."""
+        return cls.filename_format or "{database_id}_blackbox_{date}"
+
+    @classmethod
+    def get_date_format(cls) -> str:
+        """Get date format with default fallback."""
+        return cls.date_format or "%d_%m_%Y"
+
+    @classmethod
+    def get_rotation_patterns(cls, database_id: str) -> list[str]:
+        """
+        Get regex patterns for backup file rotation.
+
+        Returns patterns for both current and legacy filename formats
+        to support migration.
+        """
+        current_format = cls.get_filename_format()
+        patterns = []
+
+        # Current configurable format pattern
+        # Replace {database_id} and {date} with regex patterns
+        current_pattern = current_format.replace("{database_id}", database_id)
+        current_pattern = current_pattern.replace("{date}", r"\d{2}_\d{2}_\d{4}")
+        patterns.append(current_pattern + r".+")
+
+        # Legacy format pattern (for backwards compatibility)
+        legacy_pattern = rf"{database_id}_blackbox_\d{{2}}_\d{{2}}_\d{{4}}.+"
+        if current_pattern + r".+" != legacy_pattern:
+            patterns.append(legacy_pattern)
+
+        return patterns

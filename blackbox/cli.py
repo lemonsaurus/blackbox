@@ -43,14 +43,18 @@ def run() -> bool:
     with TemporaryDirectory() as backup_dir:
         log.info(f"Backing up to folder: {backup_dir}")
         backup_dir = Path(backup_dir)
-        date = datetime.date.today().strftime("%d_%m_%Y")
+        date = datetime.date.today().strftime(CONFIG.get_date_format())
         backup_files = []
 
         for workflow in all_workflows:
             database = workflow.database
 
             # Do a backup, then return the path to the backup file
-            backup_filename = f"{database.config['id']}_blackbox_{date}{database.backup_extension}"
+            filename_format = CONFIG.get_filename_format()
+            backup_filename = filename_format.format(
+                database_id=database.config['id'],
+                date=date
+            ) + database.backup_extension
             backup_path = backup_dir / backup_filename
             database.backup(backup_path)
             backup_files.append(backup_path)

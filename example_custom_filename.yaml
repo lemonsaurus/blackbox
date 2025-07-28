@@ -1,0 +1,30 @@
+# Example blackbox.yaml showing custom filename format configuration
+databases:
+  postgres:
+    main_postgres:
+      username: testuser
+      password: testpass
+      host: localhost
+      port: 5432
+
+storage:
+  s3:
+    main_s3:
+      bucket: my-backup-bucket
+      endpoint: s3.amazonaws.com
+      aws_access_key_id: AKIAIOSFODNN7EXAMPLE
+      aws_secret_access_key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+
+notifiers:
+  discord:
+    main_discord:
+      webhook: https://discord.com/api/webhooks/EXAMPLE/WEBHOOK
+
+retention_days: 7
+
+# Custom filename format configuration
+filename_format: "backup_{database_id}_{date}"
+date_format: "%Y-%m-%d"
+
+# This will generate filenames like: backup_main_postgres_2024-12-25.sql
+# instead of the default: main_postgres_blackbox_25_12_2024.sql

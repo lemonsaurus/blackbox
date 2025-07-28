@@ -116,21 +116,22 @@ class Dropbox(BlackboxStorage):
             log.error("Dropbox token is invalid - Can't delete old backups!")
             return None
         # Let's rotate only this type of database
-        db_type_regex = rf"{database_id}_blackbox_\d{{2}}_\d{{2}}_\d{{4}}.+"
+        from blackbox.config import Blackbox
+        rotation_patterns = Blackbox.get_rotation_patterns(database_id)
 
         # Receive first batch of files.
         files_result = self.client.files_list_folder(
             self.upload_base if self.upload_base != "/" else ""
         )
         entries = [entry for entry in files_result.entries if
-                   self._is_backup_file(entry, db_type_regex)]
+                   self._is_backup_file(entry, rotation_patterns)]
 
         # If there is more files, receive all of them.
         while files_result.has_more:
             cursor = files_result.cursor
             files_result = self.client.files_list_folder_continue(cursor)
             entries += [entry for entry in files_result.entries if
-                        self._is_backup_file(entry, db_type_regex)]
+                        self._is_backup_file(entry, rotation_patterns)]
 
         # Sort the backups in order of most recent to last.
         entries = sorted(
@@ -145,6 +146,8 @@ class Dropbox(BlackboxStorage):
             self._do_rotate(file_id=item.path_lower, modified_time=last_modified)
 
     @staticmethod
-    def _is_backup_file(entry, db_type_regex) -> bool:
+    def _is_backup_file(entry, rotation_patterns) -> bool:
         """Check if file is actually this kind of database backup."""
-        return isinstance(entry, FileMetadata) and re.match(db_type_regex, entry.name)
+        return isinstance(entry, FileMetadata) and any(
+            re.match(pattern, entry.name) for pattern in rotation_patterns
+        )

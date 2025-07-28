@@ -260,7 +260,8 @@ class GoogleDrive(BlackboxStorage):
             folder_id = self._get_and_ensure_deepest_folder_id(path=self.upload_base)
 
         # Fetch database backup files
-        db_type_regex = rf"{database_id}_blackbox_\d{{2}}_\d{{2}}_\d{{4}}.+"
+        from blackbox.config import Blackbox
+        rotation_patterns = Blackbox.get_rotation_patterns(database_id)
         query = f"'{folder_id}' in parents and name contains 'blackbox'"
         try:
             response = self.client.files().list(
@@ -279,7 +280,7 @@ class GoogleDrive(BlackboxStorage):
         else:
             # Delete database backups that do not match the user's retention config
             for file_ in files:
-                if re.match(db_type_regex, file_["name"]):
+                if any(re.match(pattern, file_["name"]) for pattern in rotation_patterns):
                     last_modified = file_["modifiedTime"]
                     modified_time = datetime.fromisoformat(
                         last_modified.replace("Z", "+00:00"))

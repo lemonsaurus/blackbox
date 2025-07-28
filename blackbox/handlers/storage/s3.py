@@ -114,7 +114,8 @@ class S3(BlackboxStorage):
         those files fit certain regular expressions. We don't want to delete
         files that are not related to backup or logging.
         """
-        db_type_regex = rf"{database_id}_blackbox_\d{{2}}_\d{{2}}_\d{{4}}.+"
+        from blackbox.config import Blackbox
+        rotation_patterns = Blackbox.get_rotation_patterns(database_id)
 
         # Get files object from remote S3 bucket.
         remote_objects = self.client.list_objects_v2(Bucket=self.bucket).get("Contents")
@@ -124,7 +125,7 @@ class S3(BlackboxStorage):
         relevant_backups = sorted(
             [
                 item for item in remote_objects
-                if re.match(db_type_regex, item.get("Key"))
+                if any(re.match(pattern, item.get("Key")) for pattern in rotation_patterns)
             ],
             key=lambda obj: obj.get("LastModified"),
             reverse=True,
