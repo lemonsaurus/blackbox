@@ -58,20 +58,20 @@ def test_discord_uses_1024_character_limit():
     from blackbox.utils.reports import Report
 
     discord = Discord(webhook=WEBHOOK)
-    
+
     # Verify Discord's character limit is set correctly
     assert discord.max_output_chars == 1024
-    
+
     # Create a failed database with output longer than 1024 chars
     long_output = "Error: " + "x" * 2000
     failed_db = DatabaseReport("failed_db", False, long_output)
-    
+
     report = Report()
     report.databases = [failed_db]
     discord.report = report
-    
+
     optimized_output = discord.get_optimized_output()
-    
+
     # Should be truncated to Discord's 1024 character limit
     assert len(optimized_output) <= 1024
 
