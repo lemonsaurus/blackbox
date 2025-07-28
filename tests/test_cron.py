@@ -1,11 +1,11 @@
 """Test the cron/rotation strategy helpers."""
 from datetime import datetime
 from datetime import timezone
+from typing import Tuple
 from typing import Union
 from unittest.mock import patch
 
 import pytest
-from pytest_mock import Tuple
 
 import blackbox.utils.rotation as rotation
 
