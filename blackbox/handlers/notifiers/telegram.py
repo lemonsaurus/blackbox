@@ -5,7 +5,6 @@ from blackbox.handlers.notifiers._base import BlackboxNotifier
 from blackbox.utils.logger import log
 
 
-STRING_LIMIT = 2000  # Limit output
 CHECKMARK_EMOJI = "\U00002705"  # ✔
 FAIL_EMOJI = "\U0000274C"       # ❌
 WARNING_EMOJI = "\U000026A0"    # ⚠
@@ -15,6 +14,8 @@ class Telegram(BlackboxNotifier):
     """Telegram notifier for Blackbox."""
 
     required_fields = ("token", "chat_id",)
+    # Telegram bot API message character limit is 4096 UTF-8 characters
+    max_output_chars = 4096
 
     def _parse_report(self) -> str:
         """Convert the report object to a Telegram-friendly string."""
@@ -27,8 +28,11 @@ class Telegram(BlackboxNotifier):
                     data_report += f"{CHECKMARK_EMOJI} {storage.storage_id}\n"
                 else:
                     data_report += f"{FAIL_EMOJI} {storage.storage_id}\n"
-            if db.success is False:
-                data_report += f"{WARNING_EMOJI} {db.output[:STRING_LIMIT]}\n"
+        # Add optimized output for failed databases
+        if not self.report.success:
+            optimized_output = self.get_optimized_output()
+            if optimized_output:
+                data_report += f"\n{WARNING_EMOJI} Output:\n{optimized_output}\n"
         return data_report
 
     def notify(self):

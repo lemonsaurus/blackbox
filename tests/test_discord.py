@@ -67,7 +67,7 @@ def test_discord_output_optimization_single_failure():
     report.databases = [failed_db]
     discord.report = report
 
-    optimized_output = discord._get_optimized_output()
+    optimized_output = discord.get_optimized_output()
 
     # Should be truncated to last 1024 characters
     assert len(optimized_output) <= 1024
@@ -90,7 +90,7 @@ def test_discord_output_optimization_multiple_failures():
     report.databases = [db1, db2, db3]
     discord.report = report
 
-    optimized_output = discord._get_optimized_output()
+    optimized_output = discord.get_optimized_output()
 
     # Should be within 1024 character limit
     assert len(optimized_output) <= 1024
@@ -114,7 +114,7 @@ def test_discord_output_optimization_no_failures():
     report.databases = [success_db]
     discord.report = report
 
-    optimized_output = discord._get_optimized_output()
+    optimized_output = discord.get_optimized_output()
 
     # Should be empty since no failures
     assert optimized_output == ""
@@ -137,7 +137,7 @@ def test_discord_output_tail_truncation():
     report.databases = [failed_db]
     discord.report = report
 
-    optimized_output = discord._get_optimized_output()
+    optimized_output = discord.get_optimized_output()
 
     # Should only contain last 10 lines
     assert "Line 10" in optimized_output
