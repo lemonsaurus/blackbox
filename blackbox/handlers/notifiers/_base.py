@@ -63,6 +63,8 @@ class BlackboxNotifier(BlackboxHandler):
 
         for db_id, output in sorted_outputs:
             # Calculate budget for this service
+            if remaining_services == 0 or total_budget <= 0:
+                break
             budget_per_service = total_budget // remaining_services
 
             # Calculate the formatted output length including separators
