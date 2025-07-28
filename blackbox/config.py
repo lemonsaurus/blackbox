@@ -98,7 +98,7 @@ class YAMLGetter(type):
             # If one of the handler lists isn't defined, return an empty list.
             log.warning(
                 f"{name} is not defined in the blackbox.yaml file -- "
-                "returning an falsy value."
+                "returning a falsy value."
             )
             if cls._get_annotation(name) == list:
                 return []

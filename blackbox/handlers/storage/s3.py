@@ -1,4 +1,3 @@
-import datetime
 import os
 import re
 from pathlib import Path
@@ -7,7 +6,6 @@ import boto3
 from botocore.exceptions import BotoCoreError
 from botocore.exceptions import ClientError
 
-from blackbox.config import Blackbox
 from blackbox.exceptions import ImproperlyConfigured
 from blackbox.handlers.storage._base import BlackboxStorage
 from blackbox.utils.logger import log
@@ -71,6 +69,16 @@ class S3(BlackboxStorage):
             endpoint_url=f"https://{self.endpoint}",
         )
 
+    def _delete_backup(self, file_id: str) -> None:
+        """
+        Delete a backup file.
+
+        Args
+            file_id: The identifier of the file. For S3, this would be its Key.
+        """
+
+        self.client.delete_object(Bucket=self.bucket, Key=file_id)
+
     def sync(self, file_path: Path) -> None:
         """Sync a file to an S3 bucket."""
         file_, recompressed = self.compress(file_path)
@@ -97,30 +105,26 @@ class S3(BlackboxStorage):
         files that are not related to backup or logging.
         """
         db_type_regex = rf"{database_id}_blackbox_\d{{2}}_\d{{2}}_\d{{4}}.+"
-        retention_days = 7
-        if Blackbox.retention_days:
-            retention_days = Blackbox.retention_days
 
         # Get files object from remote S3 bucket.
         remote_objects = self.client.list_objects_v2(Bucket=self.bucket).get("Contents")
 
-        # Filter their names with only this kind of database.
-        relevant_backups = [item for item in remote_objects
-                            if re.match(db_type_regex, item.get("Key"))]
+        # Filter their names with only this kind of database, sorted in order of last
+        # modified datetime, with the most recent backups first.
+        relevant_backups = sorted(
+            [
+                item for item in remote_objects
+                if re.match(db_type_regex, item.get("Key"))
+            ],
+            key=lambda obj: obj.get("LastModified"),
+            reverse=True,
+        )
 
         # Look through the items and figure out which ones are older than `retention_days`.
         # Catch all boto errors and log them to avoid return code 1.
         try:
             for item in relevant_backups:
                 last_modified = item.get("LastModified")
-                now_tz = datetime.datetime.now(tz=last_modified.tzinfo)
-                delta = now_tz - item.get("LastModified")
-
-                # Delete the deprecated items
-                if delta.days >= retention_days:
-                    self.client.delete_object(
-                        Bucket=self.bucket,
-                        Key=item.get("Key")
-                    )
+                self._do_rotate(file_id=item.get("Key"), modified_time=last_modified)
         except (ClientError, BotoCoreError) as e:
             log.error(e)
