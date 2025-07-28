@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pytest
+from botocore.config import Config
 
 from blackbox.exceptions import MissingFields
 from blackbox.handlers.storage import S3
@@ -54,3 +55,58 @@ def test_s3_handler_fails_without_required_fields():
 
     with pytest.raises(MissingFields):
         S3(**incomplete_config)
+
+
+def test_s3_handler_supports_client_config_dict():
+    """Test if the s3 storage handler can be instantiated with client_config as dict."""
+    valid_config = {
+        "bucket": "bigbucket",
+        "endpoint": "s3.endpoint.com",
+        "aws_access_key_id": "lemon",
+        "aws_secret_access_key": "dance",
+        "client_config": {
+            "request_checksum_calculation": "when_required",
+            "response_checksum_validation": "when_required",
+        }
+    }
+    s3_handler = S3(**valid_config)
+
+    # Verify the client config was applied
+    assert s3_handler.client._client_config.request_checksum_calculation == "when_required"
+    assert s3_handler.client._client_config.response_checksum_validation == "when_required"
+
+
+def test_s3_handler_supports_client_config_object():
+    """Test if the s3 storage handler can be instantiated with client_config as Config object."""
+    client_config = Config(
+        request_checksum_calculation="when_required",
+        response_checksum_validation="when_required",
+    )
+
+    valid_config = {
+        "bucket": "bigbucket",
+        "endpoint": "s3.endpoint.com",
+        "aws_access_key_id": "lemon",
+        "aws_secret_access_key": "dance",
+        "client_config": client_config
+    }
+    s3_handler = S3(**valid_config)
+
+    # Verify the client config was applied
+    assert s3_handler.client._client_config.request_checksum_calculation == "when_required"
+    assert s3_handler.client._client_config.response_checksum_validation == "when_required"
+
+
+def test_s3_handler_works_without_client_config():
+    """Test if the s3 storage handler works normally without client_config."""
+    valid_config = {
+        "bucket": "bigbucket",
+        "endpoint": "s3.endpoint.com",
+        "aws_access_key_id": "lemon",
+        "aws_secret_access_key": "dance"
+    }
+    s3_handler = S3(**valid_config)
+
+    # Should work normally without client_config
+    assert s3_handler.bucket == "bigbucket"
+    assert s3_handler.endpoint == "s3.endpoint.com"

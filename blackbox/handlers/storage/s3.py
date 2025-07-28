@@ -3,6 +3,7 @@ import re
 from pathlib import Path
 
 import boto3
+from botocore.config import Config
 from botocore.exceptions import BotoCoreError
 from botocore.exceptions import ClientError
 
@@ -64,9 +65,18 @@ class S3(BlackboxStorage):
         self.session = boto3.Session(
             **configuration
         )
+
+        # Support for custom client configuration (e.g., for Backblaze B2 compatibility)
+        client_config = self.config.get("client_config")
+        if client_config is not None:
+            # Convert dict to Config object if needed
+            if isinstance(client_config, dict):
+                client_config = Config(**client_config)
+
         self.client = self.session.client(
             's3',
             endpoint_url=f"https://{self.endpoint}",
+            config=client_config,
         )
 
     def _delete_backup(self, file_id: str) -> None:

@@ -471,7 +471,7 @@ is set to 7 `retention_days`, then your backups are all gonna be deleted after
 
 - **Storage Type**: `s3`
 - **Required fields**: `bucket`, `endpoint`
-- **Optional fields**: `aws_access_key_id`, `aws_secret_access_key`
+- **Optional fields**: `aws_access_key_id`, `aws_secret_access_key`, `client_config`
 - The `endpoint` field can look something like
   this: `s3.eu-west-1.amazonaws.com`
 
@@ -488,6 +488,25 @@ provided in several ways. This is the order in which blackbox looks for them:
 - If we can't find these, we'll look for an `.aws/config` file in the local
   environment.
 - NOTE: If the bucket is public, no credentials are necessary.
+
+#### Backblaze B2 Compatibility
+
+For **Backblaze B2** users using boto3 versions 1.35.99 or higher, you may encounter compatibility issues due to newer data integrity protection headers. To resolve this, use the `client_config` option:
+
+```yaml
+storage:
+  s3:
+    backblaze_b2:
+      bucket: my-b2-bucket
+      endpoint: s3.us-west-004.backblazeb2.com
+      aws_access_key_id: {{ B2_ACCESS_KEY_ID }}
+      aws_secret_access_key: {{ B2_SECRET_KEY }}
+      client_config:
+        request_checksum_calculation: when_required
+        response_checksum_validation: when_required
+```
+
+This configuration disables the problematic checksum headers that Backblaze B2 doesn't support, while maintaining compatibility with other S3-compatible services.
 
 ### Dropbox
 
