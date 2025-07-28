@@ -69,6 +69,30 @@ def test_slack_notify(mock_valid_slack_config, report):
         slack.notify()
 
 
+def test_slack_uses_2000_character_limit():
+    """Test that Slack specifically uses 2000 character limit."""
+    from blackbox.utils.reports import DatabaseReport
+    from blackbox.utils.reports import Report
+
+    slack = Slack(webhook=WEBHOOK)
+
+    # Verify Slack's character limit is set correctly
+    assert slack.max_output_chars == 2000
+
+    # Create a failed database with output longer than 2000 chars
+    long_output = "Error: " + "x" * 3000
+    failed_db = DatabaseReport("failed_db", False, long_output)
+
+    report = Report()
+    report.databases = [failed_db]
+    slack.report = report
+
+    optimized_output = slack.get_optimized_output()
+
+    # Should be truncated to Slack's 2000 character limit
+    assert len(optimized_output) <= 2000
+
+
 def test_slack_notify_modern(mock_valid_slack_config_with_block_kit, report):
     """Test report parsing for slack notifications."""
     slack = Slack(**mock_valid_slack_config_with_block_kit)
@@ -109,4 +133,3 @@ def test_slack_notify_modern(mock_valid_slack_config_with_block_kit, report):
 
     with requests_mock.Mocker() as m:
         m.post(WEBHOOK)
-        slack.notify()

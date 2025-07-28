@@ -7,6 +7,8 @@ class Slack(BlackboxNotifier):
     """A notifier for sending webhooks to Slack."""
 
     required_fields = ("webhook",)
+    # Slack field character limit is 2000 for attachment fields
+    max_output_chars = 2000
 
     def _parse_report(self) -> dict:
         """Turn the report from main.py into something the notify function can use."""
@@ -24,8 +26,8 @@ class Slack(BlackboxNotifier):
             "author_icon": "https://raw.githubusercontent.com/lemonsaurus/blackbox/main/img/blackbox_avatar.png"  # NOQA: E501
         }
 
-        # Combine and truncate total output to < 2000 characters, fields don't support more.
-        output = self.report.output[:2000]
+        # Generate optimally truncated output for failed databases only
+        output = self.get_optimized_output()
 
         # Was this a success?
         success = self.report.success
@@ -111,8 +113,8 @@ class Slack(BlackboxNotifier):
             blocks.append(section)
 
         if not success:
-            # Combine and truncate total output to < 2000 characters, fields don't support more.
-            output = self.report.output[:2000]
+            # Generate optimally truncated output for failed databases only
+            output = self.get_optimized_output()
             blocks += [
                 {
                     "type": "divider"

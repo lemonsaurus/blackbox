@@ -7,11 +7,13 @@ class Discord(BlackboxNotifier):
     """A notifier for sending webhooks to Discord."""
 
     required_fields = ("webhook",)
+    # Discord embed field limit is 1024 characters
+    max_output_chars = 1024
 
     def _parse_report(self) -> dict:
         """Turn the report into something the notify function can use."""
-        # Combine and truncate total output to < 2000 characters, fields don't support more.
-        output = self.report.output[:2000]
+        # Generate optimally truncated output for failed databases only
+        output = self.get_optimized_output()
 
         # Was this a success?
         success = self.report.success
