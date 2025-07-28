@@ -32,8 +32,10 @@ class Dropbox(BlackboxStorage):
     def _validate_token(self):
         """Check if dropbox token is valid."""
         try:
-            return self.client.check_user("test").result == "test"
-        except AuthError:
+            # Try to get current account info to validate token
+            self.client.users_get_current_account()
+            return True
+        except (AuthError, ApiError, HttpError):
             return False
 
     def sync(self, file_path: Path) -> None:

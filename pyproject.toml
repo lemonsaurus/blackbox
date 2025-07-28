@@ -24,27 +24,27 @@ exclude = ["tests", "tests.*"]
 [tool.poetry.dependencies]
 python = "^3.9"
 pyyaml = "^6.0"
-requests = "^2.25.1"
+requests = "^2.32.4"
 boto3 = "^1.16.51"
 loguru = "^0.5.3"
-jinja2 = "^3.1.2"
+jinja2 = "^3.1.6"
 click = ">=7.1.2,<9.0.0"
 dropbox = "^11.0.0"
-pytelegrambotapi = "^3.7.7"
-single-source = "^0.2.0"
+pytelegrambotapi = "^4.27.0"
+single-source = "^0.4.0"
 stone = "^3.2.1"
 google-api-python-client = "^2.160.0"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^3.9.2"
 flake8-isort = "^4.0.0"
-pytest = "*"
+pytest = "^8.4.1"
 pytest-cov = "^2.11.1"
 pytest-mock = "^3.5.1"
 pytest-subprocess = "^1.0.1"
 pytest-testdox = "^2.0.1"
 poethepoet = "^0.10.0"
-requests-mock = "^1.8.0"
+requests-mock = "^1.12.1"
 win32-setctime = "^1.0.3"
 
 [build-system]
