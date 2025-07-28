@@ -64,6 +64,7 @@ def run() -> bool:
 
             # If backup failed, continue to next database. No need to sync.
             if not database.success:
+                success = False
                 continue
 
             for storage in workflow.storage_providers:
