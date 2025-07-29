@@ -1,3 +1,4 @@
+import contextlib
 import os
 import re
 import tempfile
@@ -143,36 +144,56 @@ class S3(BlackboxStorage):
         encrypted_path = None
         is_encrypted = False
         temp_file_path = None
-        final_file: Optional[BinaryIO] = None
 
         try:
             if recompressed:
                 final_file_path, is_encrypted = self._prepare_compressed_file(file_path, file_)
-                temp_file_path = final_file_path if not is_encrypted else Path(file_.name)
+                temp_file_path = final_file_path if not is_encrypted else None
                 if is_encrypted:
                     encrypted_path = final_file_path
-                final_file = open(final_file_path, 'rb')
+
+                # Use context manager to safely handle file
+                with open(final_file_path, 'rb') as final_file:
+                    final_filename = self._determine_filename(
+                        file_path.name, recompressed, is_encrypted
+                    )
+                    extra_args = {}
+                    if recompressed and not is_encrypted:
+                        extra_args["ContentEncoding"] = "gzip"
+
+                    self.client.upload_fileobj(
+                        final_file,
+                        self.bucket,
+                        final_filename,
+                        ExtraArgs=extra_args
+                    )
             else:
                 # Encrypt original file directly
                 encrypted_path, is_encrypted = self.encrypt_file(file_path)
-                if is_encrypted:
+
+                # Determine filename and use context manager
+                final_filename = self._determine_filename(
+                    file_path.name, recompressed, is_encrypted
+                )
+
+                # Close the compressed file if we're not using it
+                if not is_encrypted:
                     file_.close()
-                    final_file = open(encrypted_path, 'rb')
+                    with open(file_path, 'rb') as upload_file:
+                        self.client.upload_fileobj(
+                            upload_file,
+                            self.bucket,
+                            final_filename
+                        )
                 else:
-                    final_file = file_
+                    file_.close()
+                    with open(encrypted_path, 'rb') as upload_file:
+                        self.client.upload_fileobj(
+                            upload_file,
+                            self.bucket,
+                            final_filename
+                        )
 
-            final_filename = self._determine_filename(file_path.name, recompressed, is_encrypted)
-
-            extra_args = {}
-            if recompressed and not is_encrypted:
-                extra_args["ContentEncoding"] = "gzip"
-
-            self.client.upload_fileobj(
-                final_file,
-                self.bucket,
-                final_filename,
-                ExtraArgs=extra_args
-            )
             self.success = True
 
         except (ClientError, BotoCoreError) as e:
@@ -180,8 +201,10 @@ class S3(BlackboxStorage):
             self.output = str(e)
             self.success = False
         finally:
-            if final_file:
-                final_file.close()
+            # Ensure compressed file is closed if still open
+            if hasattr(file_, 'close'):
+                with contextlib.suppress(Exception):
+                    file_.close()
             self._cleanup_temp_files(temp_file_path, encrypted_path, is_encrypted)
 
     def rotate(self, database_id: str) -> None:

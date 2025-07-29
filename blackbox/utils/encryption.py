@@ -1,4 +1,5 @@
 import base64
+import contextlib
 import gzip
 import os
 import re
@@ -43,6 +44,8 @@ class EncryptionHandler:
             return file_path
         elif self.method == "password":
             return self._encrypt_with_fernet(file_path)
+        else:
+            raise ValueError(f"Unknown encryption method: {self.method}")
 
     def _encrypt_with_fernet(self, file_path: Path) -> Path:
         """Encrypt file using Fernet symmetric encryption."""
@@ -80,35 +83,27 @@ class EncryptionHandler:
         except (OSError, IOError, PermissionError) as e:
             # Handle file system errors
             if encrypted_path.exists():
-                try:
+                with contextlib.suppress(OSError):
                     encrypted_path.unlink()
-                except OSError:
-                    pass  # Best effort cleanup
-            raise ValueError(f"File operation failed during encryption: {e}")
+            raise ValueError(f"File operation failed during encryption: {e}") from e
         except (UnicodeDecodeError, UnicodeError) as e:
             # Handle encoding issues
             if encrypted_path.exists():
-                try:
+                with contextlib.suppress(OSError):
                     encrypted_path.unlink()
-                except OSError:
-                    pass
-            raise ValueError(f"Password encoding error: {e}")
+            raise ValueError(f"Password encoding error: {e}") from e
         except InvalidToken as e:
             # Handle cryptography-specific errors
             if encrypted_path.exists():
-                try:
+                with contextlib.suppress(OSError):
                     encrypted_path.unlink()
-                except OSError:
-                    pass
-            raise ValueError(f"Encryption token error: {e}")
+            raise ValueError(f"Encryption token error: {e}") from e
         except (MemoryError, OverflowError) as e:
             # Handle memory/size errors
             if encrypted_path.exists():
-                try:
+                with contextlib.suppress(OSError):
                     encrypted_path.unlink()
-                except OSError:
-                    pass
-            raise ValueError(f"Memory error during encryption: {e}")
+            raise ValueError(f"Memory error during encryption: {e}") from e
 
     def _derive_key(self, password: bytes) -> bytes:
         """
@@ -134,7 +129,16 @@ class EncryptionHandler:
         return key
 
     def cleanup_temp_file(self, file_path: Path) -> None:
-        """Securely delete a temporary file."""
+        """
+        Securely delete a temporary file (typically an encrypted backup file).
+
+        This method is intended for cleaning up encrypted temporary files created
+        during the backup process. It attempts to securely overwrite the file
+        with random data before deletion when encryption is enabled.
+
+        Args:
+            file_path: Path to the temporary file to delete
+        """
         if file_path.exists() and self.method != "none":
             try:
                 # Overwrite with random data then delete
@@ -148,10 +152,8 @@ class EncryptionHandler:
                 log.debug(f"Securely deleted: {file_path.name}")
             except Exception as e:
                 log.warning(f"Failed to securely delete {file_path}: {e}")
-                try:
+                with contextlib.suppress(Exception):
                     file_path.unlink()
-                except Exception:
-                    pass
 
     def _validate_password_strength(self, password: str) -> None:
         """

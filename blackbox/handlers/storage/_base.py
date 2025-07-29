@@ -87,7 +87,7 @@ class BlackboxStorage(BlackboxHandler):
 
             return encrypted_path, is_encrypted
         except Exception as e:
-            log.error(f"Encryption failed: {e}")
+            log.error("Encryption failed", exc_info=e)
             # Return original file path if encryption fails
             return file_path, False
 
