@@ -74,6 +74,25 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # Parse version tags from release tag
+      - name: Parse version tags
+        id: version_tags
+        run: |
+          TAG_NAME=${{ github.event.release.tag_name }}
+          # Remove 'v' prefix if present
+          VERSION=${TAG_NAME#v}
+          
+          # Split version into parts
+          IFS='.' read -ra VERSION_PARTS <<< "$VERSION"
+          MAJOR=${VERSION_PARTS[0]}
+          MINOR=${VERSION_PARTS[1]}
+          PATCH=${VERSION_PARTS[2]}
+          
+          # Set outputs for use in Docker tags
+          echo "full_version=${TAG_NAME}" >> $GITHUB_OUTPUT
+          echo "major_minor=v${MAJOR}.${MINOR}" >> $GITHUB_OUTPUT
+          echo "major=v${MAJOR}" >> $GITHUB_OUTPUT
+
       # Set up Docker Buildx and log into DockerHub
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -95,4 +114,6 @@ jobs:
           cache-to: type=inline
           tags: |
             lemonsaurus/blackbox:latest
-            lemonsaurus/blackbox:${{ github.event.release.tag_name }}
+            lemonsaurus/blackbox:${{ steps.version_tags.outputs.full_version }}
+            lemonsaurus/blackbox:${{ steps.version_tags.outputs.major_minor }}
+            lemonsaurus/blackbox:${{ steps.version_tags.outputs.major }}
