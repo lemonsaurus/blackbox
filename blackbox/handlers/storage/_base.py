@@ -10,6 +10,7 @@ from pathlib import Path
 import blackbox.utils.rotation as rotation
 from blackbox.config import Blackbox
 from blackbox.handlers._base import BlackboxHandler
+from blackbox.utils.encryption import create_encryption_handler
 from blackbox.utils.logger import log
 
 
@@ -34,6 +35,10 @@ class BlackboxStorage(BlackboxHandler):
         self.backups_retained = rotation.construct_retention_tracker(
             cron_expressions=self.rotation_strategies,
         )
+
+        # Set up encryption handler
+        encryption_config = self.config.get("encryption", Blackbox.encryption or {})
+        self.encryption_handler = create_encryption_handler({"encryption": encryption_config})
 
     @staticmethod
     def compress(file_path: Path) -> tuple[typing.IO, bool]:
@@ -61,6 +66,39 @@ class BlackboxStorage(BlackboxHandler):
 
         temp_file.seek(0)
         return temp_file, True
+
+    def encrypt_file(self, file_path: Path) -> tuple[Path, bool]:
+        """
+        Encrypt the file if encryption is configured.
+
+        Returns a two elements tuple.
+        The first one is the path to the (possibly encrypted) file.
+        The second one is True if the file has been encrypted, False otherwise.
+
+        This should be called after compression but before syncing the
+        file to a storage provider.
+        """
+        try:
+            encrypted_path = self.encryption_handler.encrypt_file(file_path)
+            is_encrypted = encrypted_path != file_path
+
+            if is_encrypted:
+                log.info(f"File encrypted: {encrypted_path.name}")
+
+            return encrypted_path, is_encrypted
+        except Exception as e:
+            log.error(f"Encryption failed: {e}")
+            # Return original file path if encryption fails
+            return file_path, False
+
+    def cleanup_encrypted_file(self, file_path: Path) -> None:
+        """
+        Securely clean up encrypted temporary files.
+
+        Args:
+            file_path: Path to the encrypted file to clean up
+        """
+        self.encryption_handler.cleanup_temp_file(file_path)
 
     @property
     def _matches_retention_config(self):

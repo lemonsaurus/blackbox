@@ -93,22 +93,40 @@ class S3(BlackboxStorage):
         """Sync a file to an S3 bucket."""
         file_, recompressed = self.compress(file_path)
 
+        # Try to encrypt the file if encryption is enabled
+        encrypted_path, is_encrypted = self.encrypt_file(file_path)
+
         try:
+            # If encryption occurred, use the encrypted file
+            if is_encrypted:
+                file_.close()  # Close compressed file
+                file_ = open(encrypted_path, 'rb')  # Open encrypted file
+                final_filename = encrypted_path.name
+            else:
+                final_filename = f"{file_path.name}{'.gz' if recompressed else ''}"
+
             extra_args = {}
-            if recompressed:
+            if recompressed and not is_encrypted:
                 extra_args["ContentEncoding"] = "gzip"
 
             self.client.upload_fileobj(
                 file_,
                 self.bucket,
-                f"{file_path.name}{'.gz' if recompressed else ''}",
+                final_filename,
                 ExtraArgs=extra_args
             )
             self.success = True
+
         except (ClientError, BotoCoreError) as e:
             log.error(e)
             self.output = str(e)
             self.success = False
+        finally:
+            if file_:
+                file_.close()
+            # Clean up encrypted file if it was created
+            if is_encrypted and encrypted_path.exists():
+                self.cleanup_encrypted_file(encrypted_path)
 
     def rotate(self, database_id: str) -> None:
         """
