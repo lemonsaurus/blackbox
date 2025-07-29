@@ -43,7 +43,7 @@ class EncryptionHandler:
             return file_path
         elif self.method == "password":
             return self._encrypt_with_fernet(file_path)
-        
+
         # This should be unreachable due to __init__ validation, but included for type safety
         raise ValueError(f"Unknown encryption method: {self.method}")
 
