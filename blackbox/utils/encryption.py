@@ -80,30 +80,25 @@ class EncryptionHandler:
             log.info(f"File encrypted: {encrypted_path.name}")
             return encrypted_path
 
-        except (OSError, IOError, PermissionError) as e:
-            # Handle file system errors
+        except Exception as e:
+            # Clean up partial encrypted file on any error
             if encrypted_path.exists():
                 with contextlib.suppress(OSError):
                     encrypted_path.unlink()
-            raise ValueError(f"File operation failed during encryption: {e}") from e
-        except (UnicodeDecodeError, UnicodeError) as e:
-            # Handle encoding issues
-            if encrypted_path.exists():
-                with contextlib.suppress(OSError):
-                    encrypted_path.unlink()
-            raise ValueError(f"Password encoding error: {e}") from e
-        except InvalidToken as e:
-            # Handle cryptography-specific errors
-            if encrypted_path.exists():
-                with contextlib.suppress(OSError):
-                    encrypted_path.unlink()
-            raise ValueError(f"Encryption token error: {e}") from e
-        except (MemoryError, OverflowError) as e:
-            # Handle memory/size errors
-            if encrypted_path.exists():
-                with contextlib.suppress(OSError):
-                    encrypted_path.unlink()
-            raise ValueError(f"Memory error during encryption: {e}") from e
+
+            # Provide specific error messages based on exception type
+            if isinstance(e, (OSError, IOError, PermissionError)):
+                error_msg = f"File operation failed during encryption: {e}"
+            elif isinstance(e, (UnicodeDecodeError, UnicodeError)):
+                error_msg = f"Password encoding error: {e}"
+            elif isinstance(e, InvalidToken):
+                error_msg = f"Encryption token error: {e}"
+            elif isinstance(e, (MemoryError, OverflowError)):
+                error_msg = f"Memory error during encryption: {e}"
+            else:
+                error_msg = f"Unexpected error during encryption: {e}"
+
+            raise ValueError(error_msg) from e
 
     def _derive_key(self, password: bytes) -> bytes:
         """
