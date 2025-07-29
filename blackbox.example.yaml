@@ -28,3 +28,28 @@ date_format: "%Y-%m-%d"
 
 # This will generate filenames like: backup_main_postgres_2024-12-25.sql
 # instead of the default: main_postgres_blackbox_25_12_2024.sql
+
+# Global encryption configuration (applies to all storage providers unless overridden)
+encryption:
+  method: none  # Options: "none", "password"
+  # For password encryption:
+  # password: "your-strong-password-here"
+  
+  # ⚠️  SECURITY WARNINGS:
+  # - Use a strong password (12+ characters, mixed case, numbers, symbols)
+  # - Never commit passwords to version control
+  # - Consider using environment variables: password: "${BACKUP_ENCRYPTION_PASSWORD}"
+  # - Passwords are stored in plaintext in the config file
+  # - Lost passwords mean permanently inaccessible backups
+
+# Per-storage encryption configuration example:
+# storage:
+#   s3:
+#     main_s3:
+#       bucket: my-backup-bucket
+#       endpoint: s3.amazonaws.com
+#       aws_access_key_id: AKIAIOSFODNN7EXAMPLE
+#       aws_secret_access_key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+#       encryption:
+#         method: password
+#         password: "your-strong-password-here"

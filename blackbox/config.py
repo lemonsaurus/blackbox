@@ -130,6 +130,7 @@ class Blackbox(metaclass=YAMLGetter):
     notifier_frequency: int
     filename_format: str
     date_format: str
+    encryption: dict
 
     @classmethod
     def get_filename_format(cls) -> str:
