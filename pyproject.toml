@@ -34,6 +34,7 @@ pytelegrambotapi = "^4.27.0"
 single-source = "^0.4.0"
 stone = "^3.2.1"
 google-api-python-client = "^2.160.0"
+cryptography = "^43.0.0"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^3.9.2"
