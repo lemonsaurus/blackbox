@@ -94,11 +94,15 @@ class S3(BlackboxStorage):
         file_, recompressed = self.compress(file_path)
 
         try:
+            extra_args = {}
+            if recompressed:
+                extra_args["ContentEncoding"] = "gzip"
+
             self.client.upload_fileobj(
                 file_,
                 self.bucket,
                 f"{file_path.name}{'.gz' if recompressed else ''}",
-                ExtraArgs={"ContentEncoding": "gzip"}
+                ExtraArgs=extra_args
             )
             self.success = True
         except (ClientError, BotoCoreError) as e:
