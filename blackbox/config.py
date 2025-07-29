@@ -142,6 +142,30 @@ class Blackbox(metaclass=YAMLGetter):
         return cls.date_format or "%d_%m_%Y"
 
     @classmethod
+    def _date_format_to_regex(cls, date_format: str) -> str:
+        """Convert strftime date format to regex pattern."""
+        # Common strftime codes to regex patterns
+        replacements = {
+            "%d": r"\d{2}",  # Day of month (01-31)
+            "%m": r"\d{2}",  # Month (01-12)
+            "%Y": r"\d{4}",  # Year with century (e.g., 2023)
+            "%y": r"\d{2}",  # Year without century (00-99)
+            "%H": r"\d{2}",  # Hour (00-23)
+            "%M": r"\d{2}",  # Minute (00-59)
+            "%S": r"\d{2}",  # Second (00-59)
+            "%B": r"[A-Za-z]+",  # Full month name
+            "%b": r"[A-Za-z]{3}",  # Abbreviated month name
+            "%A": r"[A-Za-z]+",  # Full weekday name
+            "%a": r"[A-Za-z]{3}",  # Abbreviated weekday name
+        }
+        
+        regex_pattern = date_format
+        for fmt_code, regex in replacements.items():
+            regex_pattern = regex_pattern.replace(fmt_code, regex)
+        
+        return regex_pattern
+
+    @classmethod
     def get_rotation_patterns(cls, database_id: str) -> list[str]:
         """
         Get regex patterns for backup file rotation.
@@ -155,7 +179,11 @@ class Blackbox(metaclass=YAMLGetter):
         # Current configurable format pattern
         # Replace {database_id} and {date} with regex patterns
         current_pattern = current_format.replace("{database_id}", database_id)
-        current_pattern = current_pattern.replace("{date}", r"\d{2}_\d{2}_\d{4}")
+        
+        # Convert configured date format to regex pattern
+        date_format = cls.get_date_format()
+        date_regex = cls._date_format_to_regex(date_format)
+        current_pattern = current_pattern.replace("{date}", date_regex)
         patterns.append(current_pattern + r".+")
 
         # Legacy format pattern (for backwards compatibility)
