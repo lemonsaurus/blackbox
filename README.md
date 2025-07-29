@@ -212,7 +212,36 @@ notifiers:
       webhook: https://hooks.slack.com/services/XXXXXXXXXXX/XXXXXXXXXXX/XXXXXXXXXXXXXXXXXXX
 
 retention_days: 7
+
+# Optional filename format configuration
+filename_format: "{database_id}_blackbox_{date}"  # Default format
+date_format: "%d_%m_%Y"  # Default: DD_MM_YYYY
 ```
+
+## Filename Format Configuration
+
+You can customize the format of backup filenames using the `filename_format` and `date_format` configuration options:
+
+- **`filename_format`**: Template for the backup filename. Use `{database_id}` and `{date}` as placeholders.
+- **`date_format`**: Python strftime format for the date portion of the filename.
+
+### Examples
+
+```yaml
+# Default format: mydb_blackbox_25_12_2024.sql
+filename_format: "{database_id}_blackbox_{date}"
+date_format: "%d_%m_%Y"
+
+# Custom format: backup_mydb_2024-12-25.sql  
+filename_format: "backup_{database_id}_{date}"
+date_format: "%Y-%m-%d"
+
+# Enterprise format: mydb_backup_20241225_daily.sql
+filename_format: "{database_id}_backup_{date}_daily"
+date_format: "%Y%m%d"
+```
+
+**Note**: The rotation system supports both legacy and custom filename formats to ensure existing backups continue to be managed properly during the transition.
 
 Blackbox will look for this file in the root folder by default, however you can
 provide an alternative config file path by creating an environment variable
