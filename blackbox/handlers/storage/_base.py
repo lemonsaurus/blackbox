@@ -14,7 +14,7 @@ from blackbox.utils.encryption import create_encryption_handler
 from blackbox.utils.logger import log
 
 
-# File suffixes considered as an archive
+# File suffixes considered as archives
 ARCHIVE_SUFFIXES = {".tar", ".zip"}
 
 
@@ -24,35 +24,26 @@ class BlackboxStorage(BlackboxHandler):
     handler_type = "storage"
 
     def __init__(self, **kwargs):
-        """Set up storage handler."""
+        """Initialize storage handler with encryption and rotation config."""
         super().__init__(**kwargs)
 
-        self.success = False  # Was the upload successful?
-        self.output = ""     # What did the storage upload output?
+        self.success = False  # Upload success status
+        self.output = ""     # Storage operation output/errors
 
-        # Enable us to track how many backups matching each strategy have been retained
+        # Track backup retention counts per rotation strategy
         self.rotation_strategies = self.config.get("rotation_strategies", [])
         self.backups_retained = rotation.construct_retention_tracker(
             cron_expressions=self.rotation_strategies,
         )
 
-        # Set up encryption handler
+        # Initialize encryption handler from config
         encryption_config = self.config.get("encryption", Blackbox.encryption or {})
         self.encryption_handler = create_encryption_handler({"encryption": encryption_config})
 
     @staticmethod
     def compress(file_path: Path) -> tuple[typing.IO, bool]:
-        """
-        Compress the file using gzip into a tempfile.TemporaryFile.
-
-        Returns a two elements tuple.
-        The first one is a file-like object, which is removed when it is closed.
-        The second one is True if the file has been recompressed, False otherwise.
-
-        This should always be called before syncing the
-        file to a storage provider.
-        """
-        # If the file is already considered as an archive, we don't recompress it
+        """Compress file with gzip unless archive. Returns (file_obj, was_compressed)."""
+        # Skip compression for archives (.tar, .zip)
         if file_path.suffix in ARCHIVE_SUFFIXES:
             log.debug(f"File {file_path.name} is already compressed.")
             return open(file_path, "rb"), False
@@ -68,16 +59,7 @@ class BlackboxStorage(BlackboxHandler):
         return temp_file, True
 
     def encrypt_file(self, file_path: Path) -> tuple[Path, bool]:
-        """
-        Encrypt the file if encryption is configured.
-
-        Returns a two elements tuple.
-        The first one is the path to the (possibly encrypted) file.
-        The second one is True if the file has been encrypted, False otherwise.
-
-        This should be called after compression but before syncing the
-        file to a storage provider.
-        """
+        """Encrypt file if configured. Returns (file_path, was_encrypted)."""
         try:
             encrypted_path = self.encryption_handler.encrypt_file(file_path)
             is_encrypted = encrypted_path != file_path
@@ -88,26 +70,16 @@ class BlackboxStorage(BlackboxHandler):
             return encrypted_path, is_encrypted
         except Exception as e:
             log.error("Encryption failed", exc_info=e)
-            # Return original file path if encryption fails
+            # Fallback to unencrypted file if encryption fails
             return file_path, False
 
     def cleanup_encrypted_file(self, file_path: Path) -> None:
-        """
-        Securely clean up encrypted temporary files.
-
-        Args:
-            file_path: Path to the encrypted file to clean up
-        """
+        """Securely clean up encrypted temporary files."""
         self.encryption_handler.cleanup_temp_file(file_path)
 
     @property
     def _matches_retention_config(self):
-        """
-        Return the algorithm used for backup retention.
-
-        Ensure backwards compatibility for the old `retention_days` configuration by
-        using the retention days algorithm if this configuration is set by the user.
-        """
+        """Get retention algorithm - rotation strategies or legacy retention_days."""
 
         if self.rotation_strategies:
             return partial(
@@ -121,49 +93,31 @@ class BlackboxStorage(BlackboxHandler):
             return partial(rotation.within_retention_days, days=Blackbox.retention_days)
 
     def _do_rotate(self, file_id: str, modified_time: datetime) -> None:
-        """
-        Remove or retain the backup file with the given ID based on rotation strategies.
+        """Apply retention policy to decide if backup should be deleted or kept."""
 
-        Args
-            file_id: The unique identifier of the backup file, from the storage system.
-                Its format will vary depending on the system. For example, in Google
-                Drive, this is the value of the resource's "id" attribute, but in S3,
-                this would be the file's Key.
-            modified_time: The datetime the file was last modified.
-        """
-
-        # Check if we should retain this backup
+        # Check if backup matches any retention rules
         retention_config_matches = self._matches_retention_config(
             dt=modified_time)
 
         if not retention_config_matches:
-            # Backup doesn't match any of the retention configs (whether using retention
-            # days or rotation strategies) - delete it!
+            # No retention rules match - delete the backup
             self._delete_backup(file_id=file_id)
 
         elif self.rotation_strategies:
-            # Determine whether we should delete this backup, based on the rotation
-            # strategies config representing the maximum number of backups to retain
+            # Apply rotation strategy limits to determine if backup should be deleted
             if len(retention_config_matches) == 1:
-                # There's only one matching cron/config, so use its max
+                # Single matching strategy - use its max directly
                 highest_expression = retention_config_matches[0]
                 maximum = self.backups_retained[highest_expression]["max"]
             else:
-                # There are multiple matching crons/configs, find the one with the
-                # highest configured max backups to retain, and use this max to
-                # determine whether the backup should be deleted
+                # Multiple strategies match - use the one with highest retention limit
                 highest_expression, maximum = (
                     rotation.get_highest_max_retention_count(
                         retention_tracker=self.backups_retained,
                         cron_expressions=retention_config_matches,
                     ))
 
-            # Delete the backup if the following conditions are met:
-            #   Configured max is 0
-            #   OR We've reached the configured max number of backups
-            #   AND
-            #   retention_days is not configured
-            #   OR retention_days is configured, but the retention window has passed
+            # 🧮 Complex deletion logic: max=0 OR (reached limit AND passed retention window)
             num_retained = self.backups_retained[highest_expression]["num_retained"]
             if rotation.meets_delete_criteria(
                 max_to_retain=maximum,
@@ -173,14 +127,13 @@ class BlackboxStorage(BlackboxHandler):
             ):
                 self._delete_backup(file_id=file_id)
             else:
-                # Otherwise, we've retained the backup, so we should increment the
-                # corresponding expression(s) in our retention tracker
+                # Backup retained - increment counters for matching strategies
                 for exp in retention_config_matches:
                     self.backups_retained[exp]["num_retained"] += 1
 
     @abstractmethod
     def _delete_backup(self, file_id: str) -> None:
-        """Delete a backup file."""
+        """Delete a backup file (storage-specific implementation)."""
 
     @abstractmethod
     def sync(self, file_path: Path):

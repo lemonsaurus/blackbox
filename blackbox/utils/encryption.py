@@ -17,7 +17,7 @@ from blackbox.utils.logger import log
 
 class EncryptionHandler:
     """
-    Handles password-based encryption of backup files using Python cryptography.
+    🔒 Handles password-based encryption of backup files using Python cryptography.
 
     Uses Fernet symmetric encryption (AES 128 in CBC mode with HMAC) with
     PBKDF2 key derivation. Files are compressed before encryption for better
@@ -31,7 +31,6 @@ class EncryptionHandler:
     """
 
     def __init__(self, encryption_config: Dict[str, Any]) -> None:
-        """Initialize encryption handler with configuration."""
         self.config = encryption_config
         self.method = self.config.get("method", "none").lower()
 
@@ -39,7 +38,7 @@ class EncryptionHandler:
             raise ValueError(f"Invalid encryption method: {self.method}")
 
     def encrypt_file(self, file_path: Path) -> Path:
-        """Encrypt a file if password encryption is enabled."""
+        """Main encryption entry point - encrypts file if method is 'password'."""
         if self.method == "none":
             return file_path
         elif self.method == "password":
@@ -48,7 +47,7 @@ class EncryptionHandler:
             raise ValueError(f"Unknown encryption method: {self.method}")
 
     def _encrypt_with_fernet(self, file_path: Path) -> Path:
-        """Encrypt file using Fernet symmetric encryption."""
+        """Core encryption logic: compress → encrypt → save with .enc extension."""
         password = self.config.get("password")
         if not password:
             raise ValueError("Password is required for encryption")
@@ -57,23 +56,19 @@ class EncryptionHandler:
 
         log.info(f"Encrypting {file_path.name}")
 
-        # Create encrypted file path
         encrypted_path = file_path.with_suffix(f"{file_path.suffix}.enc")
 
         try:
-            # Generate key from password
             key = self._derive_key(password.encode())
             fernet = Fernet(key)
 
-            # Read and encrypt file
             with open(file_path, 'rb') as f:
                 data = f.read()
 
-            # Compress then encrypt
+            # Compress first for smaller encrypted files and better security
             compressed_data = gzip.compress(data)
             encrypted_data = fernet.encrypt(compressed_data)
 
-            # Write encrypted data to file
             with open(encrypted_path, 'wb') as f:
                 f.write(encrypted_data)
 
@@ -81,7 +76,7 @@ class EncryptionHandler:
             return encrypted_path
 
         except Exception as e:
-            # Clean up partial encrypted file on any error
+            # Cleanup partial files on any failure
             if encrypted_path.exists():
                 with contextlib.suppress(OSError):
                     encrypted_path.unlink()
@@ -102,12 +97,11 @@ class EncryptionHandler:
 
     def _derive_key(self, password: bytes) -> bytes:
         """
-        Derive encryption key from password using PBKDF2.
+        Derive encryption key from password using PBKDF2 with SHA256.
 
-        Note: This implementation uses a fixed salt for simplicity and consistency
-        across different environments. While this reduces some security benefits
-        of salting (protection against rainbow tables), it ensures that backups
-        encrypted with the same password can be decrypted consistently.
+        ⚠️ Uses a fixed salt for consistency across environments. While this reduces
+        some security benefits of salting (protection against rainbow tables), it ensures
+        backups encrypted with the same password can be decrypted consistently.
 
         For maximum security in sensitive environments, consider implementing
         a configurable salt mechanism where the salt is stored alongside
@@ -124,19 +118,10 @@ class EncryptionHandler:
         return key
 
     def cleanup_temp_file(self, file_path: Path) -> None:
-        """
-        Securely delete a temporary file (typically an encrypted backup file).
-
-        This method is intended for cleaning up encrypted temporary files created
-        during the backup process. It attempts to securely overwrite the file
-        with random data before deletion when encryption is enabled.
-
-        Args:
-            file_path: Path to the temporary file to delete
-        """
+        """Securely delete encrypted temporary files with random data overwrite."""
         if file_path.exists() and self.method != "none":
             try:
-                # Overwrite with random data then delete
+                # Overwrite with random data for security, then delete
                 file_size = file_path.stat().st_size
                 with open(file_path, 'r+b') as f:
                     f.write(os.urandom(file_size))
@@ -151,19 +136,11 @@ class EncryptionHandler:
                     file_path.unlink()
 
     def _validate_password_strength(self, password: str) -> None:
-        """
-        Validate password meets minimum security requirements.
-
-        Args:
-            password: The password to validate
-
-        Raises:
-            ValueError: If password doesn't meet requirements
-        """
+        """Validate password meets security requirements (14+ chars, 2 of 3 complexity types)."""
         if len(password) < 14:
             raise ValueError("Password must be at least 14 characters long")
 
-        # Check for basic complexity (uppercase, lowercase, numbers)
+        # Check complexity: uppercase, lowercase, numbers (no symbols required)
         has_upper = bool(re.search(r'[A-Z]', password))
         has_lower = bool(re.search(r'[a-z]', password))
         has_digit = bool(re.search(r'\d', password))
@@ -177,6 +154,6 @@ class EncryptionHandler:
 
 
 def create_encryption_handler(config: Dict[str, Any]) -> EncryptionHandler:
-    """Create an encryption handler based on configuration."""
+    """Factory function to create encryption handler from config."""
     encryption_config = config.get("encryption", {})
     return EncryptionHandler(encryption_config)
