@@ -40,6 +40,9 @@ def config_file(mocker):
                     endpoint: s3.eu-west-1.amazonaws.com
                     aws_access_key_id: lemon
                     aws_secret_access_key: citrus
+                    client_config:
+                        request_checksum_calculation: when_required
+                        response_checksum_validation: when_required
 
         notifiers:
             discord:
