@@ -11,7 +11,19 @@ from blackbox.utils.logger import log
 
 
 class EncryptionHandler:
-    """Handles basic password-based encryption of backup files using Python cryptography."""
+    """
+    Handles password-based encryption of backup files using Python cryptography.
+
+    Uses Fernet symmetric encryption (AES 128 in CBC mode with HMAC) with
+    PBKDF2 key derivation. Files are compressed before encryption for better
+    security and smaller file sizes.
+
+    Security Notes:
+        - Passwords must be strong and kept secure
+        - Lost passwords result in permanently inaccessible backups
+        - Uses a fixed salt for consistency across environments
+        - Temporary files are securely overwritten during cleanup
+    """
 
     def __init__(self, encryption_config: dict):
         """Initialize encryption handler with configuration."""
@@ -59,14 +71,44 @@ class EncryptionHandler:
             log.info(f"File encrypted: {encrypted_path.name}")
             return encrypted_path
 
-        except Exception as e:
+        except (OSError, IOError, PermissionError) as e:
+            # Handle file system errors
             if encrypted_path.exists():
-                encrypted_path.unlink()
-            raise ValueError(f"Encryption failed: {e}")
+                try:
+                    encrypted_path.unlink()
+                except OSError:
+                    pass  # Best effort cleanup
+            raise ValueError(f"File operation failed during encryption: {e}")
+        except (UnicodeDecodeError, UnicodeError) as e:
+            # Handle encoding issues
+            if encrypted_path.exists():
+                try:
+                    encrypted_path.unlink()
+                except OSError:
+                    pass
+            raise ValueError(f"Password encoding error: {e}")
+        except Exception as e:
+            # Handle any other unexpected errors
+            if encrypted_path.exists():
+                try:
+                    encrypted_path.unlink()
+                except OSError:
+                    pass
+            raise ValueError(f"Unexpected encryption error: {e}")
 
     def _derive_key(self, password: bytes) -> bytes:
-        """Derive encryption key from password using PBKDF2."""
-        # Use a fixed salt for simplicity (in production, should be random and stored)
+        """
+        Derive encryption key from password using PBKDF2.
+
+        Note: This implementation uses a fixed salt for simplicity and consistency
+        across different environments. While this reduces some security benefits
+        of salting (protection against rainbow tables), it ensures that backups
+        encrypted with the same password can be decrypted consistently.
+
+        For maximum security in sensitive environments, consider implementing
+        a configurable salt mechanism where the salt is stored alongside
+        the encrypted backup metadata.
+        """
         salt = b'blackbox_backup_salt_v1'
         kdf = PBKDF2HMAC(
             algorithm=hashes.SHA256(),

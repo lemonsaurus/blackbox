@@ -34,6 +34,13 @@ encryption:
   method: none  # Options: "none", "password"
   # For password encryption:
   # password: "your-strong-password-here"
+  
+  # ⚠️  SECURITY WARNINGS:
+  # - Use a strong password (12+ characters, mixed case, numbers, symbols)
+  # - Never commit passwords to version control
+  # - Consider using environment variables: password: "${BACKUP_ENCRYPTION_PASSWORD}"
+  # - Passwords are stored in plaintext in the config file
+  # - Lost passwords mean permanently inaccessible backups
 
 # Per-storage encryption configuration example:
 # storage:

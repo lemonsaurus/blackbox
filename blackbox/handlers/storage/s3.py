@@ -1,5 +1,6 @@
 import os
 import re
+import tempfile
 from pathlib import Path
 
 import boto3
@@ -100,7 +101,6 @@ class S3(BlackboxStorage):
         try:
             if recompressed:
                 # Create temporary file from compressed data for encryption
-                import tempfile
                 temp_file = tempfile.NamedTemporaryFile(
                     delete=False, suffix=f"-{file_path.name}.gz"
                 )
