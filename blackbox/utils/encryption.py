@@ -47,6 +47,63 @@ class EncryptionHandler:
         # This should be unreachable due to __init__ validation, but included for type safety
         raise ValueError(f"Unknown encryption method: {self.method}")
 
+    def decrypt_file(self, encrypted_file_path: Path, output_path: Path = None) -> Path:
+        """Decrypt an encrypted backup file."""
+        if not encrypted_file_path.exists():
+            raise FileNotFoundError(f"Encrypted file not found: {encrypted_file_path}")
+        
+        if not encrypted_file_path.name.endswith('.enc'):
+            raise ValueError(f"File does not appear to be encrypted (missing .enc extension): {encrypted_file_path}")
+        
+        if self.method != "password":
+            raise ValueError("Decryption is only supported for password encryption method")
+        
+        password = self.config.get("password")
+        if not password:
+            raise ValueError("Password is required for decryption")
+        
+        # Determine output path
+        if output_path is None:
+            # Remove .enc extension to get original filename
+            output_path = encrypted_file_path.with_suffix('')
+        
+        log.info(f"Decrypting {encrypted_file_path.name}")
+        
+        try:
+            key = self._derive_key(password.encode())
+            fernet = Fernet(key)
+            
+            # Read and decrypt the file
+            with open(encrypted_file_path, 'rb') as f:
+                encrypted_data = f.read()
+            
+            decrypted_compressed_data = fernet.decrypt(encrypted_data)
+            
+            # Decompress the data
+            decrypted_data = gzip.decompress(decrypted_compressed_data)
+            
+            # Write decrypted data to output file
+            with open(output_path, 'wb') as f:
+                f.write(decrypted_data)
+            
+            log.info(f"File decrypted successfully: {output_path.name}")
+            return output_path
+            
+        except InvalidToken:
+            raise ValueError("Decryption failed: Invalid password or corrupted file")
+        except Exception as e:
+            # Cleanup partial output file on failure
+            if output_path.exists():
+                with contextlib.suppress(OSError):
+                    output_path.unlink()
+            
+            if isinstance(e, (OSError, IOError, PermissionError)):
+                error_msg = f"File operation failed during decryption: {e}"
+            else:
+                error_msg = f"Decryption failed: {e}"
+                
+            raise ValueError(error_msg) from e
+
     def _encrypt_with_fernet(self, file_path: Path) -> Path:
         """Core encryption logic: compress → encrypt → save with .enc extension."""
         password = self.config.get("password")

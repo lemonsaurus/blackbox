@@ -33,6 +33,7 @@ like `cron`, or a Kubernetes CronJob.
     - [Telegram](#telegram)
     - [Json](#json)
 - [Rotation](#rotation)
+- [Encryption](#encryption)
 - [Cooldown](#cooldown)
 
 # Setup
@@ -753,6 +754,105 @@ storage:
       client_secret: 123
       upload_directory: Blackbox
 ```
+
+## Encryption
+
+Blackbox supports password-based encryption of backup files for enhanced security. Encrypted backups are compressed and then encrypted using Fernet symmetric encryption (AES 128 in CBC mode with HMAC) with PBKDF2 key derivation.
+
+### Configuration
+
+Add encryption configuration to your `blackbox.yaml`:
+
+```yaml
+# Global encryption (applies to all storage providers)
+encryption:
+  method: password
+  password: YourVeryStrongPassword123
+
+# Or per-storage provider
+storage:
+  s3:
+    main_s3:
+      bucket: my-bucket
+      endpoint: s3.amazonaws.com
+      encryption:
+        method: password
+        password: YourVeryStrongPassword123
+```
+
+### Password Requirements
+
+- Minimum 14 characters
+- Must contain at least 2 of: uppercase letters, lowercase letters, numbers
+- Keep passwords secure - lost passwords result in permanently inaccessible backups
+
+### Decrypting Backups
+
+#### Using Blackbox CLI
+
+```bash
+# Decrypt an encrypted backup file
+blackbox decrypt /path/to/backup.sql.enc
+
+# Specify custom output path
+blackbox decrypt /path/to/backup.sql.enc --output /path/to/restored.sql
+
+# The CLI will prompt for the password
+```
+
+#### Manual Decryption with Python
+
+If you need to decrypt backups manually without the blackbox CLI:
+
+```python
+import base64
+import gzip
+from pathlib import Path
+from cryptography.fernet import Fernet
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+
+def decrypt_backup(encrypted_file_path, password, output_path=None):
+    """Manually decrypt a blackbox encrypted backup file."""
+    
+    # Derive the same key that blackbox uses
+    salt = b'blackbox_backup_salt_v1'
+    kdf = PBKDF2HMAC(
+        algorithm=hashes.SHA256(),
+        length=32,
+        salt=salt,
+        iterations=100000,
+    )
+    key = base64.urlsafe_b64encode(kdf.derive(password.encode()))
+    fernet = Fernet(key)
+    
+    # Read and decrypt the file
+    with open(encrypted_file_path, 'rb') as f:
+        encrypted_data = f.read()
+    
+    decrypted_compressed_data = fernet.decrypt(encrypted_data)
+    
+    # Decompress the data
+    decrypted_data = gzip.decompress(decrypted_compressed_data)
+    
+    # Determine output path
+    if output_path is None:
+        output_path = Path(encrypted_file_path).with_suffix('')
+    
+    # Write decrypted data
+    with open(output_path, 'wb') as f:
+        f.write(decrypted_data)
+    
+    return output_path
+
+# Example usage
+decrypt_backup('/path/to/backup.sql.enc', 'YourPassword123')
+```
+
+**Security Notes:**
+- Encryption uses a fixed salt for consistency across environments
+- Temporary files are securely overwritten during cleanup
+- Always use strong passwords and keep them secure
 
 ## Cooldown
 

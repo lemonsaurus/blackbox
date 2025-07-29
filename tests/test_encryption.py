@@ -83,6 +83,142 @@ class TestEncryptionHandler:
             if encrypted_file.exists():
                 encrypted_file.unlink()
 
+    def test_password_decryption_success(self):
+        """Test successful password decryption."""
+        config = {"method": "password", "password": "DecryptionTestPassword123"}
+        handler = EncryptionHandler(config)
+
+        # Create and encrypt a test file
+        test_content = "test data for decryption"
+        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.sql') as f:
+            f.write(test_content)
+            test_file = Path(f.name)
+
+        try:
+            # Encrypt the file
+            encrypted_file = handler.encrypt_file(test_file)
+            
+            # Decrypt the file
+            decrypted_file = handler.decrypt_file(encrypted_file)
+            
+            # Verify decryption worked
+            assert decrypted_file != encrypted_file
+            assert decrypted_file.exists()
+            assert not decrypted_file.name.endswith('.enc')
+            
+            # Check content matches original
+            with open(decrypted_file, 'r') as f:
+                decrypted_content = f.read()
+            
+            assert decrypted_content == test_content
+
+        finally:
+            test_file.unlink()
+            if encrypted_file.exists():
+                encrypted_file.unlink()
+            if decrypted_file.exists():
+                decrypted_file.unlink()
+
+    def test_decryption_with_custom_output_path(self):
+        """Test decryption with custom output path."""
+        config = {"method": "password", "password": "CustomOutputPassword123"}
+        handler = EncryptionHandler(config)
+
+        test_content = "custom output test"
+        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.sql') as f:
+            f.write(test_content)
+            test_file = Path(f.name)
+
+        try:
+            # Encrypt the file
+            encrypted_file = handler.encrypt_file(test_file)
+            
+            # Create custom output path
+            custom_output = test_file.parent / "custom_decrypted.sql"
+            
+            # Decrypt with custom output path
+            decrypted_file = handler.decrypt_file(encrypted_file, custom_output)
+            
+            # Verify custom path was used
+            assert decrypted_file == custom_output
+            assert custom_output.exists()
+            
+            # Check content
+            with open(decrypted_file, 'r') as f:
+                decrypted_content = f.read()
+            
+            assert decrypted_content == test_content
+
+        finally:
+            test_file.unlink()
+            if encrypted_file.exists():
+                encrypted_file.unlink()
+            if custom_output.exists():
+                custom_output.unlink()
+
+    def test_decryption_wrong_password(self):
+        """Test decryption fails with wrong password."""
+        # Encrypt with one password
+        encrypt_config = {"method": "password", "password": "CorrectPassword123"}
+        encrypt_handler = EncryptionHandler(encrypt_config)
+        
+        test_content = "secret data"
+        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.sql') as f:
+            f.write(test_content)
+            test_file = Path(f.name)
+
+        try:
+            # Encrypt the file
+            encrypted_file = encrypt_handler.encrypt_file(test_file)
+            
+            # Try to decrypt with wrong password
+            decrypt_config = {"method": "password", "password": "WrongPassword123"}
+            decrypt_handler = EncryptionHandler(decrypt_config)
+            
+            with pytest.raises(ValueError, match="Invalid password or corrupted file"):
+                decrypt_handler.decrypt_file(encrypted_file)
+
+        finally:
+            test_file.unlink()
+            if encrypted_file.exists():
+                encrypted_file.unlink()
+
+    def test_decryption_invalid_file(self):
+        """Test decryption with invalid/non-encrypted file."""
+        config = {"method": "password", "password": "TestPassword123"}
+        handler = EncryptionHandler(config)
+
+        # Test with non-existent file
+        fake_file = Path("nonexistent.enc")
+        with pytest.raises(FileNotFoundError):
+            handler.decrypt_file(fake_file)
+
+        # Test with file without .enc extension
+        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.sql') as f:
+            f.write("not encrypted")
+            regular_file = Path(f.name)
+
+        try:
+            with pytest.raises(ValueError, match="missing .enc extension"):
+                handler.decrypt_file(regular_file)
+        finally:
+            regular_file.unlink()
+
+    def test_decryption_none_method(self):
+        """Test decryption fails when method is 'none'."""
+        config = {"method": "none"}
+        handler = EncryptionHandler(config)
+
+        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.sql.enc') as f:
+            f.write("fake encrypted content")
+            fake_encrypted = Path(f.name)
+
+        try:
+            with pytest.raises(ValueError, match="only supported for password encryption"):
+                handler.decrypt_file(fake_encrypted)
+        finally:
+            fake_encrypted.unlink()
+
     def test_password_encryption_consistency(self):
         """Test that same password produces consistent encryption keys."""
         config = {"method": "password", "password": "ConsistentPassword123"}
