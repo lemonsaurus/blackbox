@@ -158,11 +158,11 @@ class Blackbox(metaclass=YAMLGetter):
             "%A": r"[A-Za-z]+",  # Full weekday name
             "%a": r"[A-Za-z]{3}",  # Abbreviated weekday name
         }
-        
+
         regex_pattern = date_format
         for fmt_code, regex in replacements.items():
             regex_pattern = regex_pattern.replace(fmt_code, regex)
-        
+
         return regex_pattern
 
     @classmethod
@@ -179,7 +179,7 @@ class Blackbox(metaclass=YAMLGetter):
         # Current configurable format pattern
         # Replace {database_id} and {date} with regex patterns
         current_pattern = current_format.replace("{database_id}", database_id)
-        
+
         # Convert configured date format to regex pattern
         date_format = cls.get_date_format()
         date_regex = cls._date_format_to_regex(date_format)
