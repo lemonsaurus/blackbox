@@ -2,6 +2,9 @@ import os
 import re
 import tempfile
 from pathlib import Path
+from typing import BinaryIO
+from typing import Optional
+from typing import Tuple
 
 import boto3
 from botocore.config import Config
@@ -90,6 +93,49 @@ class S3(BlackboxStorage):
 
         self.client.delete_object(Bucket=self.bucket, Key=file_id)
 
+    def _prepare_compressed_file(self, file_path: Path,
+                                 compressed_file: BinaryIO) -> Tuple[Path, bool]:
+        """
+        Prepare compressed file for encryption by creating a temporary file.
+
+        Returns:
+            Tuple of (temp_file_path, is_encrypted)
+        """
+        temp_file = tempfile.NamedTemporaryFile(
+            delete=False, suffix=f"-{file_path.name}.gz"
+        )
+        temp_file_path = Path(temp_file.name)
+
+        # Copy compressed data to temp file
+        compressed_file.seek(0)
+        temp_file.write(compressed_file.read())
+        temp_file.close()
+        compressed_file.close()
+
+        # Encrypt the compressed temp file
+        encrypted_path, is_encrypted = self.encrypt_file(temp_file_path)
+        return encrypted_path if is_encrypted else temp_file_path, is_encrypted
+
+    def _determine_filename(self, original_name: str, is_compressed: bool,
+                            is_encrypted: bool) -> str:
+        """Determine the final filename based on compression and encryption status."""
+        if is_compressed and is_encrypted:
+            return f"{original_name}.gz.enc"
+        elif is_compressed:
+            return f"{original_name}.gz"
+        elif is_encrypted:
+            return f"{original_name}.enc"
+        else:
+            return original_name
+
+    def _cleanup_temp_files(self, temp_file_path: Optional[Path],
+                            encrypted_path: Optional[Path], is_encrypted: bool) -> None:
+        """Clean up temporary and encrypted files."""
+        if temp_file_path and temp_file_path.exists():
+            temp_file_path.unlink()
+        if is_encrypted and encrypted_path and encrypted_path.exists():
+            self.cleanup_encrypted_file(encrypted_path)
+
     def sync(self, file_path: Path) -> None:
         """Sync a file to an S3 bucket."""
         file_, recompressed = self.compress(file_path)
@@ -97,47 +143,32 @@ class S3(BlackboxStorage):
         encrypted_path = None
         is_encrypted = False
         temp_file_path = None
+        final_file: Optional[BinaryIO] = None
 
         try:
             if recompressed:
-                # Create temporary file from compressed data for encryption
-                temp_file = tempfile.NamedTemporaryFile(
-                    delete=False, suffix=f"-{file_path.name}.gz"
-                )
-                temp_file_path = Path(temp_file.name)
-
-                # Copy compressed data to temp file
-                file_.seek(0)
-                temp_file.write(file_.read())
-                temp_file.close()
-                file_.close()
-
-                # Encrypt the compressed temp file
-                encrypted_path, is_encrypted = self.encrypt_file(temp_file_path)
-                final_file_path = encrypted_path if is_encrypted else temp_file_path
-                file_ = open(final_file_path, 'rb')
-
-                # Determine filename
+                final_file_path, is_encrypted = self._prepare_compressed_file(file_path, file_)
+                temp_file_path = final_file_path if not is_encrypted else Path(file_.name)
                 if is_encrypted:
-                    final_filename = f"{file_path.name}.gz.enc"
-                else:
-                    final_filename = f"{file_path.name}.gz"
+                    encrypted_path = final_file_path
+                final_file = open(final_file_path, 'rb')
             else:
                 # Encrypt original file directly
                 encrypted_path, is_encrypted = self.encrypt_file(file_path)
                 if is_encrypted:
                     file_.close()
-                    file_ = open(encrypted_path, 'rb')
-                    final_filename = f"{file_path.name}.enc"
+                    final_file = open(encrypted_path, 'rb')
                 else:
-                    final_filename = file_path.name
+                    final_file = file_
+
+            final_filename = self._determine_filename(file_path.name, recompressed, is_encrypted)
 
             extra_args = {}
             if recompressed and not is_encrypted:
                 extra_args["ContentEncoding"] = "gzip"
 
             self.client.upload_fileobj(
-                file_,
+                final_file,
                 self.bucket,
                 final_filename,
                 ExtraArgs=extra_args
@@ -149,13 +180,9 @@ class S3(BlackboxStorage):
             self.output = str(e)
             self.success = False
         finally:
-            if file_:
-                file_.close()
-            # Clean up temporary and encrypted files
-            if temp_file_path and temp_file_path.exists():
-                temp_file_path.unlink()
-            if is_encrypted and encrypted_path and encrypted_path.exists():
-                self.cleanup_encrypted_file(encrypted_path)
+            if final_file:
+                final_file.close()
+            self._cleanup_temp_files(temp_file_path, encrypted_path, is_encrypted)
 
     def rotate(self, database_id: str) -> None:
         """

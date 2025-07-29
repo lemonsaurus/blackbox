@@ -1,9 +1,13 @@
 import base64
 import gzip
 import os
+import re
 from pathlib import Path
+from typing import Any
+from typing import Dict
 
 from cryptography.fernet import Fernet
+from cryptography.fernet import InvalidToken
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
@@ -25,7 +29,7 @@ class EncryptionHandler:
         - Temporary files are securely overwritten during cleanup
     """
 
-    def __init__(self, encryption_config: dict):
+    def __init__(self, encryption_config: Dict[str, Any]) -> None:
         """Initialize encryption handler with configuration."""
         self.config = encryption_config
         self.method = self.config.get("method", "none").lower()
@@ -45,6 +49,8 @@ class EncryptionHandler:
         password = self.config.get("password")
         if not password:
             raise ValueError("Password is required for encryption")
+
+        self._validate_password_strength(password)
 
         log.info(f"Encrypting {file_path.name}")
 
@@ -87,14 +93,22 @@ class EncryptionHandler:
                 except OSError:
                     pass
             raise ValueError(f"Password encoding error: {e}")
-        except Exception as e:
-            # Handle any other unexpected errors
+        except InvalidToken as e:
+            # Handle cryptography-specific errors
             if encrypted_path.exists():
                 try:
                     encrypted_path.unlink()
                 except OSError:
                     pass
-            raise ValueError(f"Unexpected encryption error: {e}")
+            raise ValueError(f"Encryption token error: {e}")
+        except (MemoryError, OverflowError) as e:
+            # Handle memory/size errors
+            if encrypted_path.exists():
+                try:
+                    encrypted_path.unlink()
+                except OSError:
+                    pass
+            raise ValueError(f"Memory error during encryption: {e}")
 
     def _derive_key(self, password: bytes) -> bytes:
         """
@@ -139,8 +153,33 @@ class EncryptionHandler:
                 except Exception:
                     pass
 
+    def _validate_password_strength(self, password: str) -> None:
+        """
+        Validate password meets minimum security requirements.
 
-def create_encryption_handler(config: dict) -> EncryptionHandler:
+        Args:
+            password: The password to validate
+
+        Raises:
+            ValueError: If password doesn't meet requirements
+        """
+        if len(password) < 14:
+            raise ValueError("Password must be at least 14 characters long")
+
+        # Check for basic complexity (uppercase, lowercase, numbers)
+        has_upper = bool(re.search(r'[A-Z]', password))
+        has_lower = bool(re.search(r'[a-z]', password))
+        has_digit = bool(re.search(r'\d', password))
+
+        complexity_count = sum([has_upper, has_lower, has_digit])
+
+        if complexity_count < 2:
+            raise ValueError(
+                "Password must contain at least 2 of: uppercase, lowercase, numbers"
+            )
+
+
+def create_encryption_handler(config: Dict[str, Any]) -> EncryptionHandler:
     """Create an encryption handler based on configuration."""
     encryption_config = config.get("encryption", {})
     return EncryptionHandler(encryption_config)

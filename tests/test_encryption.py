@@ -48,7 +48,7 @@ class TestEncryptionHandler:
 
     def test_password_encryption_success(self):
         """Test successful password encryption."""
-        config = {"method": "password", "password": "test_password"}
+        config = {"method": "password", "password": "VeryStrongPassword123"}
         handler = EncryptionHandler(config)
 
         with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.sql') as f:
@@ -85,22 +85,22 @@ class TestEncryptionHandler:
 
     def test_password_encryption_consistency(self):
         """Test that same password produces consistent encryption keys."""
-        config = {"method": "password", "password": "consistent_password"}
+        config = {"method": "password", "password": "ConsistentPassword123"}
         handler1 = EncryptionHandler(config)
         handler2 = EncryptionHandler(config)
 
         # Both should derive the same key from the same password
-        key1 = handler1._derive_key(b"consistent_password")
-        key2 = handler2._derive_key(b"consistent_password")
+        key1 = handler1._derive_key(b"ConsistentPassword123")
+        key2 = handler2._derive_key(b"ConsistentPassword123")
         assert key1 == key2
 
         # Different passwords should produce different keys
-        key3 = handler1._derive_key(b"different_password")
+        key3 = handler1._derive_key(b"DifferentPassword456")
         assert key1 != key3
 
     def test_encryption_with_compression(self):
         """Test that encryption includes compression."""
-        config = {"method": "password", "password": "test_password"}
+        config = {"method": "password", "password": "CompressionTestPassword123"}
         handler = EncryptionHandler(config)
 
         # Create a file with repetitive content that compresses well
@@ -148,7 +148,7 @@ class TestEncryptionHandler:
 
     def test_cleanup_encrypted_file(self):
         """Test cleanup removes encrypted files when method is 'password'."""
-        config = {"method": "password", "password": "test_password"}
+        config = {"method": "password", "password": "CleanupTestPassword123"}
         handler = EncryptionHandler(config)
 
         with tempfile.NamedTemporaryFile(delete=False) as f:
@@ -186,7 +186,7 @@ class TestCreateEncryptionHandler:
 
     def test_encryption_with_compression_workflow(self):
         """Test that encryption works correctly in compression workflow."""
-        config = {"method": "password", "password": "test_password"}
+        config = {"method": "password", "password": "WorkflowTestPassword123"}
         handler = EncryptionHandler(config)
 
         # Create a test file that would be compressed
