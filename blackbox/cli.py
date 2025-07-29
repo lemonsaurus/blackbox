@@ -131,7 +131,7 @@ def cli(ctx, config, init, version):
     # Store config in context for subcommands
     ctx.ensure_object(dict)
     ctx.obj['config'] = config
-    
+
     # If no subcommand is provided, run backup by default (backward compatibility)
     if ctx.invoked_subcommand is None:
         ctx.invoke(backup, init=init)
@@ -142,7 +142,7 @@ def cli(ctx, config, init, version):
 def backup(ctx, init=False):
     """Run backup process for all configured databases."""
     config = ctx.obj.get('config')
-    
+
     if init:
         config_file = Path("blackbox.yaml")
         if not config_file.exists():
@@ -198,29 +198,28 @@ def backup(ctx, init=False):
 
 @cli.command()
 @click.argument('encrypted_file', type=click.Path(exists=True, path_type=Path))
-@click.option('--output', '-o', type=click.Path(path_type=Path), 
+@click.option('--output', '-o', type=click.Path(path_type=Path),
               help="Output file path (defaults to removing .enc extension)")
-@click.option('--password', prompt=True, hide_input=True, 
+@click.option('--password', prompt=True, hide_input=True,
               help="Password for decryption")
 @click.pass_context
 def decrypt(ctx, encrypted_file, output, password):
     """Decrypt an encrypted backup file."""
     from blackbox.utils.encryption import EncryptionHandler
-    
+
     config = ctx.obj.get('config')
     if config:
         YAMLGetter.parse_config(Path(config))
-    
+
     try:
         # Create encryption handler with the provided password
         encryption_config = {"method": "password", "password": password}
         handler = EncryptionHandler(encryption_config)
-        
+
         # Decrypt the file
         decrypted_file = handler.decrypt_file(encrypted_file, output)
-        
+
         click.echo(f"✅ Successfully decrypted: {decrypted_file}")
-        
     except Exception as e:
         click.echo(f"❌ Decryption failed: {e}", err=True)
         exit(1)

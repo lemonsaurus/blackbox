@@ -97,19 +97,19 @@ class TestEncryptionHandler:
         try:
             # Encrypt the file
             encrypted_file = handler.encrypt_file(test_file)
-            
+
             # Decrypt the file
             decrypted_file = handler.decrypt_file(encrypted_file)
-            
+
             # Verify decryption worked
             assert decrypted_file != encrypted_file
             assert decrypted_file.exists()
             assert not decrypted_file.name.endswith('.enc')
-            
+
             # Check content matches original
             with open(decrypted_file, 'r') as f:
                 decrypted_content = f.read()
-            
+
             assert decrypted_content == test_content
 
         finally:
@@ -132,21 +132,21 @@ class TestEncryptionHandler:
         try:
             # Encrypt the file
             encrypted_file = handler.encrypt_file(test_file)
-            
+
             # Create custom output path
             custom_output = test_file.parent / "custom_decrypted.sql"
-            
+
             # Decrypt with custom output path
             decrypted_file = handler.decrypt_file(encrypted_file, custom_output)
-            
+
             # Verify custom path was used
             assert decrypted_file == custom_output
             assert custom_output.exists()
-            
+
             # Check content
             with open(decrypted_file, 'r') as f:
                 decrypted_content = f.read()
-            
+
             assert decrypted_content == test_content
 
         finally:
@@ -161,7 +161,7 @@ class TestEncryptionHandler:
         # Encrypt with one password
         encrypt_config = {"method": "password", "password": "CorrectPassword123"}
         encrypt_handler = EncryptionHandler(encrypt_config)
-        
+
         test_content = "secret data"
         with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.sql') as f:
             f.write(test_content)
@@ -170,11 +170,11 @@ class TestEncryptionHandler:
         try:
             # Encrypt the file
             encrypted_file = encrypt_handler.encrypt_file(test_file)
-            
+
             # Try to decrypt with wrong password
             decrypt_config = {"method": "password", "password": "WrongPassword123"}
             decrypt_handler = EncryptionHandler(decrypt_config)
-            
+
             with pytest.raises(ValueError, match="Invalid password or corrupted file"):
                 decrypt_handler.decrypt_file(encrypted_file)
 
