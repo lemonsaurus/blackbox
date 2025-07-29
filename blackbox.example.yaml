@@ -32,7 +32,7 @@ date_format: "%Y-%m-%d"
 # Global encryption configuration (applies to all storage providers unless overridden)
 encryption:
   method: none  # Options: "none", "password"
-  # For password encryption (requires gpg installed):
+  # For password encryption:
   # password: "your-strong-password-here"
 
 # Per-storage encryption configuration example:

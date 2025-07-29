@@ -1,11 +1,17 @@
+import base64
+import gzip
 import os
 from pathlib import Path
+
+from cryptography.fernet import Fernet
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
 from blackbox.utils.logger import log
 
 
 class EncryptionHandler:
-    """Handles basic password-based encryption of backup files."""
+    """Handles basic password-based encryption of backup files using Python cryptography."""
 
     def __init__(self, encryption_config: dict):
         """Initialize encryption handler with configuration."""
@@ -20,10 +26,10 @@ class EncryptionHandler:
         if self.method == "none":
             return file_path
         elif self.method == "password":
-            return self._encrypt_with_gpg(file_path)
+            return self._encrypt_with_fernet(file_path)
 
-    def _encrypt_with_gpg(self, file_path: Path) -> Path:
-        """Encrypt file using GPG symmetric encryption."""
+    def _encrypt_with_fernet(self, file_path: Path) -> Path:
+        """Encrypt file using Fernet symmetric encryption."""
         password = self.config.get("password")
         if not password:
             raise ValueError("Password is required for encryption")
@@ -31,25 +37,24 @@ class EncryptionHandler:
         log.info(f"Encrypting {file_path.name}")
 
         # Create encrypted file path
-        encrypted_path = file_path.with_suffix(f"{file_path.suffix}.gpg")
+        encrypted_path = file_path.with_suffix(f"{file_path.suffix}.enc")
 
         try:
-            # Use gpg command for encryption with secure password handling
-            cmd = [
-                "gpg", "--batch", "--yes", "--quiet",
-                "--cipher-algo", "AES256",
-                "--compress-algo", "2",
-                "--symmetric",
-                "--passphrase-fd", "0",  # Read password from stdin
-                "--output", str(encrypted_path),
-                str(file_path)
-            ]
+            # Generate key from password
+            key = self._derive_key(password.encode())
+            fernet = Fernet(key)
 
-            import subprocess
-            result = subprocess.run(cmd, input=password, text=True, capture_output=True)
+            # Read and encrypt file
+            with open(file_path, 'rb') as f:
+                data = f.read()
 
-            if result.returncode != 0:
-                raise RuntimeError(f"GPG encryption failed: {result.stderr}")
+            # Compress then encrypt
+            compressed_data = gzip.compress(data)
+            encrypted_data = fernet.encrypt(compressed_data)
+
+            # Write encrypted data to file
+            with open(encrypted_path, 'wb') as f:
+                f.write(encrypted_data)
 
             log.info(f"File encrypted: {encrypted_path.name}")
             return encrypted_path
@@ -58,6 +63,19 @@ class EncryptionHandler:
             if encrypted_path.exists():
                 encrypted_path.unlink()
             raise ValueError(f"Encryption failed: {e}")
+
+    def _derive_key(self, password: bytes) -> bytes:
+        """Derive encryption key from password using PBKDF2."""
+        # Use a fixed salt for simplicity (in production, should be random and stored)
+        salt = b'blackbox_backup_salt_v1'
+        kdf = PBKDF2HMAC(
+            algorithm=hashes.SHA256(),
+            length=32,
+            salt=salt,
+            iterations=100000,
+        )
+        key = base64.urlsafe_b64encode(kdf.derive(password))
+        return key
 
     def cleanup_temp_file(self, file_path: Path) -> None:
         """Securely delete a temporary file."""

@@ -119,7 +119,7 @@ class S3(BlackboxStorage):
 
                 # Determine filename
                 if is_encrypted:
-                    final_filename = f"{file_path.name}.gz.gpg"
+                    final_filename = f"{file_path.name}.gz.enc"
                 else:
                     final_filename = f"{file_path.name}.gz"
             else:
@@ -128,7 +128,7 @@ class S3(BlackboxStorage):
                 if is_encrypted:
                     file_.close()
                     file_ = open(encrypted_path, 'rb')
-                    final_filename = f"{file_path.name}.gpg"
+                    final_filename = f"{file_path.name}.enc"
                 else:
                     final_filename = file_path.name
 
