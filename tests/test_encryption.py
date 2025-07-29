@@ -73,10 +73,15 @@ class TestEncryptionHandler:
 
             # Verify gpg was called correctly
             mock_run.assert_called_once()
-            call_args = mock_run.call_args[0][0]
-            assert "gpg" in call_args
-            assert "--symmetric" in call_args
-            assert "test_password" in call_args
+            call_args, call_kwargs = mock_run.call_args
+            cmd = call_args[0]
+            assert "gpg" in cmd
+            assert "--symmetric" in cmd
+            assert "--passphrase-fd" in cmd
+            assert "0" in cmd  # stdin file descriptor
+            # Password should be passed via input, not command line
+            assert "test_password" not in cmd
+            assert call_kwargs.get("input") == "test_password"
 
         finally:
             test_file.unlink()
@@ -120,3 +125,44 @@ class TestCreateEncryptionHandler:
 
         assert isinstance(handler, EncryptionHandler)
         assert handler.method == "none"
+
+    @patch('subprocess.run')
+    def test_encryption_with_compression_workflow(self, mock_run):
+        """Test that encryption works correctly in compression workflow."""
+        # Mock successful gpg command
+        mock_run.return_value.returncode = 0
+        mock_run.return_value.stderr = ""
+
+        config = {"method": "password", "password": "test_password"}
+        handler = EncryptionHandler(config)
+
+        # Create a test file that would be compressed
+        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.sql') as f:
+            f.write("test data for compression and encryption")
+            test_file = Path(f.name)
+
+        try:
+            # Simulate compressed temp file (what S3 handler would create)
+            compressed_file = test_file.with_suffix('.gz')
+            compressed_file.write_bytes(b"compressed data")
+
+            # Create expected encrypted file
+            encrypted_path = Path(str(compressed_file) + '.gpg')
+            encrypted_path.write_text("encrypted compressed content")
+
+            result = handler.encrypt_file(compressed_file)
+
+            assert result == encrypted_path
+            assert encrypted_path.exists()
+
+            # Verify the compressed file was encrypted, not the original
+            call_args = mock_run.call_args[0][0]
+            assert str(compressed_file) in call_args
+            assert str(test_file) not in call_args
+
+        finally:
+            test_file.unlink()
+            if compressed_file.exists():
+                compressed_file.unlink()
+            if encrypted_path.exists():
+                encrypted_path.unlink()

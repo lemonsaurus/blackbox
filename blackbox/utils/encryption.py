@@ -34,19 +34,19 @@ class EncryptionHandler:
         encrypted_path = file_path.with_suffix(f"{file_path.suffix}.gpg")
 
         try:
-            # Use gpg command for encryption
+            # Use gpg command for encryption with secure password handling
             cmd = [
                 "gpg", "--batch", "--yes", "--quiet",
                 "--cipher-algo", "AES256",
                 "--compress-algo", "2",
                 "--symmetric",
-                "--passphrase", password,
+                "--passphrase-fd", "0",  # Read password from stdin
                 "--output", str(encrypted_path),
                 str(file_path)
             ]
 
             import subprocess
-            result = subprocess.run(cmd, capture_output=True, text=True)
+            result = subprocess.run(cmd, input=password, text=True, capture_output=True)
 
             if result.returncode != 0:
                 raise RuntimeError(f"GPG encryption failed: {result.stderr}")

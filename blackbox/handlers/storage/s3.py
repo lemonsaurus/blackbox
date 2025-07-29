@@ -93,17 +93,44 @@ class S3(BlackboxStorage):
         """Sync a file to an S3 bucket."""
         file_, recompressed = self.compress(file_path)
 
-        # Try to encrypt the file if encryption is enabled
-        encrypted_path, is_encrypted = self.encrypt_file(file_path)
+        encrypted_path = None
+        is_encrypted = False
+        temp_file_path = None
 
         try:
-            # If encryption occurred, use the encrypted file
-            if is_encrypted:
-                file_.close()  # Close compressed file
-                file_ = open(encrypted_path, 'rb')  # Open encrypted file
-                final_filename = encrypted_path.name
+            if recompressed:
+                # Create temporary file from compressed data for encryption
+                import tempfile
+                temp_file = tempfile.NamedTemporaryFile(
+                    delete=False, suffix=f"-{file_path.name}.gz"
+                )
+                temp_file_path = Path(temp_file.name)
+
+                # Copy compressed data to temp file
+                file_.seek(0)
+                temp_file.write(file_.read())
+                temp_file.close()
+                file_.close()
+
+                # Encrypt the compressed temp file
+                encrypted_path, is_encrypted = self.encrypt_file(temp_file_path)
+                final_file_path = encrypted_path if is_encrypted else temp_file_path
+                file_ = open(final_file_path, 'rb')
+
+                # Determine filename
+                if is_encrypted:
+                    final_filename = f"{file_path.name}.gz.gpg"
+                else:
+                    final_filename = f"{file_path.name}.gz"
             else:
-                final_filename = f"{file_path.name}{'.gz' if recompressed else ''}"
+                # Encrypt original file directly
+                encrypted_path, is_encrypted = self.encrypt_file(file_path)
+                if is_encrypted:
+                    file_.close()
+                    file_ = open(encrypted_path, 'rb')
+                    final_filename = f"{file_path.name}.gpg"
+                else:
+                    final_filename = file_path.name
 
             extra_args = {}
             if recompressed and not is_encrypted:
@@ -124,8 +151,10 @@ class S3(BlackboxStorage):
         finally:
             if file_:
                 file_.close()
-            # Clean up encrypted file if it was created
-            if is_encrypted and encrypted_path.exists():
+            # Clean up temporary and encrypted files
+            if temp_file_path and temp_file_path.exists():
+                temp_file_path.unlink()
+            if is_encrypted and encrypted_path and encrypted_path.exists():
                 self.cleanup_encrypted_file(encrypted_path)
 
     def rotate(self, database_id: str) -> None:
