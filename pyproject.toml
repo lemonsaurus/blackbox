@@ -44,7 +44,7 @@ pytest-cov = "^2.11.1"
 pytest-mock = "^3.5.1"
 pytest-subprocess = "^1.0.1"
 pytest-testdox = "^2.0.1"
-poethepoet = "^0.10.0"
+poethepoet = "^0.37.0"
 requests-mock = "^1.12.1"
 win32-setctime = "^1.0.3"
 
