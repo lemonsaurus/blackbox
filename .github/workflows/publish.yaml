@@ -16,10 +16,10 @@ jobs:
           ref: main
           ssh-key: ${{ secrets.SSH_DEPLOY_KEY }}
 
-      - name: Set up Python 3.9
+      - name: Set up Python 3.10
         uses: actions/setup-python@v4
         with:
-          python-version: "3.9"
+          python-version: "3.10"
 
       - name: Install poetry
         uses: abatilo/actions-poetry@v2
@@ -49,7 +49,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.9"
+          python-version: "3.10"
 
       - name: Install poetry
         uses: abatilo/actions-poetry@v2
