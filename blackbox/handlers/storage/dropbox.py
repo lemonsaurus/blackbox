@@ -43,7 +43,6 @@ class Dropbox(BlackboxStorage):
         Args
             file_id: The file's identifier. For Dropbox, this would be the file path.
         """
-
         self.client.files_delete(path=file_id)
 
     def sync(self, file_path: Path) -> None:
@@ -69,32 +68,21 @@ class Dropbox(BlackboxStorage):
                 file_size = os.stat(f.name).st_size
                 log.debug(file_size)
                 if file_size <= chunk_size:
-                    self.client.files_upload(
-                        f.read(), upload_path, WriteMode.overwrite
-                    )
+                    self.client.files_upload(f.read(), upload_path, WriteMode.overwrite)
                 else:
-                    session_start = self.client.files_upload_session_start(
-                        f.read(chunk_size)
-                    )
-                    cursor = UploadSessionCursor(
-                        session_start.session_id,
-                        offset=f.tell()
-                    )
+                    session_start = self.client.files_upload_session_start(f.read(chunk_size))
+                    cursor = UploadSessionCursor(session_start.session_id, offset=f.tell())
                     # Commit contains path in Dropbox and write mode about file
                     commit = CommitInfo(upload_path, WriteMode.overwrite)
 
                     while f.tell() < file_size:
                         if (file_size - f.tell()) <= chunk_size:
                             self.client.files_upload_session_finish(
-                                f.read(chunk_size),
-                                cursor,
-                                commit
+                                f.read(chunk_size), cursor, commit
                             )
                         else:
                             self.client.files_upload_session_append(
-                                f.read(chunk_size),
-                                cursor.session_id,
-                                cursor.offset
+                                f.read(chunk_size), cursor.session_id, cursor.offset
                             )
                             cursor.offset = f.tell()
             self.success = True
@@ -117,21 +105,28 @@ class Dropbox(BlackboxStorage):
             return None
         # Let's rotate only this type of database
         from blackbox.config import Blackbox
+
         rotation_patterns = Blackbox.get_rotation_patterns(database_id)
 
         # Receive first batch of files.
         files_result = self.client.files_list_folder(
             self.upload_base if self.upload_base != "/" else ""
         )
-        entries = [entry for entry in files_result.entries if
-                   self._is_backup_file(entry, rotation_patterns)]
+        entries = [
+            entry
+            for entry in files_result.entries
+            if self._is_backup_file(entry, rotation_patterns)
+        ]
 
         # If there is more files, receive all of them.
         while files_result.has_more:
             cursor = files_result.cursor
             files_result = self.client.files_list_folder_continue(cursor)
-            entries += [entry for entry in files_result.entries if
-                        self._is_backup_file(entry, rotation_patterns)]
+            entries += [
+                entry
+                for entry in files_result.entries
+                if self._is_backup_file(entry, rotation_patterns)
+            ]
 
         # Sort the backups in order of most recent to last.
         entries = sorted(

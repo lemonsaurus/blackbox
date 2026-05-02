@@ -16,14 +16,16 @@ def mock_valid_s3_config_without_aws_credentials():
 def test_s3_handler_can_be_instantiated_with_required_fields():
     """Test if the s3 storage handler can be instantiated."""
     valid_config = {
-        "bucket": "bigbucket", "endpoint": "s3.endpoint.com",
-        "aws_access_key_id": "lemon", "aws_secret_access_key": "dance"
+        "bucket": "bigbucket",
+        "endpoint": "s3.endpoint.com",
+        "aws_access_key_id": "lemon",
+        "aws_secret_access_key": "dance",
     }
     S3(**valid_config)
 
 
 def test_s3_handler_can_be_instantiated_with_env_variables(
-        monkeypatch, mock_valid_s3_config_without_aws_credentials
+    monkeypatch, mock_valid_s3_config_without_aws_credentials
 ):
     """Test if the s3 storage handler can be instantiated with key & secret from env variables."""
     # Add them to the environment
@@ -34,7 +36,7 @@ def test_s3_handler_can_be_instantiated_with_env_variables(
 
 
 def test_s3_handler_can_be_instantiated_with_aws_config_files(
-        monkeypatch, tmp_path, mock_valid_s3_config_without_aws_credentials
+    monkeypatch, tmp_path, mock_valid_s3_config_without_aws_credentials
 ):
     """Test if the s3 storage handler can be instantiated with key & secret from .aws/ files."""
     # Make valid config files
@@ -67,7 +69,7 @@ def test_s3_handler_supports_client_config_dict():
         "client_config": {
             "request_checksum_calculation": "when_required",
             "response_checksum_validation": "when_required",
-        }
+        },
     }
     s3_handler = S3(**valid_config)
 
@@ -88,7 +90,7 @@ def test_s3_handler_supports_client_config_object():
         "endpoint": "s3.endpoint.com",
         "aws_access_key_id": "lemon",
         "aws_secret_access_key": "dance",
-        "client_config": client_config
+        "client_config": client_config,
     }
     s3_handler = S3(**valid_config)
 
@@ -103,7 +105,7 @@ def test_s3_handler_works_without_client_config():
         "bucket": "bigbucket",
         "endpoint": "s3.endpoint.com",
         "aws_access_key_id": "lemon",
-        "aws_secret_access_key": "dance"
+        "aws_secret_access_key": "dance",
     }
     s3_handler = S3(**valid_config)
 

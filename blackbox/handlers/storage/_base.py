@@ -13,7 +13,6 @@ from blackbox.handlers._base import BlackboxHandler
 from blackbox.utils.encryption import create_encryption_handler
 from blackbox.utils.logger import log
 
-
 # File suffixes considered as archives
 ARCHIVE_SUFFIXES = {".tar", ".zip"}
 
@@ -28,7 +27,7 @@ class BlackboxStorage(BlackboxHandler):
         super().__init__(**kwargs)
 
         self.success = False  # Upload success status
-        self.output = ""     # Storage operation output/errors
+        self.output = ""  # Storage operation output/errors
 
         # Track backup retention counts per rotation strategy
         self.rotation_strategies = self.config.get("rotation_strategies", [])
@@ -80,13 +79,11 @@ class BlackboxStorage(BlackboxHandler):
     @property
     def _matches_retention_config(self):
         """Get retention algorithm - rotation strategies or legacy retention_days."""
-
         if self.rotation_strategies:
             return partial(
                 rotation.matches_crons,
                 cron_expressions=[
-                    rotation.clean_cron_expression(exp)
-                    for exp in self.rotation_strategies
+                    rotation.clean_cron_expression(exp) for exp in self.rotation_strategies
                 ],
             )
         else:
@@ -94,10 +91,8 @@ class BlackboxStorage(BlackboxHandler):
 
     def _do_rotate(self, file_id: str, modified_time: datetime) -> None:
         """Apply retention policy to decide if backup should be deleted or kept."""
-
         # Check if backup matches any retention rules
-        retention_config_matches = self._matches_retention_config(
-            dt=modified_time)
+        retention_config_matches = self._matches_retention_config(dt=modified_time)
 
         if not retention_config_matches:
             # No retention rules match - delete the backup
@@ -111,11 +106,10 @@ class BlackboxStorage(BlackboxHandler):
                 maximum = self.backups_retained[highest_expression]["max"]
             else:
                 # Multiple strategies match - use the one with highest retention limit
-                highest_expression, maximum = (
-                    rotation.get_highest_max_retention_count(
-                        retention_tracker=self.backups_retained,
-                        cron_expressions=retention_config_matches,
-                    ))
+                highest_expression, maximum = rotation.get_highest_max_retention_count(
+                    retention_tracker=self.backups_retained,
+                    cron_expressions=retention_config_matches,
+                )
 
             # 🧮 Complex deletion logic: max=0 OR (reached limit AND passed retention window)
             num_retained = self.backups_retained[highest_expression]["num_retained"]

@@ -1,4 +1,3 @@
 SET foo 100
 SET bar "baz"
 RPUSH mylist "a" "b" "c"
-

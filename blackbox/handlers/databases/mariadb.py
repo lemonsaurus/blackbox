@@ -6,7 +6,11 @@ from blackbox.utils.logger import log
 class MariaDB(BlackboxDatabase):
     """A Database handler that will do a mysqldump for MariaDB, backing up all tables."""
 
-    required_fields = ("username", "password", "host", )
+    required_fields = (
+        "username",
+        "password",
+        "host",
+    )
     backup_extension = ".sql"
 
     def backup(self, backup_path) -> None:

@@ -4,7 +4,6 @@ import requests_mock
 from blackbox.exceptions import MissingFields
 from blackbox.handlers.notifiers.slack import Slack
 
-
 WEBHOOK = "https://hooks.slack.com/services/x/x/x"
 
 
@@ -49,17 +48,16 @@ def test_slack_notify(mock_valid_slack_config, report):
     slack.report = report
 
     assert slack._parse_report() == {
-        'attachments': [
+        "attachments": [
             {
-                'author_icon': 'https://raw.githubusercontent.com/lemonsaurus/blackbox/main/img/blackbox_avatar.png',  # NOQA: E501
-                'author_name': 'blackbox',
-                'color': '#0FA031',
-
-                'fields': [{'short': True,
-                            'title': 'main_mongo',
-                            'value': ':white_check_mark:  main_s3'}],
-                'mrkdwn_in': ['fields'],
-                'title': 'Backup'
+                "author_icon": "https://raw.githubusercontent.com/lemonsaurus/blackbox/main/img/blackbox_avatar.png",  # NOQA: E501
+                "author_name": "blackbox",
+                "color": "#0FA031",
+                "fields": [
+                    {"short": True, "title": "main_mongo", "value": ":white_check_mark:  main_s3"}
+                ],
+                "mrkdwn_in": ["fields"],
+                "title": "Backup",
             }
         ]
     }
@@ -99,35 +97,23 @@ def test_slack_notify_modern(mock_valid_slack_config_with_block_kit, report):
     slack.report = report
 
     assert slack._parse_report() == {
-        'blocks': [
+        "blocks": [
+            {"text": {"text": "Backup", "type": "plain_text"}, "type": "header"},
             {
-                'text': {
-                    'text': 'Backup', 'type': 'plain_text'
-                },
-                'type': 'header'
+                "fields": [{"text": "*main_mongo*\n:white_check_mark: main_s3", "type": "mrkdwn"}],
+                "type": "section",
             },
             {
-                'fields': [
+                "elements": [
                     {
-                        'text': '*main_mongo*\n:white_check_mark: main_s3', 'type': 'mrkdwn'
-                    }
-                ], 'type': 'section'
-            },
-            {
-                'elements': [
-                    {
-                        'alt_text': 'blackbox',
-                        'image_url': 'https://raw.githubusercontent.com/lemonsaurus/blackbox/main/img/blackbox_avatar.png',  # NOQA: E501
-                        'type': 'image'
+                        "alt_text": "blackbox",
+                        "image_url": "https://raw.githubusercontent.com/lemonsaurus/blackbox/main/img/blackbox_avatar.png",  # NOQA: E501
+                        "type": "image",
                     },
-                    {
-                        'emoji': True,
-                        'text': 'blackbox',
-                        'type': 'plain_text'
-                    }
+                    {"emoji": True, "text": "blackbox", "type": "plain_text"},
                 ],
-                'type': 'context'
-            }
+                "type": "context",
+            },
         ]
     }
 

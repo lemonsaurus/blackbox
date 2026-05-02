@@ -17,13 +17,13 @@ class TestExceptionChaining:
         handler = EncryptionHandler(config)
 
         # Create a file that we'll simulate failing to read
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.sql') as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".sql") as f:
             f.write("test data")
             test_file = Path(f.name)
 
         try:
             # Mock open to raise a PermissionError
-            with patch('builtins.open', side_effect=PermissionError("Mock permission error")):
+            with patch("builtins.open", side_effect=PermissionError("Mock permission error")):
                 with pytest.raises(ValueError) as exc_info:
                     handler.encrypt_file(test_file)
 
@@ -42,7 +42,7 @@ class TestExceptionChaining:
         handler = EncryptionHandler({"method": "none"})
         handler.method = "invalid_method"  # Force invalid method
 
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.sql') as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".sql") as f:
             f.write("test data")
             test_file = Path(f.name)
 
@@ -57,24 +57,28 @@ class TestExceptionChaining:
         config = {"method": "password", "password": "VeryStrongPassword123"}
         handler = EncryptionHandler(config)
 
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.sql') as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".sql") as f:
             f.write("test data")
             test_file = Path(f.name)
 
         try:
             # Test different exception types still get specific messages
             test_cases = [
-                (PermissionError("Mock permission error"),
-                 "File operation failed during encryption"),
-                (UnicodeDecodeError("utf-8", b"", 0, 1, "Mock unicode error"),
-                 "Password encoding error"),
+                (
+                    PermissionError("Mock permission error"),
+                    "File operation failed during encryption",
+                ),
+                (
+                    UnicodeDecodeError("utf-8", b"", 0, 1, "Mock unicode error"),
+                    "Password encoding error",
+                ),
                 (InvalidToken("Mock token error"), "Encryption token error"),
                 (MemoryError("Mock memory error"), "Memory error during encryption"),
                 (RuntimeError("Mock runtime error"), "Unexpected error during encryption"),
             ]
 
             for exception, expected_msg in test_cases:
-                with patch('builtins.open', side_effect=exception):
+                with patch("builtins.open", side_effect=exception):
                     with pytest.raises(ValueError) as exc_info:
                         handler.encrypt_file(test_file)
 

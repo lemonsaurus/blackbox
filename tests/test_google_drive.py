@@ -25,7 +25,8 @@ def mock_invalid_google_drive_config():
 
 @patch("blackbox.handlers.storage.GoogleDrive._initialize_drive_client")
 def test_google_drive_handler_can_be_instantiated_with_required_fields(
-        mock_initialize_drive_client, mock_valid_google_drive_config):
+    mock_initialize_drive_client, mock_valid_google_drive_config
+):
     """Test if the Google Drive storage handler can be instantiated."""
     GoogleDrive(**mock_valid_google_drive_config)
     mock_initialize_drive_client.assert_called_once()
@@ -33,7 +34,8 @@ def test_google_drive_handler_can_be_instantiated_with_required_fields(
 
 @patch("blackbox.handlers.storage.GoogleDrive._initialize_drive_client")
 def test_google_drive_handler_fails_without_required_fields(
-        mock_initialize_drive_client, mock_invalid_google_drive_config):
+    mock_initialize_drive_client, mock_invalid_google_drive_config
+):
     """Test if the Google Drive storage handler cannot be instantiated with missing
     fields."""
     with pytest.raises(MissingFields):
@@ -43,7 +45,8 @@ def test_google_drive_handler_fails_without_required_fields(
 
 @patch("blackbox.handlers.storage.GoogleDrive._initialize_drive_client")
 def test_google_drive_handler_instantiates_optional_fields(
-        mock_initialize_drive_client, mock_valid_google_drive_config):
+    mock_initialize_drive_client, mock_valid_google_drive_config
+):
     """Test if the Google Drive storage handler instantiates optional fields."""
     google_drive_instance = GoogleDrive(**mock_valid_google_drive_config)
     assert google_drive_instance.upload_base == "Blackbox"

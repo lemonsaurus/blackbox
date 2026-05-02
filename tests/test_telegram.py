@@ -32,7 +32,7 @@ def test_parse_report(mock_valid_telegram_config, report):
     telegram = Telegram(**mock_valid_telegram_config)
     telegram.report = report
 
-    assert telegram._parse_report() == 'Blackbox Backup Status:\nmain_mongo: \n✅ main_s3\n'
+    assert telegram._parse_report() == "Blackbox Backup Status:\nmain_mongo: \n✅ main_s3\n"
 
 
 def test_telegram_uses_4096_character_limit():

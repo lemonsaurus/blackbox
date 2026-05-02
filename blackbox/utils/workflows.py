@@ -9,7 +9,6 @@ from blackbox.handlers import BlackboxNotifier
 from blackbox.handlers import BlackboxStorage
 from blackbox.handlers._base import BlackboxHandler
 
-
 Handler = t.TypeVar("Handler", bound=BlackboxHandler)
 HandlerById = t.Mapping[str, set[Handler]]
 
@@ -28,7 +27,7 @@ class Workflow:
 #   HANDLER_MAPPING = { "postgres": Postgres, "discord": Discord }
 components = (BlackboxDatabase, BlackboxNotifier, BlackboxStorage)
 
-HANDLER_MAPPING: dict[str, t.Type[BlackboxHandler]] = {
+HANDLER_MAPPING: dict[str, type[BlackboxHandler]] = {
     handler.__name__.lower(): handler
     for handler in chain.from_iterable(component.__subclasses__() for component in components)
 }
@@ -47,8 +46,8 @@ def get_configured_handlers(config: dict) -> dict:
     for handler_type, handler_config in config.items():
         try:
             Handler = HANDLER_MAPPING[handler_type]
-        except KeyError:
-            raise exceptions.InvalidHandler(handler_type)
+        except KeyError as e:
+            raise exceptions.InvalidHandler(handler_type) from e
 
         for handler_id, handler_fields in handler_config.items():
             handler_instance = Handler(**handler_fields, id=handler_id)
@@ -63,10 +62,7 @@ def get_configured_handlers(config: dict) -> dict:
     return handler_dict
 
 
-def get_handlers_by_id(
-    id_: t.Union[str, list[str]],
-    handlers: HandlerById[Handler]
-) -> set[Handler]:
+def get_handlers_by_id(id_: str | list[str], handlers: HandlerById[Handler]) -> set[Handler]:
     """
     Given ids and a mapping of id to handlers, return handlers matching the ids.
 
@@ -107,14 +103,14 @@ def get_workflows(
             wanted_notifiers = database.config.get("notifiers", "all")
             notifiers = get_handlers_by_id(wanted_notifiers, notifier_handlers)
             workflow.notifiers.update(notifiers)
-        except TypeError:
+        except TypeError as e:
             raise exceptions.ImproperlyConfigured(
                 "storage_providers and notifiers have to be a list of ids or an id"
-            )
+            ) from e
         except KeyError as e:
             raise exceptions.UnknownId(
                 database.__class__.__name__, database.config["id"], e.args[0]
-            )
+            ) from e
 
         workflows.append(workflow)
     return workflows

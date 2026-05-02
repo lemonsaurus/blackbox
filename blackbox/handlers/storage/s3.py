@@ -4,8 +4,6 @@ import re
 import tempfile
 from pathlib import Path
 from typing import BinaryIO
-from typing import Optional
-from typing import Tuple
 
 import boto3
 from botocore.config import Config
@@ -31,7 +29,7 @@ class S3(BlackboxStorage):
         # Use provided credentials if both key_id and secret_key are given
         key_id = self.config.get("aws_access_key_id")
         secret_key = self.config.get("aws_secret_access_key")
-        configuration = dict()
+        configuration = {}
 
         # Both credentials provided - use them
         if key_id and secret_key:
@@ -43,18 +41,17 @@ class S3(BlackboxStorage):
         # ⚠️ Only one credential provided - invalid configuration (XOR check)
         elif bool(key_id) ^ bool(secret_key):
             raise ImproperlyConfigured(
-                "You must configure either both or none of the S3 credential params.")
+                "You must configure either both or none of the S3 credential params."
+            )
 
         else:
             # No explicit credentials - check environment variables and ~/.aws/ files
-            has_environment_variables = (
-                os.environ.get("AWS_ACCESS_KEY_ID")
-                and os.environ.get("AWS_SECRET_ACCESS_KEY")
+            has_environment_variables = os.environ.get("AWS_ACCESS_KEY_ID") and os.environ.get(
+                "AWS_SECRET_ACCESS_KEY"
             )
-            has_aws_config_files = (
-                (Path.home() / ".aws/config").exists()
-                and (Path.home() / ".aws/credentials").exists()
-            )
+            has_aws_config_files = (Path.home() / ".aws/config").exists() and (
+                Path.home() / ".aws/credentials"
+            ).exists()
             if not has_aws_config_files and not has_environment_variables:
                 raise ImproperlyConfigured(
                     "Blackbox could not find any valid S3 credentials. "
@@ -62,9 +59,7 @@ class S3(BlackboxStorage):
                 )
 
         # Credentials found - proceed with boto3 session creation
-        self.session = boto3.Session(
-            **configuration
-        )
+        self.session = boto3.Session(**configuration)
 
         # Custom client config support (e.g., Backblaze B2 compatibility)
         client_config = self.config.get("client_config")
@@ -74,22 +69,20 @@ class S3(BlackboxStorage):
                 client_config = Config(**client_config)
 
         self.client = self.session.client(
-            's3',
+            "s3",
             endpoint_url=f"https://{self.endpoint}",
             config=client_config,
         )
 
     def _delete_backup(self, file_id: str) -> None:
         """🗑️ Delete S3 object by Key."""
-
         self.client.delete_object(Bucket=self.bucket, Key=file_id)
 
-    def _prepare_compressed_file(self, file_path: Path,
-                                 compressed_file: BinaryIO) -> Tuple[Path, bool]:
+    def _prepare_compressed_file(
+        self, file_path: Path, compressed_file: BinaryIO
+    ) -> tuple[Path, bool]:
         """Create temp file from compressed data and encrypt if configured."""
-        temp_file = tempfile.NamedTemporaryFile(
-            delete=False, suffix=f"-{file_path.name}.gz"
-        )
+        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=f"-{file_path.name}.gz")
         temp_file_path = Path(temp_file.name)
 
         # Copy compressed data to temporary file
@@ -102,8 +95,9 @@ class S3(BlackboxStorage):
         encrypted_path, is_encrypted = self.encrypt_file(temp_file_path)
         return encrypted_path if is_encrypted else temp_file_path, is_encrypted
 
-    def _determine_filename(self, original_name: str, is_compressed: bool,
-                            is_encrypted: bool) -> str:
+    def _determine_filename(
+        self, original_name: str, is_compressed: bool, is_encrypted: bool
+    ) -> str:
         """Build filename with .gz and/or .enc extensions as needed."""
         if is_compressed and is_encrypted:
             return f"{original_name}.gz.enc"
@@ -114,8 +108,9 @@ class S3(BlackboxStorage):
         else:
             return original_name
 
-    def _cleanup_temp_files(self, temp_file_path: Optional[Path],
-                            encrypted_path: Optional[Path], is_encrypted: bool) -> None:
+    def _cleanup_temp_files(
+        self, temp_file_path: Path | None, encrypted_path: Path | None, is_encrypted: bool
+    ) -> None:
         """Clean up temporary and encrypted files safely."""
         if temp_file_path and temp_file_path.exists():
             temp_file_path.unlink()
@@ -138,7 +133,7 @@ class S3(BlackboxStorage):
                     encrypted_path = final_file_path
 
                 # Safe file handling with context manager
-                with open(final_file_path, 'rb') as final_file:
+                with open(final_file_path, "rb") as final_file:
                     final_filename = self._determine_filename(
                         file_path.name, recompressed, is_encrypted
                     )
@@ -147,10 +142,7 @@ class S3(BlackboxStorage):
                         extra_args["ContentEncoding"] = "gzip"
 
                     self.client.upload_fileobj(
-                        final_file,
-                        self.bucket,
-                        final_filename,
-                        ExtraArgs=extra_args
+                        final_file, self.bucket, final_filename, ExtraArgs=extra_args
                     )
             else:
                 # Encrypt original file without recompression
@@ -164,20 +156,12 @@ class S3(BlackboxStorage):
                 # Close compressed file handle before proceeding
                 if not is_encrypted:
                     file_.close()
-                    with open(file_path, 'rb') as upload_file:
-                        self.client.upload_fileobj(
-                            upload_file,
-                            self.bucket,
-                            final_filename
-                        )
+                    with open(file_path, "rb") as upload_file:
+                        self.client.upload_fileobj(upload_file, self.bucket, final_filename)
                 else:
                     file_.close()
-                    with open(encrypted_path, 'rb') as upload_file:
-                        self.client.upload_fileobj(
-                            upload_file,
-                            self.bucket,
-                            final_filename
-                        )
+                    with open(encrypted_path, "rb") as upload_file:
+                        self.client.upload_fileobj(upload_file, self.bucket, final_filename)
 
             self.success = True
 
@@ -187,7 +171,7 @@ class S3(BlackboxStorage):
             self.success = False
         finally:
             # Ensure compressed file handle is properly closed
-            if hasattr(file_, 'close'):
+            if hasattr(file_, "close"):
                 with contextlib.suppress(Exception):
                     file_.close()
             self._cleanup_temp_files(temp_file_path, encrypted_path, is_encrypted)
@@ -195,6 +179,7 @@ class S3(BlackboxStorage):
     def rotate(self, database_id: str) -> None:
         """Delete old backups from S3 bucket based on retention policies."""
         from blackbox.config import Blackbox
+
         rotation_patterns = Blackbox.get_rotation_patterns(database_id)
 
         # Fetch all objects from S3 bucket
@@ -203,7 +188,8 @@ class S3(BlackboxStorage):
         # Filter to database-specific backups, sorted by modification time (newest first)
         relevant_backups = sorted(
             [
-                item for item in remote_objects
+                item
+                for item in remote_objects
                 if any(re.match(pattern, item.get("Key")) for pattern in rotation_patterns)
             ],
             key=lambda obj: obj.get("LastModified"),

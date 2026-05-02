@@ -128,7 +128,7 @@ def test_character_allocation_edge_case_zero_budget():
 
     # Create multiple databases with outputs that would exceed tiny budget
     db1 = DatabaseReport("database1", False, "Long error message")  # ~17 chars + prefix
-    db2 = DatabaseReport("database2", False, "Another error")       # ~13 chars + prefix
+    db2 = DatabaseReport("database2", False, "Another error")  # ~13 chars + prefix
 
     report = Report()
     report.databases = [db1, db2]
