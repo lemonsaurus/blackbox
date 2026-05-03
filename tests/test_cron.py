@@ -1,22 +1,22 @@
 """Test the cron/rotation strategy helpers."""
 
+from datetime import UTC
 from datetime import datetime
-from datetime import timezone
 from unittest.mock import patch
 
 import pytest
 
 import blackbox.utils.rotation as rotation
 
-SAMPLE_DATETIME_1 = datetime(2025, 2, 24, 15, 38, 45, tzinfo=timezone.utc)
-SAMPLE_DATETIME_2 = datetime(2025, 1, 5, 10, 18, 36, tzinfo=timezone.utc)
+SAMPLE_DATETIME_1 = datetime(2025, 2, 24, 15, 38, 45, tzinfo=UTC)
+SAMPLE_DATETIME_2 = datetime(2025, 1, 5, 10, 18, 36, tzinfo=UTC)
 
 
 @pytest.fixture(autouse=True)
 def mock_datetime_now():
     """Mock the value of datetime.now() so it's consistent whenever tests are run."""
     # Fix now() to: February 25th, 2025 at 12:00 UTC
-    fixed_now = datetime(2025, 2, 25, 12, 0, 0, tzinfo=timezone.utc)
+    fixed_now = datetime(2025, 2, 25, 12, 0, 0, tzinfo=UTC)
     with patch("blackbox.utils.rotation.datetime") as mock_datetime:
         mock_datetime.now.return_value = fixed_now
         mock_datetime.side_effect = lambda *args, **kwargs: datetime(*args, **kwargs)
