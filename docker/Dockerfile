@@ -23,7 +23,7 @@ RUN architecture="x86_64"; \
     case $(uname -m) in \
         arm64|aarch64) architecture="arm64" ;; \
     esac; \
-    wget -q "https://fastdl.mongodb.org/tools/db/mongodb-database-tools-ubuntu2004-${architecture}-100.6.1.deb" -O /tmp/mongo-tools.deb && \
+    wget -q "https://fastdl.mongodb.org/tools/db/mongodb-database-tools-ubuntu2404-${architecture}-100.12.2.deb" -O /tmp/mongo-tools.deb && \
     apt-get install -y /tmp/mongo-tools.deb && \
     rm /tmp/mongo-tools.deb && \
     rm -rf /var/lib/apt/lists/*
