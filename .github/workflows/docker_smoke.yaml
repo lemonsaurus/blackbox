@@ -1,0 +1,53 @@
+name: Docker Smoke Test
+
+on:
+  pull_request:
+    paths:
+      - 'docker/Dockerfile'
+      - 'pyproject.toml'
+      - 'uv.lock'
+      - '.github/workflows/docker_smoke.yaml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'docker/Dockerfile'
+      - 'pyproject.toml'
+      - 'uv.lock'
+      - '.github/workflows/docker_smoke.yaml'
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: Build and verify backup tools
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build image (amd64, load to local Docker)
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ./docker/Dockerfile
+          push: false
+          load: true
+          tags: blackbox:smoke
+
+      - name: Verify backup tools are installed and runnable
+        run: |
+          set -euo pipefail
+          docker run --rm --entrypoint sh blackbox:smoke -c '
+            set -e
+            echo "blackbox:" && blackbox --help >/dev/null && echo "  ok"
+            echo "mongodump:" && mongodump --version | head -1
+            echo "mongorestore:" && mongorestore --version | head -1
+            echo "pg_dump:" && pg_dump --version
+            echo "mariadb-dump:" && mariadb-dump --version
+            echo "redis-cli:" && redis-cli --version
+          '
