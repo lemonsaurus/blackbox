@@ -16,6 +16,9 @@ on:
       - 'uv.lock'
       - '.github/workflows/docker_smoke.yaml'
 
+permissions:
+  contents: read
+
 jobs:
   smoke:
     name: Build and verify backup tools
