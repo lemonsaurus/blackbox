@@ -1,6 +1,6 @@
-# AGENTS.md
+# Contributing to Blackbox
 
-Guidance for AI agents (and humans) working on Blackbox. The repo is increasingly maintained by AI agents, so the toolchain is set up to be self-enforcing: if the local hooks pass, CI passes.
+Everything you need to know to work on this repo. The toolchain is self-enforcing: if the local hooks pass, CI passes.
 
 ## Toolchain
 
@@ -12,8 +12,8 @@ Guidance for AI agents (and humans) working on Blackbox. The repo is increasingl
 ## First-time setup
 
 ```bash
-uv sync                          # install runtime + dev deps into .venv
-uv run pre-commit install        # install the per-commit hook
+uv sync                                          # install runtime + dev deps into .venv
+uv run pre-commit install                        # install the per-commit hook
 uv run pre-commit install --hook-type pre-push   # install the pre-push gate
 ```
 
@@ -37,10 +37,10 @@ After this, every commit gets linted and every push runs the full test suite loc
 The pre-push hook runs the full pytest suite. CI runs:
 
 1. `lint.yaml` — `pre-commit run --all-files`
-2. `tests.yaml` — pytest matrix on Python 3.10–3.13 + a `min-versions` job that resolves every direct dep to its lowest allowed version
+2. `tests.yaml` — pytest matrix on Python 3.11–3.13 + a `min-versions` job that resolves every direct dep to its lowest allowed version
 3. `security.yaml` — `pip-audit` against the runtime dep graph, weekly + on every PR
 
-If you're an agent and you cannot run the pre-push hook for some reason, run these three things by hand before you call your work done:
+If the pre-push hook isn't available in your environment, run these three by hand before opening a PR:
 
 ```bash
 uv run pre-commit run --all-files
@@ -57,7 +57,9 @@ uv run pip-audit
 
 ## Releasing
 
-Releases are cut by publishing a GitHub Release with a tag like `v2.7.0`. The `publish.yaml` workflow:
+Releases are cut by publishing a GitHub Release with a tag like `v3.0.0`. The `publish.yaml` workflow:
 1. Strips the leading `v` and runs `uv version <X.Y.Z>` to bump `pyproject.toml`.
-2. Builds and publishes to PyPI via `uv publish`.
-3. Builds and pushes the Docker image with `latest`, `vX.Y.Z`, `vX.Y`, and `vX` tags.
+2. Builds the sdist and wheel with `uv build`.
+3. Commits the version bump back to `main`.
+4. Publishes to PyPI via Trusted Publishing (OIDC, no token).
+5. Builds and pushes the Docker image with `latest`, `vX.Y.Z`, `vX.Y`, and `vX` tags.
