@@ -23,7 +23,7 @@ class Slack(BlackboxNotifier):
             "mrkdwn_in": ["fields"],
             "title": "Backup",
             "author_name": "blackbox",
-            "author_icon": "https://raw.githubusercontent.com/lemonsaurus/blackbox/main/img/blackbox_avatar.png"  # NOQA: E501
+            "author_icon": "https://raw.githubusercontent.com/lemonsaurus/blackbox/main/img/blackbox_avatar.png",  # NOQA: E501
         }
 
         # Generate optimally truncated output for failed databases only
@@ -36,47 +36,30 @@ class Slack(BlackboxNotifier):
         # Make a list of database fields
         fields = []
         for database in self.report.databases:
-            field = {
-                "title": f"{database.database_id}",
-                "short": True,
-                "value": ""
-            }
+            field = {"title": f"{database.database_id}", "short": True, "value": ""}
 
             for provider in database.storages:
                 emoji = ":white_check_mark:" if provider.success else ":x:"
-                field['value'] += f"{emoji}  {provider.storage_id}\n"
+                field["value"] += f"{emoji}  {provider.storage_id}\n"
 
             # Indicate that backup have failed if no storage providers was used.
-            if not field['value']:
-                field['value'] = ":x:"
+            if not field["value"]:
+                field["value"] = ":x:"
 
             # Strip any trailing newlines and append
-            field['value'] = field['value'].strip()
+            field["value"] = field["value"].strip()
             fields.append(field)
 
         if not success:
-            fields.append({
-                "title": "Output",
-                "value": output
-            })
+            fields.append({"title": "Output", "value": output})
 
         attachment["fields"] = fields
 
-        return {
-            "attachments": [attachment]
-        }
+        return {"attachments": [attachment]}
 
     def _parse_report_modern(self) -> dict:
         """Turn the report from main.py into Slack webhook payload with Block Kit."""
-        blocks = [
-            {
-                "type": "header",
-                "text": {
-                    "type": "plain_text",
-                    "text": "Backup"
-                }
-            }
-        ]
+        blocks = [{"type": "header", "text": {"type": "plain_text", "text": "Backup"}}]
 
         # Was this a success?
         success = self.report.success
@@ -89,10 +72,7 @@ class Slack(BlackboxNotifier):
 
             fields = []
             for db in dbs:
-                field = {
-                    "type": "mrkdwn",
-                    "text": f"*{db.database_id}*"
-                }
+                field = {"type": "mrkdwn", "text": f"*{db.database_id}*"}
 
                 for provider in db.storages:
                     emoji = ":white_check_mark:" if provider.success else ":x:"
@@ -103,36 +83,19 @@ class Slack(BlackboxNotifier):
                     field["text"] += "\n:x:"
 
                 # Strip any trailing newlines and append
-                field['text'] = field['text'].strip()
+                field["text"] = field["text"].strip()
                 fields.append(field)
 
-            section = {
-                "type": "section",
-                "fields": fields
-            }
+            section = {"type": "section", "fields": fields}
             blocks.append(section)
 
         if not success:
             # Generate optimally truncated output for failed databases only
             output = self.get_optimized_output()
             blocks += [
-                {
-                    "type": "divider"
-                },
-                {
-                    "type": "header",
-                    "text": {
-                        "type": "plain_text",
-                        "text": "Output"
-                    }
-                },
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "plain_text",
-                        "text": output
-                    }
-                }
+                {"type": "divider"},
+                {"type": "header", "text": {"type": "plain_text", "text": "Output"}},
+                {"type": "section", "text": {"type": "plain_text", "text": output}},
             ]
 
         blocks.append(
@@ -142,14 +105,10 @@ class Slack(BlackboxNotifier):
                     {
                         "type": "image",
                         "image_url": "https://raw.githubusercontent.com/lemonsaurus/blackbox/main/img/blackbox_avatar.png",  # NOQA: E501
-                        "alt_text": "blackbox"
+                        "alt_text": "blackbox",
                     },
-                    {
-                        "type": "plain_text",
-                        "text": "blackbox",
-                        "emoji": True
-                    }
-                ]
+                    {"type": "plain_text", "text": "blackbox", "emoji": True},
+                ],
             }
         )
 
@@ -157,4 +116,4 @@ class Slack(BlackboxNotifier):
 
     def notify(self) -> None:
         """Send a webhook to Slack with a blackbox report."""
-        requests.post(self.config["webhook"], json=self._parse_report())
+        requests.post(self.config["webhook"], json=self._parse_report(), timeout=30)

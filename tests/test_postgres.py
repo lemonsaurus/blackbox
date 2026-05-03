@@ -10,8 +10,13 @@ from blackbox.handlers.databases import Postgres
 @pytest.fixture
 def mock_valid_postgres_config():
     """Mock valid Postgres config."""
-    return {"username": "lemon", "password": "citrus", "host": "localhost",
-            "port": "5432", "id": "main_postgres", }
+    return {
+        "username": "lemon",
+        "password": "citrus",
+        "host": "localhost",
+        "port": "5432",
+        "id": "main_postgres",
+    }
 
 
 @pytest.fixture
@@ -37,13 +42,9 @@ def test_postgres_backup(mock_valid_postgres_config, fake_process):
     date = datetime.date.today().strftime("%d_%m_%Y")
     backup_path = Path.home() / f"main_postgres_blackbox_{date}.sql"
 
-    command_to_run = [
-        f"pg_dumpall --file={backup_path}"
-    ]
+    command_to_run = [f"pg_dumpall --file={backup_path}"]
 
-    fake_process.register_subprocess(
-        command_to_run, stdout=["thing", "stuff"]
-    )
+    fake_process.register_subprocess(command_to_run, stdout=["thing", "stuff"])
 
     postgres.backup(backup_path)
     assert fake_process.call_count(command_to_run) == 1

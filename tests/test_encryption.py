@@ -15,7 +15,7 @@ class TestEncryptionHandler:
         config = {"method": "none"}
         handler = EncryptionHandler(config)
 
-        with tempfile.NamedTemporaryFile(mode='w', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False) as f:
             f.write("test data")
             test_file = Path(f.name)
 
@@ -36,7 +36,7 @@ class TestEncryptionHandler:
         config = {"method": "password"}
         handler = EncryptionHandler(config)
 
-        with tempfile.NamedTemporaryFile(mode='w', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False) as f:
             f.write("test data")
             test_file = Path(f.name)
 
@@ -51,7 +51,7 @@ class TestEncryptionHandler:
         config = {"method": "password", "password": "VeryStrongPassword123"}
         handler = EncryptionHandler(config)
 
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.sql') as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".sql") as f:
             f.write("test data for encryption")
             test_file = Path(f.name)
 
@@ -61,17 +61,17 @@ class TestEncryptionHandler:
             # Should create a new file with .enc extension
             assert encrypted_file != test_file
             assert encrypted_file.exists()
-            assert encrypted_file.suffix == '.enc'
-            assert encrypted_file.name.endswith('.sql.enc')
+            assert encrypted_file.suffix == ".enc"
+            assert encrypted_file.name.endswith(".sql.enc")
 
             # Original file should still exist
             assert test_file.exists()
 
             # Encrypted file should have different content and be binary
-            with open(encrypted_file, 'rb') as f:
+            with open(encrypted_file, "rb") as f:
                 encrypted_content = f.read()
 
-            with open(test_file, 'r') as f:
+            with open(test_file) as f:
                 original_content = f.read()
 
             # Encrypted content should be different and binary
@@ -90,7 +90,7 @@ class TestEncryptionHandler:
 
         # Create and encrypt a test file
         test_content = "test data for decryption"
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.sql') as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".sql") as f:
             f.write(test_content)
             test_file = Path(f.name)
 
@@ -104,10 +104,10 @@ class TestEncryptionHandler:
             # Verify decryption worked
             assert decrypted_file != encrypted_file
             assert decrypted_file.exists()
-            assert not decrypted_file.name.endswith('.enc')
+            assert not decrypted_file.name.endswith(".enc")
 
             # Check content matches original
-            with open(decrypted_file, 'r') as f:
+            with open(decrypted_file) as f:
                 decrypted_content = f.read()
 
             assert decrypted_content == test_content
@@ -125,7 +125,7 @@ class TestEncryptionHandler:
         handler = EncryptionHandler(config)
 
         test_content = "custom output test"
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.sql') as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".sql") as f:
             f.write(test_content)
             test_file = Path(f.name)
 
@@ -144,7 +144,7 @@ class TestEncryptionHandler:
             assert custom_output.exists()
 
             # Check content
-            with open(decrypted_file, 'r') as f:
+            with open(decrypted_file) as f:
                 decrypted_content = f.read()
 
             assert decrypted_content == test_content
@@ -163,7 +163,7 @@ class TestEncryptionHandler:
         encrypt_handler = EncryptionHandler(encrypt_config)
 
         test_content = "secret data"
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.sql') as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".sql") as f:
             f.write(test_content)
             test_file = Path(f.name)
 
@@ -194,7 +194,7 @@ class TestEncryptionHandler:
             handler.decrypt_file(fake_file)
 
         # Test with file without .enc extension
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.sql') as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".sql") as f:
             f.write("not encrypted")
             regular_file = Path(f.name)
 
@@ -209,7 +209,7 @@ class TestEncryptionHandler:
         config = {"method": "none"}
         handler = EncryptionHandler(config)
 
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.sql.enc') as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".sql.enc") as f:
             f.write("fake encrypted content")
             fake_encrypted = Path(f.name)
 
@@ -241,7 +241,7 @@ class TestEncryptionHandler:
 
         # Create a file with repetitive content that compresses well
         test_content = "This is repetitive content. " * 100
-        with tempfile.NamedTemporaryFile(mode='w', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False) as f:
             f.write(test_content)
             test_file = Path(f.name)
 
@@ -253,7 +253,7 @@ class TestEncryptionHandler:
 
             # Due to compression + encryption, size relationship may vary
             # but encrypted file should be binary data
-            with open(encrypted_file, 'rb') as f:
+            with open(encrypted_file, "rb") as f:
                 encrypted_data = f.read()
 
             assert len(encrypted_data) > 0
@@ -326,24 +326,24 @@ class TestCreateEncryptionHandler:
         handler = EncryptionHandler(config)
 
         # Create a test file that would be compressed
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.sql') as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".sql") as f:
             f.write("test data for compression and encryption")
             test_file = Path(f.name)
 
         try:
             # Simulate compressed temp file (what S3 handler would create)
-            compressed_file = test_file.with_suffix('.gz')
+            compressed_file = test_file.with_suffix(".gz")
             compressed_file.write_bytes(b"compressed data")
 
             result = handler.encrypt_file(compressed_file)
 
             # Should create encrypted file with .enc extension
-            expected_path = Path(str(compressed_file) + '.enc')
+            expected_path = Path(str(compressed_file) + ".enc")
             assert result == expected_path
             assert expected_path.exists()
 
             # Verify the compressed file was encrypted, not the original
-            assert result.name.endswith('.gz.enc')
+            assert result.name.endswith(".gz.enc")
 
         finally:
             test_file.unlink()

@@ -29,7 +29,11 @@ class SanitizeReportMixin:
         """Helper method to get secrets values."""
         sensitive_words = []
         # Blackbox_Type -> Kind -> Unique ID (str) -> Keys and Values (passwords and tokens)
-        types = [CONFIG.databases.values(), CONFIG.storage.values(), CONFIG.notifiers.values(), ]
+        types = [
+            CONFIG.databases.values(),
+            CONFIG.storage.values(),
+            CONFIG.notifiers.values(),
+        ]
 
         for blackbox_type in types:
             for kind in blackbox_type:

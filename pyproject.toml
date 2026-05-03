@@ -1,63 +1,111 @@
-[tool.poetry]
+[project]
 name = "blackbox-cli"
-packages = [
-    { include = "blackbox" }
-]
-version = "v2.6.0"
+version = "2.6.0"
 description = "Tool for automatic backups of databases"
-authors = ["Leon Sandøy <leon.sandoy@gmail.com>"]
+authors = [{ name = "Leon Sandøy", email = "leon.sandoy@gmail.com" }]
 license = "MIT"
 readme = "README.md"
-homepage = "https://github.com/lemonsaurus/blackbox"
-repository = "https://github.com/lemonsaurus/blackbox"
+requires-python = ">=3.11"
 classifiers = [
     "License :: OSI Approved :: MIT License",
     "Development Status :: 3 - Alpha",
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Database",
-    "Topic :: System :: Archiving :: Backup"
+    "Topic :: System :: Archiving :: Backup",
 ]
-exclude = ["tests", "tests.*"]
+dependencies = [
+    "pyyaml>=6.0,<7.0",
+    "requests>=2.33.0,<3.0",
+    "boto3>=1.16.51,<2.0",
+    "loguru>=0.5.3,<1.0",
+    "jinja2>=3.1.6,<4.0",
+    "click>=7.1.2,<9.0",
+    "dropbox>=11.0.0,<13.0",
+    "pytelegrambotapi>=4.27.0,<5.0",
+    "single-source>=0.4.0,<1.0",
+    "stone>=3.2.1,<4.0",
+    "google-api-python-client>=2.185.0,<3.0",
+    "cryptography>=46.0.6",
+]
 
-[tool.poetry.dependencies]
-python = "^3.9"
-pyyaml = "^6.0"
-requests = "^2.32.4"
-boto3 = "^1.16.51"
-loguru = "^0.5.3"
-jinja2 = "^3.1.6"
-click = ">=7.1.2,<9.0.0"
-dropbox = "^11.0.0"
-pytelegrambotapi = "^4.27.0"
-single-source = "^0.4.0"
-stone = "^3.2.1"
-google-api-python-client = "^2.160.0"
-cryptography = "^43.0.0"
+[project.urls]
+Homepage = "https://github.com/lemonsaurus/blackbox"
+Repository = "https://github.com/lemonsaurus/blackbox"
 
-[tool.poetry.dev-dependencies]
-flake8 = "^3.9.2"
-flake8-isort = "^4.0.0"
-pytest = "^8.4.1"
-pytest-cov = "^2.11.1"
-pytest-mock = "^3.5.1"
-pytest-subprocess = "^1.0.1"
-pytest-testdox = "^2.0.1"
-poethepoet = "^0.10.0"
-requests-mock = "^1.12.1"
-win32-setctime = "^1.0.3"
-
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.poetry.scripts]
+[project.scripts]
 blackbox = "blackbox.cli:cli"
 
-# Use 'poetry run poe <taskname>' to run these.
-[tool.poe.tasks]
-tests = "pytest --cov blackbox -vv --cov-report=term-missing ."
-lint = "flake8 ."
-isort = "isort ."
-html = "pytest --cov blackbox --cov-report=html ."
+[dependency-groups]
+dev = [
+    "pytest>=8.4.1",
+    "pytest-cov>=7.0.0",
+    "pytest-mock>=3.5.1",
+    "pytest-subprocess>=1.0.1",
+    "pytest-testdox>=3.1.0",
+    "requests-mock>=1.12.1",
+    "win32-setctime>=1.0.3",
+    "pre-commit>=4.0.0",
+    "ruff>=0.8.0",
+    "pip-audit>=2.7.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.sdist]
+include = ["blackbox", "README.md", "LICENSE"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["blackbox"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = ["__pycache__", ".venv", "act"]
+
+[tool.ruff.lint]
+# Mirror the old flake8 rule set, ported to ruff codes.
+# E/W = pycodestyle, F = pyflakes, B = bugbear, C4 = comprehensions,
+# I = isort, UP = pyupgrade, S = bandit-lite, D = pydocstyle.
+# N (naming) and T20 (print) are intentionally off; this is a CLI tool
+# with established naming conventions (CONFIG, Handler) and prints to
+# stdout by design.
+select = ["E", "W", "F", "B", "C4", "I", "UP", "S", "D"]
+ignore = [
+    # `random` is fine, this isn't a crypto module.
+    "S311",
+    # Subprocess use is intentional throughout the backup handlers.
+    "S404", "S603", "S607",
+    # `isinstance(x, A | B)` is slower than the tuple form at runtime.
+    "UP038",
+    # Docstring noise: missing/format-only nitpicks. We keep D200/D205
+    # /D400 family so real signature drift still gets flagged.
+    "D100", "D104", "D105", "D107",
+    "D102", "D205",
+    "D203", "D212",
+    "D401",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["D", "S"]
+"**/__init__.py" = ["F401"]
+"blackbox/__init__.py" = ["D"]
+
+[tool.ruff.lint.isort]
+force-single-line = true
+known-first-party = ["blackbox"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
+
+[tool.pytest.ini_options]
+addopts = "--testdox --cov=blackbox --cov-report=term-missing"
+testpaths = ["tests"]
+
+[tool.coverage.report]
+skip_empty = true

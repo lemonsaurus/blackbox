@@ -1,53 +1,46 @@
-FROM python:3.9-slim
+FROM python:3.12-slim
 
-# Keeps Python from generating .pyc files in the container
-ENV PYTHONDONTWRITEBYTECODE 1
-# Turns off buffering for easier container logging
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    UV_LINK_MODE=copy \
+    UV_COMPILE_BYTECODE=1 \
+    UV_PROJECT_ENVIRONMENT=/usr/local
 
-# Install essential tools
-RUN apt-get -y update && apt-get install -y \
+# Install uv from the official static binary.
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
+
+# System tooling needed for backups: postgres-client, mariadb-client,
+# mongo-tools, redis-tools.
+RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
     gnupg \
-    lsb-release
+    lsb-release \
+    ca-certificates \
+    redis-tools \
+ && rm -rf /var/lib/apt/lists/*
 
-# Install and setup poetry
-RUN pip install -U pip \
-    && apt install -y curl \
-    && curl -sSL https://install.python-poetry.org | POETRY_HOME=/root/.poetry python
-ENV PATH="${PATH}:/root/.poetry/bin"
+RUN architecture="x86_64"; \
+    case $(uname -m) in \
+        arm64|aarch64) architecture="arm64" ;; \
+    esac; \
+    wget -q "https://fastdl.mongodb.org/tools/db/mongodb-database-tools-ubuntu2004-${architecture}-100.6.1.deb" -O /tmp/mongo-tools.deb && \
+    apt-get install -y /tmp/mongo-tools.deb && \
+    rm /tmp/mongo-tools.deb && \
+    rm -rf /var/lib/apt/lists/*
 
-# Install mongotools, used for getting mongo backups
-RUN <<-EOF
-architecture="x86_64"
-    case $(uname -m) in
-        arm64) architecture="arm64" ;;
-        aarch64) architecture="arm64" ;;
-    esac
-    wget https://fastdl.mongodb.org/tools/db/mongodb-database-tools-ubuntu2004-${architecture}-100.6.1.deb -O mongo-tools.deb
-    apt install -y ./mongo-tools.deb
-    rm ./mongo-tools.deb
-EOF
+RUN sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list' && \
+    wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg && \
+    apt-get update -y && \
+    apt-get install -y --no-install-recommends postgresql-client-16 mariadb-client && \
+    rm -rf /var/lib/apt/lists/*
 
-# Install redis-tools, used for redis backups.
-RUN apt install -y redis-tools
-
-# Install the Postgres 16 client, needed for pg_dumpall
-# And MariaDB client for mysqldump
-RUN sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
-RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
-RUN apt-get update -y && \
-    apt-get install -y postgresql-client-16 mariadb-client
-
-# Create and set the working directory, so we don't make a mess in the Docker filesystem.
 WORKDIR /blackbox
 
-# Copy the project files into working directory
+# Install dependencies first (better layer caching), then the project.
+COPY pyproject.toml uv.lock README.md ./
+RUN uv sync --frozen --no-install-project --no-dev
+
 COPY . .
+RUN uv sync --frozen --no-dev
 
-# Run poetry
-RUN poetry config virtualenvs.create false \
-  && poetry install --no-interaction --no-ansi
-
-# Start the application!
-CMD poetry run blackbox
+CMD ["blackbox"]

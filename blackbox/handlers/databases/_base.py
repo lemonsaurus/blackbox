@@ -15,7 +15,7 @@ class BlackboxDatabase(BlackboxHandler):
         super().__init__(**kwargs)
 
         self.success = False  # Was the backup successful?
-        self.output = ""      # What did the backup output?
+        self.output = ""  # What did the backup output?
 
     @abstractmethod
     def backup(self, backup_path: Path):

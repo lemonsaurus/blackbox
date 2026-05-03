@@ -97,12 +97,11 @@ class YAMLGetter(type):
         except KeyError:
             # If one of the handler lists isn't defined, return an empty list.
             log.warning(
-                f"{name} is not defined in the blackbox.yaml file -- "
-                "returning a falsy value."
+                f"{name} is not defined in the blackbox.yaml file -- " "returning a falsy value."
             )
-            if cls._get_annotation(name) == list:
+            if cls._get_annotation(name) is list:
                 return []
-            elif cls._get_annotation(name) == dict:
+            elif cls._get_annotation(name) is dict:
                 return {}
             else:
                 return None

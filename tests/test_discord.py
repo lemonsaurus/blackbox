@@ -4,7 +4,6 @@ import requests_mock
 from blackbox.exceptions import MissingFields
 from blackbox.handlers.notifiers.discord import Discord
 
-
 WEBHOOK = "https://discord.com/api/webhooks/x"
 
 
@@ -37,14 +36,22 @@ def test_discord_notify(mock_valid_discord_config, report):
     discord.report = report
 
     assert discord._parse_report() == {
-        'avatar_url': 'https://raw.githubusercontent.com/lemonsaurus/blackbox/main/img/blackbox_avatar.png',  # NOQA: E501
-        'content': None,
-        'embeds': [{'color': 1024049,
-                    'fields': [{'inline': True,
-                                'name': '**main_mongo**',
-                                'value': ':white_check_mark:  main_s3'}],
-                    'title': 'Backup'}],
-        'username': 'blackbox'
+        "avatar_url": "https://raw.githubusercontent.com/lemonsaurus/blackbox/main/img/blackbox_avatar.png",  # NOQA: E501
+        "content": None,
+        "embeds": [
+            {
+                "color": 1024049,
+                "fields": [
+                    {
+                        "inline": True,
+                        "name": "**main_mongo**",
+                        "value": ":white_check_mark:  main_s3",
+                    }
+                ],
+                "title": "Backup",
+            }
+        ],
+        "username": "blackbox",
     }
 
     with requests_mock.Mocker() as m:
@@ -97,8 +104,7 @@ def test_discord_failed_output_excludes_successful_databases():
 
     # Output field should only contain failed database output
     output_field = next(
-        field for field in parsed["embeds"][0]["fields"]
-        if field["name"] == "Output"
+        field for field in parsed["embeds"][0]["fields"] if field["name"] == "Output"
     )
     assert "Error occurred" in output_field["value"]
     assert "Success log content" not in output_field["value"]

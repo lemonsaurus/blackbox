@@ -1,11 +1,10 @@
 """Google Drive database backup storage integration."""
+
 import mimetypes
 import re
 from datetime import datetime
 from io import BytesIO
 from pathlib import Path
-from typing import Optional
-from typing import Union
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -34,7 +33,6 @@ class GoogleDrive(BlackboxStorage):
         Example input: /Hello//World///
         Example output: Hello/World
         """
-
         # Clean up duplicate slashes
         while "//" in upload_directory:
             upload_directory = upload_directory.replace("//", "/")
@@ -76,7 +74,7 @@ class GoogleDrive(BlackboxStorage):
         # Establish the Google Drive client
         self.client: Resource = build("drive", "v3", credentials=self.credentials)
 
-    def _find_folder(self, folder_path: str, parent_id: str = "root") -> Optional[dict]:
+    def _find_folder(self, folder_path: str, parent_id: str = "root") -> dict | None:
         """
         Search for an existing folder by path within a specific parent.
 
@@ -87,7 +85,6 @@ class GoogleDrive(BlackboxStorage):
         Return
             The folder matching the provided path, or None if it wasn't found.
         """
-
         folder_names = folder_path.split("/")
         current_path: list[str] = []  # Track how far along we've gone down the path
         last_folder_found = None
@@ -106,11 +103,15 @@ class GoogleDrive(BlackboxStorage):
                 f"and mimeType='application/vnd.google-apps.folder' "
                 f"and trashed=false and '{parent_id}' in parents"
             )
-            response = self.client.files().list(
-                q=query,
-                spaces="drive",
-                fields="files(id, name, parents)",
-            ).execute()
+            response = (
+                self.client.files()
+                .list(
+                    q=query,
+                    spaces="drive",
+                    fields="files(id, name, parents)",
+                )
+                .execute()
+            )
             folders = response.get("files", [])
             if folders:
                 parent_id = folders[0]["id"]
@@ -135,7 +136,6 @@ class GoogleDrive(BlackboxStorage):
             The ID of the created folder, or the ID of the folder with the given path
             if it already exists.
         """
-
         last_folder_id = parent_id
         folder_names = folder_path.split("/")
         for folder_name in folder_names:
@@ -152,10 +152,14 @@ class GoogleDrive(BlackboxStorage):
                 "mimeType": "application/vnd.google-apps.folder",
                 "parents": [last_folder_id],
             }
-            folder = self.client.files().create(
-                body=metadata,
-                fields="id",
-            ).execute()
+            folder = (
+                self.client.files()
+                .create(
+                    body=metadata,
+                    fields="id",
+                )
+                .execute()
+            )
             last_folder_id = folder.get("id")
         return last_folder_id
 
@@ -171,7 +175,6 @@ class GoogleDrive(BlackboxStorage):
         Return
             The ID of the deepest folder.
         """
-
         folder = self._find_folder(path)
         if not folder:
             parent_id = "root"
@@ -182,7 +185,7 @@ class GoogleDrive(BlackboxStorage):
         else:
             return folder["id"]
 
-    def _upload(self, file_path: str, file_content: Union[bytes, str]) -> str:
+    def _upload(self, file_path: str, file_content: bytes | str) -> str:
         """
         Upload a file to Google Drive.
 
@@ -193,7 +196,6 @@ class GoogleDrive(BlackboxStorage):
         Return
             The ID of the uploaded file.
         """
-
         # Determine the MIME type of the file, because we need to include this in the
         # payload when we upload the file to Google Drive.
         mimetype, _ = mimetypes.guess_type(file_path)
@@ -218,11 +220,15 @@ class GoogleDrive(BlackboxStorage):
             mimetype=mimetype,
             resumable=True,  # Allow this upload to occur in multiple parts
         )
-        response = self.client.files().create(
-            body=file_metadata,
-            media_body=media,
-            fields="id",
-        ).execute()
+        response = (
+            self.client.files()
+            .create(
+                body=file_metadata,
+                media_body=media,
+                fields="id",
+            )
+            .execute()
+        )
         return response["id"]
 
     def _delete_backup(self, file_id: str) -> None:
@@ -253,7 +259,6 @@ class GoogleDrive(BlackboxStorage):
         than `retention_days`. Because of this, it's better to store backups in an
         isolated folder.
         """
-
         # Get the folder
         folder_id = "root"  # Default to the root folder
         if self.upload_base:
@@ -261,15 +266,20 @@ class GoogleDrive(BlackboxStorage):
 
         # Fetch database backup files
         from blackbox.config import Blackbox
+
         rotation_patterns = Blackbox.get_rotation_patterns(database_id)
         query = f"'{folder_id}' in parents and name contains 'blackbox'"
         try:
-            response = self.client.files().list(
-                q=query,
-                spaces="drive",
-                fields="files(id, name, modifiedTime)",
-                orderBy="modifiedTime desc",  # Order by most recent backup
-            ).execute()
+            response = (
+                self.client.files()
+                .list(
+                    q=query,
+                    spaces="drive",
+                    fields="files(id, name, modifiedTime)",
+                    orderBy="modifiedTime desc",  # Order by most recent backup
+                )
+                .execute()
+            )
             files = response.get("files", [])
 
         except HttpError as e:
@@ -282,7 +292,6 @@ class GoogleDrive(BlackboxStorage):
             for file_ in files:
                 if any(re.match(pattern, file_["name"]) for pattern in rotation_patterns):
                     last_modified = file_["modifiedTime"]
-                    modified_time = datetime.fromisoformat(
-                        last_modified.replace("Z", "+00:00"))
+                    modified_time = datetime.fromisoformat(last_modified.replace("Z", "+00:00"))
                     self._do_rotate(file_id=file_["id"], modified_time=modified_time)
             self.success = True

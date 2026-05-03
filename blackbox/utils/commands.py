@@ -1,11 +1,10 @@
 import os
 import subprocess
-from typing import Tuple
 
 from blackbox.utils.logger import log
 
 
-def run_command(command: str, **environment) -> Tuple[bool, str]:
+def run_command(command: str, **environment) -> tuple[bool, str]:
     """
     Execute the command, and log the result.
 
@@ -24,13 +23,16 @@ def run_command(command: str, **environment) -> Tuple[bool, str]:
 
     # Run the command and capture the output
     try:
-        result = subprocess.run(
+        # shell=True is required: backup commands use pipes and redirects
+        # (e.g. `pg_dumpall | gzip > out.sql.gz`). Input is admin config,
+        # not user-supplied.
+        result = subprocess.run(  # noqa: S602
             [command],
             shell=True,
             env=env,
             check=True,
             stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT
+            stderr=subprocess.STDOUT,
         )
         output = result.stdout.decode("utf-8").strip()
         success = True

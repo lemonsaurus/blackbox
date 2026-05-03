@@ -1,6 +1,6 @@
 """Handler-agnostic cron and rotation strategy helper functions."""
+
 from datetime import datetime
-from typing import Tuple
 
 
 def meets_delete_criteria(
@@ -26,15 +26,12 @@ def meets_delete_criteria(
     Return
         Whether the item associated with the given datetime is eligible for deletion.
     """
-
     return (
-        (
-            not days  # No configured retention days
-            or days and not within_retention_days(days=days, dt=dt)  # Window has passed
-        )
-        and (
-            max_to_retain == 0 or num_retained >= max_to_retain  # Retained max backups
-        )
+        not days  # No configured retention days
+        or days
+        and not within_retention_days(days=days, dt=dt)  # Window has passed
+    ) and (
+        max_to_retain == 0 or num_retained >= max_to_retain  # Retained max backups
     )
 
 
@@ -49,7 +46,6 @@ def matches_crons(cron_expressions: list[str], dt: datetime) -> list[str]:
     Return
         A list of matching cron expressions.
     """
-
     matches = []
     for exp in cron_expressions:
         if matches_cron(cron_expression=exp, dt=dt):
@@ -67,7 +63,6 @@ def matches_cron(cron_expression: str, dt: datetime) -> bool:
     Return
         True if the datetime fits within the cron expression, False otherwise.
     """
-
     # Get the different pieces of the datetime to match against the cron expression
     minute, hour, day, month = dt.minute, dt.hour, dt.day, dt.month
     # We need to use isoweekday here, because cron expressions use 7 for Sunday, whereas
@@ -76,8 +71,7 @@ def matches_cron(cron_expression: str, dt: datetime) -> bool:
 
     parts = cron_expression.split()
     if len(parts) != 5:
-        raise ValueError(
-            f"Invalid cron expression (should have 5 fields): {cron_expression}")
+        raise ValueError(f"Invalid cron expression (should have 5 fields): {cron_expression}")
     cron_min, cron_hour, cron_day, cron_month, cron_weekday = parts
 
     # Check if each cron expression "part" matches the corresponding datetime "part"
@@ -106,7 +100,6 @@ def match_field(dt_value: int, cron_value: str, is_weekday: bool = False) -> boo
         Whether the provided value matches or falls within the range of the the cron
         expression field.
     """
-
     # For weekday, allow both 0 and 7 to represent Sunday
     if is_weekday and cron_value == "0":
         cron_value = "7"
@@ -146,8 +139,8 @@ def match_field(dt_value: int, cron_value: str, is_weekday: bool = False) -> boo
     # Direct number match
     try:
         return dt_value == int(cron_value)
-    except ValueError:
-        raise ValueError(f"Cannot parse cron value: {cron_value}")
+    except ValueError as e:
+        raise ValueError(f"Cannot parse cron value: {cron_value}") from e
 
 
 def within_retention_days(days: int, dt: datetime) -> bool:
@@ -163,7 +156,8 @@ def construct_retention_tracker(
     cron_expressions: list[str],
 ) -> dict[str, dict[str, int]]:
     """Construct a dictionary tracking how many retentions have occurred for a file
-    matching each cron expression."""
+    matching each cron expression.
+    """
     unlimited = 9999999  # Who's going to have 9999999 backups? Probably no-one.
     tracker = {}
     if not cron_expressions:
@@ -193,7 +187,7 @@ def construct_retention_tracker(
 def get_highest_max_retention_count(
     retention_tracker: dict[str, dict[str, int]],
     cron_expressions: list[str],
-) -> Tuple[str, int]:
+) -> tuple[str, int]:
     """
     Get the highest maximum retention count.
 
@@ -201,7 +195,6 @@ def get_highest_max_retention_count(
         The highest maximum retention count configured between the provided cron
         expressions, or 0 if the expression is not in the tracker.
     """
-
     maximum = 0
     highest_exp = ""
     for exp in cron_expressions:
@@ -220,7 +213,6 @@ def clean_cron_expression(cron_expression: list[str]) -> str:
     Sample input: "* * 4 * * 7"
     Sample output: "* * 4 * *"
     """
-
     parts = cron_expression.split()
     if len(parts) == 6:
         parts.pop()
