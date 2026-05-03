@@ -1,6 +1,6 @@
 [project]
 name = "blackbox-cli"
-version = "3.0.1"
+version = "3.0.2"
 description = "Tool for automatic backups of databases"
 authors = [{ name = "Leon Sandøy", email = "leon.sandoy@gmail.com" }]
 license = "MIT"
