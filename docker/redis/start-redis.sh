@@ -19,4 +19,3 @@ redis-cli shutdown
 
 # Start server normally
 redis-server --requirepass blackbox --appendonly yes
-

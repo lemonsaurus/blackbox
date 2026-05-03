@@ -4,16 +4,18 @@ from telebot.apihelper import ApiTelegramException
 from blackbox.handlers.notifiers._base import BlackboxNotifier
 from blackbox.utils.logger import log
 
-
 CHECKMARK_EMOJI = "\U00002705"  # ✔
-FAIL_EMOJI = "\U0000274C"       # ❌
-WARNING_EMOJI = "\U000026A0"    # ⚠
+FAIL_EMOJI = "\U0000274c"  # ❌
+WARNING_EMOJI = "\U000026a0"  # ⚠
 
 
 class Telegram(BlackboxNotifier):
     """Telegram notifier for Blackbox."""
 
-    required_fields = ("token", "chat_id",)
+    required_fields = (
+        "token",
+        "chat_id",
+    )
     # Telegram bot API message character limit is 4096 UTF-8 characters
     max_output_chars = 4096
 
@@ -45,6 +47,5 @@ class Telegram(BlackboxNotifier):
             )
         except ApiTelegramException:
             log.debug(
-                "Telegram API key or user_id is wrong "
-                "or you forgot to press /start in your bot."
+                "Telegram API key or user_id is wrong " "or you forgot to press /start in your bot."
             )

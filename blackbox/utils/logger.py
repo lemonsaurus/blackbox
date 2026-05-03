@@ -2,7 +2,6 @@ import sys
 
 from loguru import logger
 
-
 # Remove all pre-configured loggers. We just want the ones we're about to add
 logger.remove(None)
 

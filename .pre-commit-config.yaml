@@ -1,0 +1,34 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-merge-conflict
+      - id: check-yaml
+      - id: check-toml
+      - id: check-added-large-files
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.4
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: https://github.com/crate-ci/typos
+    rev: v1.28.4
+    hooks:
+      - id: typos
+
+  # Pre-push gate: full test suite must pass before any push reaches the remote.
+  # This is the local mirror of CI; if this hook is green, CI will be green.
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest (full suite)
+        entry: uv run pytest
+        language: system
+        pass_filenames: false
+        stages: [pre-push]

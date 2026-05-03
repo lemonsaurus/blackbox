@@ -20,8 +20,9 @@ class BlackboxHandler(ABC, SanitizeReportMixin):
         missing_fields = [field for field in self.required_fields if field not in self.config]
 
         if missing_fields:
-            raise MissingFields(self.handler_type, handler_name, self.config.get("id"),
-                                missing_fields)
+            raise MissingFields(
+                self.handler_type, handler_name, self.config.get("id"), missing_fields
+            )
 
     def teardown(self) -> None:
         """

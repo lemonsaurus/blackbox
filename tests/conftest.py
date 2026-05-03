@@ -6,7 +6,6 @@ import pytest
 
 from blackbox.utils import reports
 
-
 ########################
 # Config file Fixtures #
 ########################
@@ -53,10 +52,7 @@ def config_file(mocker):
         """
     )
 
-    environment_variables = {
-        "MONGO_USER": "mongouser",
-        "MONGO_PW": "mongopassword"
-    }
+    environment_variables = {"MONGO_USER": "mongouser", "MONGO_PW": "mongopassword"}
 
     mocker.patch.dict(os.environ, environment_variables)
 

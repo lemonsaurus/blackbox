@@ -10,8 +10,12 @@ from blackbox.handlers.databases import Redis
 @pytest.fixture
 def mock_valid_redis_config():
     """Mock valid Redis config."""
-    return {"password": "citrus", "host": "localhost", "port": "5432",
-            "id": "main_redis", }
+    return {
+        "password": "citrus",
+        "host": "localhost",
+        "port": "5432",
+        "id": "main_redis",
+    }
 
 
 @pytest.fixture
@@ -42,9 +46,7 @@ def test_redis_backup(mock_valid_redis_config, fake_process):
         f"redis-cli -h {redis.config.get('host')} -p {redis.config.get('port')} --rdb {backup_path}"
     ]
 
-    fake_process.register_subprocess(
-        command_to_run, stdout=["redis backup"]
-    )
+    fake_process.register_subprocess(command_to_run, stdout=["redis backup"])
 
     redis.backup(backup_path)
     assert fake_process.call_count(command_to_run) == 1

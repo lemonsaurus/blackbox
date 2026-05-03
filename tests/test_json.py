@@ -5,7 +5,6 @@ from blackbox.exceptions import MissingFields
 from blackbox.handlers.notifiers.json import Json
 from blackbox.utils import reports
 
-
 URL = "https://some-domain.com/api/blackbox-notifications"
 
 
@@ -41,33 +40,22 @@ def test_json_notifier(mock_valid_json_config, report):
             {
                 "source": "main_mongo",
                 "output": "salad",
-                "backup": [
-                    {
-                        "name": "main_s3",
-                        "success": True
-                    }
-                ],
-                "success": True
+                "backup": [{"name": "main_s3", "success": True}],
+                "success": True,
             },
             {
                 "source": "secondary_mongo",
                 "output": "ham-sandwich",
                 "backup": [
-                    {
-                        "name": "main_dropbox",
-                        "success": True
-                    },
-                    {
-                        "name": "secondary_s3",
-                        "success": False
-                    }
+                    {"name": "main_dropbox", "success": True},
+                    {"name": "secondary_s3", "success": False},
                 ],
-                "success": False
-            }
+                "success": False,
+            },
         ]
     }
 
-    database = reports.DatabaseReport(database_id="secondary_mongo", success=False, output='')
+    database = reports.DatabaseReport(database_id="secondary_mongo", success=False, output="")
     database.report_storage("main_dropbox", True, "ham-")
     database.report_storage("secondary_s3", False, "sandwich")
 

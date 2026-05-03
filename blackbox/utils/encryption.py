@@ -5,7 +5,6 @@ import os
 import re
 from pathlib import Path
 from typing import Any
-from typing import Dict
 
 from cryptography.fernet import Fernet
 from cryptography.fernet import InvalidToken
@@ -30,7 +29,7 @@ class EncryptionHandler:
         - Temporary files are securely overwritten during cleanup
     """
 
-    def __init__(self, encryption_config: Dict[str, Any]) -> None:
+    def __init__(self, encryption_config: dict[str, Any]) -> None:
         self.config = encryption_config
         self.method = self.config.get("method", "none").lower()
 
@@ -52,7 +51,7 @@ class EncryptionHandler:
         if not encrypted_file_path.exists():
             raise FileNotFoundError(f"Encrypted file not found: {encrypted_file_path}")
 
-        if not encrypted_file_path.name.endswith('.enc'):
+        if not encrypted_file_path.name.endswith(".enc"):
             raise ValueError(
                 f"File does not appear to be encrypted (missing .enc extension): "
                 f"{encrypted_file_path}"
@@ -68,7 +67,7 @@ class EncryptionHandler:
         # Determine output path
         if output_path is None:
             # Remove .enc extension to get original filename
-            output_path = encrypted_file_path.with_suffix('')
+            output_path = encrypted_file_path.with_suffix("")
 
         log.info(f"Decrypting {encrypted_file_path.name}")
 
@@ -77,7 +76,7 @@ class EncryptionHandler:
             fernet = Fernet(key)
 
             # Read and decrypt the file
-            with open(encrypted_file_path, 'rb') as f:
+            with open(encrypted_file_path, "rb") as f:
                 encrypted_data = f.read()
 
             decrypted_compressed_data = fernet.decrypt(encrypted_data)
@@ -86,13 +85,13 @@ class EncryptionHandler:
             decrypted_data = gzip.decompress(decrypted_compressed_data)
 
             # Write decrypted data to output file
-            with open(output_path, 'wb') as f:
+            with open(output_path, "wb") as f:
                 f.write(decrypted_data)
 
             log.info(f"File decrypted successfully: {output_path.name}")
             return output_path
-        except InvalidToken:
-            raise ValueError("Decryption failed: Invalid password or corrupted file")
+        except InvalidToken as e:
+            raise ValueError("Decryption failed: Invalid password or corrupted file") from e
         except Exception as e:
             # Cleanup partial output file on failure
             if output_path.exists():
@@ -122,14 +121,14 @@ class EncryptionHandler:
             key = self._derive_key(password.encode())
             fernet = Fernet(key)
 
-            with open(file_path, 'rb') as f:
+            with open(file_path, "rb") as f:
                 data = f.read()
 
             # Compress first for smaller encrypted files and better security
             compressed_data = gzip.compress(data)
             encrypted_data = fernet.encrypt(compressed_data)
 
-            with open(encrypted_path, 'wb') as f:
+            with open(encrypted_path, "wb") as f:
                 f.write(encrypted_data)
 
             log.info(f"File encrypted: {encrypted_path.name}")
@@ -167,7 +166,7 @@ class EncryptionHandler:
         a configurable salt mechanism where the salt is stored alongside
         the encrypted backup metadata.
         """
-        salt = b'blackbox_backup_salt_v1'
+        salt = b"blackbox_backup_salt_v1"
         kdf = PBKDF2HMAC(
             algorithm=hashes.SHA256(),
             length=32,
@@ -183,7 +182,7 @@ class EncryptionHandler:
             try:
                 # Overwrite with random data for security, then delete
                 file_size = file_path.stat().st_size
-                with open(file_path, 'r+b') as f:
+                with open(file_path, "r+b") as f:
                     f.write(os.urandom(file_size))
                     f.flush()
                     os.fsync(f.fileno())
@@ -201,19 +200,17 @@ class EncryptionHandler:
             raise ValueError("Password must be at least 14 characters long")
 
         # Check complexity: uppercase, lowercase, numbers (no symbols required)
-        has_upper = bool(re.search(r'[A-Z]', password))
-        has_lower = bool(re.search(r'[a-z]', password))
-        has_digit = bool(re.search(r'\d', password))
+        has_upper = bool(re.search(r"[A-Z]", password))
+        has_lower = bool(re.search(r"[a-z]", password))
+        has_digit = bool(re.search(r"\d", password))
 
         complexity_count = sum([has_upper, has_lower, has_digit])
 
         if complexity_count < 2:
-            raise ValueError(
-                "Password must contain at least 2 of: uppercase, lowercase, numbers"
-            )
+            raise ValueError("Password must contain at least 2 of: uppercase, lowercase, numbers")
 
 
-def create_encryption_handler(config: Dict[str, Any]) -> EncryptionHandler:
+def create_encryption_handler(config: dict[str, Any]) -> EncryptionHandler:
     """Factory function to create encryption handler from config."""
     encryption_config = config.get("encryption", {})
     return EncryptionHandler(encryption_config)

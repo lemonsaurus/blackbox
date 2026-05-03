@@ -4,6 +4,7 @@ Blackbox is a plug-and-play service which magically backs up all your databases.
 The backups are stored on your favorite cloud storage providers, and Blackbox will notify
 you on your chat platform of choice once the job is done.
 """
+
 import datetime
 import logging
 from pathlib import Path
@@ -51,10 +52,10 @@ def run() -> bool:
 
             # Do a backup, then return the path to the backup file
             filename_format = CONFIG.get_filename_format()
-            backup_filename = filename_format.format(
-                database_id=database.config['id'],
-                date=date
-            ) + database.backup_extension
+            backup_filename = (
+                filename_format.format(database_id=database.config["id"], date=date)
+                + database.backup_extension
+            )
             backup_path = backup_dir / backup_filename
             database.backup(backup_path)
             backup_files.append(backup_path)
@@ -84,7 +85,7 @@ def run() -> bool:
             if report.success is False:
                 success = False
 
-        cooldown = CONFIG['cooldown']
+        cooldown = CONFIG["cooldown"]
         logging.debug(f"Cooldown setting is {cooldown}")
         if cooldown:
             is_on_cooldown_ = is_on_cooldown(cooldown)
@@ -100,7 +101,7 @@ def run() -> bool:
                 log.debug("Backup failed, sending notification.")
                 notifier.notify()
             elif cooldown is None:
-                log.debug('Cooldown config is None, sending notification.')
+                log.debug("Cooldown config is None, sending notification.")
                 notifier.notify()
 
             # But otherwise let's check do we have a right to notify
@@ -113,9 +114,9 @@ def run() -> bool:
 
 
 @click.group(invoke_without_command=True)
-@click.option('--config', help="Path to blackbox.yaml file.")
-@click.option('--init', is_flag=True, help="Generate blackbox.yaml file and exit.")
-@click.option('--version', is_flag=True, help="Show version and exit.")
+@click.option("--config", help="Path to blackbox.yaml file.")
+@click.option("--init", is_flag=True, help="Generate blackbox.yaml file and exit.")
+@click.option("--version", is_flag=True, help="Show version and exit.")
 @click.pass_context
 def cli(ctx, config, init, version):
     """
@@ -125,12 +126,13 @@ def cli(ctx, config, init, version):
     """  # noqa
     if version:
         from blackbox import __version__
+
         print(f"Blackbox {__version__}")
         exit()
 
     # Store config in context for subcommands
     ctx.ensure_object(dict)
-    ctx.obj['config'] = config
+    ctx.obj["config"] = config
 
     # If no subcommand is provided, run backup by default (backward compatibility)
     if ctx.invoked_subcommand is None:
@@ -141,13 +143,14 @@ def cli(ctx, config, init, version):
 @click.pass_context
 def backup(ctx, init=False):
     """Run backup process for all configured databases."""
-    config = ctx.obj.get('config')
+    config = ctx.obj.get("config")
 
     if init:
         config_file = Path("blackbox.yaml")
         if not config_file.exists():
-            config_file.write_text(dedent(
-                """
+            config_file.write_text(
+                dedent(
+                    """
                 databases:
                   mongodb:
                     main_mongodb:
@@ -178,7 +181,9 @@ def backup(ctx, init=False):
                       webhook: https://web.hook/
 
                 retention_days: 7
-                """).lstrip())
+                """
+                ).lstrip()
+            )
             print("blackbox.yaml configuration created", flush=True)
 
         else:
@@ -197,17 +202,20 @@ def backup(ctx, init=False):
 
 
 @cli.command()
-@click.argument('encrypted_file', type=click.Path(exists=True, path_type=Path))
-@click.option('--output', '-o', type=click.Path(path_type=Path),
-              help="Output file path (defaults to removing .enc extension)")
-@click.option('--password', prompt=True, hide_input=True,
-              help="Password for decryption")
+@click.argument("encrypted_file", type=click.Path(exists=True, path_type=Path))
+@click.option(
+    "--output",
+    "-o",
+    type=click.Path(path_type=Path),
+    help="Output file path (defaults to removing .enc extension)",
+)
+@click.option("--password", prompt=True, hide_input=True, help="Password for decryption")
 @click.pass_context
 def decrypt(ctx, encrypted_file, output, password):
     """Decrypt an encrypted backup file."""
     from blackbox.utils.encryption import EncryptionHandler
 
-    config = ctx.obj.get('config')
+    config = ctx.obj.get("config")
     if config:
         YAMLGetter.parse_config(Path(config))
 

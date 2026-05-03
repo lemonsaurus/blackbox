@@ -32,9 +32,9 @@ class BlackboxNotifier(BlackboxHandler):
         # Get tail of each failed database output (last 10 lines max)
         database_outputs = []
         for db in failed_databases:
-            lines = db.output.strip().split('\n')
+            lines = db.output.strip().split("\n")
             tail_lines = lines[-10:] if len(lines) > 10 else lines
-            tail_output = '\n'.join(tail_lines)
+            tail_output = "\n".join(tail_lines)
             database_outputs.append((db.database_id, tail_output))
 
         # If only one failed database, just truncate to character limit
@@ -42,7 +42,7 @@ class BlackboxNotifier(BlackboxHandler):
             db_id, output = database_outputs[0]
             if len(output) <= self.max_output_chars:
                 return output
-            return output[-self.max_output_chars:]  # Take last N characters
+            return output[-self.max_output_chars :]  # Take last N characters
 
         # Multiple failed databases - use optimal allocation algorithm
         return self._allocate_characters_optimally(database_outputs)
@@ -75,7 +75,7 @@ class BlackboxNotifier(BlackboxHandler):
                 # Output fits within budget, use as-is
                 formatted = f"{db_id}: {output}"
                 allocated_outputs.append(formatted)
-                total_budget -= (len(formatted) + separator_overhead)
+                total_budget -= len(formatted) + separator_overhead
             else:
                 # Output exceeds budget, truncate from start (keep tail)
                 available_chars = budget_per_service - len(db_prefix) - separator_overhead

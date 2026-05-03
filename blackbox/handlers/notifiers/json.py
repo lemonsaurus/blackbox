@@ -21,7 +21,7 @@ class Json(BlackboxNotifier):
             database_payload = {
                 "source": database.database_id,
                 "success": database.success,
-                "output": database.output or None
+                "output": database.output or None,
             }
 
             storages_payload = []
@@ -33,11 +33,11 @@ class Json(BlackboxNotifier):
                 storages_payload.append({"name": provider.storage_id, "success": provider.success})
 
             # Aggregate the storage points data with the current database
-            database_payload['backup'] = storages_payload
+            database_payload["backup"] = storages_payload
             payload.append(database_payload)
 
         return {"backup-data": payload}
 
     def notify(self):
         """Send a webhook to a particular url with a blackbox report."""
-        requests.post(self.config["url"], json=self._parse_report())
+        requests.post(self.config["url"], json=self._parse_report(), timeout=30)

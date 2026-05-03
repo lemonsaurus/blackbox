@@ -10,7 +10,7 @@ from blackbox.utils.cooldown import should_notify
 @pytest.fixture
 def cooldown_config():
     """Test humanized cooldown period."""
-    return '2h 7M 3s'
+    return "2h 7M 3s"
 
 
 def test_regex_cooldown_setting(cooldown_config):

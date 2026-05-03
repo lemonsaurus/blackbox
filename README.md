@@ -167,7 +167,7 @@ See below for specific configuration information for each handler.
 
 ```yaml
 databases:
-  postgres: # Database type 
+  postgres: # Database type
     main_postgres: # Database identifier
       # Configuration (see below for further information on specific databases)
       username: username
@@ -444,7 +444,7 @@ can be a list or a string.
 
 ```yaml
 databases:
-  postgres: # Database type 
+  postgres: # Database type
     main_postgres: # Database identifier
       username: username
       password: password
@@ -554,7 +554,7 @@ one, do the following:
   incorrectly.
 
 You can also define a custom location (root is App Folder) using the
-`upload_directory` optional parameter. This **should** begin with slash and 
+`upload_directory` optional parameter. This **should** begin with slash and
 **must** end with slash. Default is root.
 
 ### Google Drive
@@ -591,7 +591,7 @@ that do not already exist will be created for you.
 ## Notifiers
 
 `blackbox` also implements different _notifiers_, which is how it reports the
-result of one of its jobs to you. Right now we only support the below listed notifiers, 
+result of one of its jobs to you. Right now we only support the below listed notifiers,
 but if you need a specific notifier, feel free to open an issue.
 
 To configure notifiers, add a section with this format:
@@ -814,7 +814,7 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
 def decrypt_backup(encrypted_file_path, password, output_path=None):
     """Manually decrypt a blackbox encrypted backup file."""
-    
+
     # Derive the same key that blackbox uses
     salt = b'blackbox_backup_salt_v1'
     kdf = PBKDF2HMAC(
@@ -825,24 +825,24 @@ def decrypt_backup(encrypted_file_path, password, output_path=None):
     )
     key = base64.urlsafe_b64encode(kdf.derive(password.encode()))
     fernet = Fernet(key)
-    
+
     # Read and decrypt the file
     with open(encrypted_file_path, 'rb') as f:
         encrypted_data = f.read()
-    
+
     decrypted_compressed_data = fernet.decrypt(encrypted_data)
-    
+
     # Decompress the data
     decrypted_data = gzip.decompress(decrypted_compressed_data)
-    
+
     # Determine output path
     if output_path is None:
         output_path = Path(encrypted_file_path).with_suffix('')
-    
+
     # Write decrypted data
     with open(output_path, 'wb') as f:
         f.write(decrypted_data)
-    
+
     return output_path
 
 # Example usage
@@ -856,7 +856,7 @@ decrypt_backup('/path/to/backup.sql.enc', 'YourPassword123')
 
 ## Cooldown
 
-By default, `blackbox` will send all notification at every backup attempt. 
+By default, `blackbox` will send all notification at every backup attempt.
 You can specify a `cooldown` period in `blackbox.yaml` during which all notifications will be muted.
 This option will not mute failed backups.
 
